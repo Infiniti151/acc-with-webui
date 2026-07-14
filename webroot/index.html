@@ -776,22 +776,27 @@
                 <div style="font-size: 12px; opacity: 0.7;">View on GitHub</div>
             </div>
         </div>
-        <span class="material-icons"
-            style="font-size: 20px; color: var(--primary); opacity: 0.8; padding-right: 4px;">open_in_new</span>
-    </a>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <span
+                style="font-family: monospace; font-size: 12px; font-weight: 700; color: var(--text-sub); background-color: var(--surface-variant); padding: 4px 8px; border-radius: 8px; border: 1px solid var(--outline);">
+                v1.0.0
+            </span>
+            <span class="material-icons"
+                style="font-size: 20px; color: var(--primary); opacity: 0.8; padding-right: 4px;">open_in_new</span>
+        </div>
 
-    <script>
-        let initialLoad = true;
-        let isTransitioning = false;
+        <script>
+            let initialLoad = true;
+            let isTransitioning = false;
 
-        const configPath = '/data/adb/vr25/acc-data/config.txt';
+            const configPath = '/data/adb/vr25/acc-data/config.txt';
 
-        async function detectEnvironment() {
-            const badge = document.getElementById('env-badge');
-            if (!badge) return;
-            badge.textContent = "CHECKING...";
+            async function detectEnvironment() {
+                const badge = document.getElementById('env-badge');
+                if (!badge) return;
+                badge.textContent = "CHECKING...";
 
-            const cmd = `
+                const cmd = `
                 if [ -d /data/adb/magisk ] || [ -d /sbin/.magisk ]; then
                     echo "MAGISK";
                 elif [ -d /data/adb/ksu ] || [ -d /data/adb/ksu-v ]; then
@@ -802,325 +807,325 @@
                     echo "UNKNOWN";
                 fi
             `;
-            try {
-                const res = await exec(cmd);
-                badge.textContent = res.stdout ? res.stdout.trim() : "UNKNOWN";
-            } catch (e) {
-                badge.textContent = "ERROR";
-            }
-        }
-
-        function exec(cmd) {
-            return new Promise(resolve => {
-                if (typeof ksu === 'undefined' || !ksu.exec) {
-                    resolve({ errno: -1, stdout: "ksu not found" });
-                    return;
-                }
-                const fullCmd = "export PATH=/data/adb/modules/acc/system/bin:$PATH; " + cmd;
-                const cbName = "cb_" + Math.random().toString(36).substr(2, 9);
-                window[cbName] = (errno, stdout = "", stderr = "") => {
-                    resolve({ errno, stdout: stdout.trim() });
-                    delete window[cbName];
-                };
                 try {
-                    ksu.exec(fullCmd, '{}', cbName);
+                    const res = await exec(cmd);
+                    badge.textContent = res.stdout ? res.stdout.trim() : "UNKNOWN";
                 } catch (e) {
-                    resolve({ errno: -2, stdout: "" });
-                }
-            });
-        }
-
-        function syncSliderFill(slider) {
-            if (!slider) return;
-            const min = parseInt(slider.min) || 1;
-            const max = parseInt(slider.max) || 100;
-            const perc = ((parseInt(slider.value) - min) / (max - min)) * 100;
-            slider.parentElement.style.setProperty('--value-percent', perc + '%');
-        }
-
-        function handleSliderChange(type, el) {
-            const start = document.getElementById('thresh-start');
-            const stop = document.getElementById('thresh-stop');
-            let s = parseInt(start.value), p = parseInt(stop.value);
-
-            if (type === 'start' && s >= p) start.value = s = p - 1;
-            if (type === 'stop' && p <= s) stop.value = p = s + 1;
-
-            document.getElementById('label-start').innerText = s + '%';
-            document.getElementById('label-stop').innerText = p + '%';
-            syncSliderFill(start);
-            syncSliderFill(stop);
-
-            clearTimeout(el.dataset.timeout);
-            el.dataset.timeout = setTimeout(updateThresholds, 450);
-        }
-
-        async function updateStatus() {
-            const [healthRes, tempRes, voltRes, currRes, statRes, cfgRes] = await Promise.all([
-                exec('cat /sys/class/power_supply/battery/health 2>/dev/null || echo 0'),
-                exec('cat /sys/class/power_supply/battery/temp 2>/dev/null || echo 0'),
-                exec('cat /sys/class/power_supply/battery/voltage_now 2>/dev/null || echo 0'),
-                exec('cat /sys/class/power_supply/battery/current_now 2>/dev/null || echo 0'),
-                exec('acc -D'),
-                exec(`cat ${configPath} 2>/dev/null`)
-            ]);
-
-            let healthValue = healthRes.stdout.trim();
-            let tempStr = tempRes.stdout.trim();
-            let voltStr = voltRes.stdout.trim();
-            let currStr = currRes.stdout.trim();
-
-            if (healthValue === "ksu not found" || !healthValue || healthValue === "0") {
-                healthValue = "N/A";
-                tempStr = "0";
-                voltStr = "0";
-                currStr = "0";
-            }
-
-            document.getElementById('bat-health').innerText = healthValue;
-
-            const temp = parseInt(tempStr);
-            document.getElementById('bat-temp').innerText = (temp > 100 ? (temp / 10).toFixed(1) : temp) + " °C";
-
-            const rawVolt = parseInt(voltStr);
-            const volt = rawVolt > 100000 ? rawVolt / 1000000 : rawVolt / 1000;
-            document.getElementById('bat-voltage').innerText = volt.toFixed(2) + " V";
-
-            const curr = Math.floor(parseInt(currStr) / 1000);
-            document.getElementById('bat-current').innerText = curr + " mA";
-
-            const configText = cfgRes.stdout || "";
-            const capacityMatch = configText.match(/capacity=\(([^)]+)\)/);
-            const resetBattStatsMatch = configText.match(/resetBattStats=\(([^)]+)\)/);
-
-            let resumeMatch = null;
-            let pauseMatch = null;
-
-            if (capacityMatch && capacityMatch[1]) {
-                const parts = capacityMatch[1].trim().split(/\s+/);
-                resumeMatch = parseInt(parts[2]);
-                pauseMatch = parseInt(parts[3]);
-
-
-                const bannerTxt = document.getElementById('banner-percentage-text');
-                if (bannerTxt && !isNaN(pauseMatch)) {
-                    bannerTxt.textContent = pauseMatch + "%";
+                    badge.textContent = "ERROR";
                 }
             }
 
-            const isRunning = (statRes.stdout || "").toLowerCase().includes("is running");
-            const statusBadge = document.getElementById('bat-status');
-
-            if (statusBadge) {
-                if (!isTransitioning) {
-                    statusBadge.innerText = isRunning ? "Running" : "Stopped";
-                    statusBadge.setAttribute('data-state', isRunning ? 'running' : 'stopped');
-
-                    document.getElementById('btn-start').disabled = isRunning;
-                    document.getElementById('btn-stop').disabled = !isRunning;
-                    document.getElementById('btn-restart').disabled = !isRunning;
-                } else {
-                    document.getElementById('btn-start').disabled = true;
-                    document.getElementById('btn-stop').disabled = true;
-                    document.getElementById('btn-restart').disabled = true;
-                }
-            }
-
-            if (initialLoad && configText) {
-
-                if (resumeMatch !== null && pauseMatch !== null && !isNaN(resumeMatch) && !isNaN(pauseMatch)) {
-                    const startSlider = document.getElementById('thresh-start');
-                    const stopSlider = document.getElementById('thresh-stop');
-
-                    startSlider.value = resumeMatch;
-                    stopSlider.value = pauseMatch;
-
-                    document.getElementById('label-start').innerText = resumeMatch + "%";
-                    document.getElementById('label-stop').innerText = pauseMatch + "%";
-
-                    syncSliderFill(startSlider);
-                    syncSliderFill(stopSlider);
-                }
-
-                if (resetBattStatsMatch && resetBattStatsMatch[1]) {
-                    const params = resetBattStatsMatch[1].trim().split(/\s+/);
-                    const pauseStat = params[0] || "false";
-                    const plugStat = params[1] || "false";
-                    const unplugStat = params[2] || "false";
-
-                    document.getElementById('toggle-stats-pause').checked = pauseStat.includes('true');
-                    document.getElementById('toggle-stats-plug').checked = plugStat.includes('true');
-                    document.getElementById('toggle-stats-unplug').checked = unplugStat.includes('true');
-                }
-
-                const configTextArea = document.getElementById('config-textarea');
-                if (configTextArea) configTextArea.value = configText;
-
-                initialLoad = false;
-            }
-        }
-
-        async function updateThresholds() {
-            const start = document.getElementById('thresh-start').value;
-            const stop = document.getElementById('thresh-stop').value;
-            await exec(`acca -s rc=${start} pc=${stop}`);
-            showNotification();
-        }
-
-        async function toggleSetting(key, checked) {
-            await exec(`acca -s ${key}=${checked ? 'true' : 'false'}`);
-            showNotification();
-        }
-
-        function controlDaemon(action) {
-            isTransitioning = true;
-
-            document.getElementById('btn-start').disabled = true;
-            document.getElementById('btn-stop').disabled = true;
-            document.getElementById('btn-restart').disabled = true;
-
-            const statusBadge = document.getElementById('bat-status');
-            if (statusBadge) {
-                const suffix = action === 'stop' ? 'PING...' : 'ING...';
-                statusBadge.innerText = `${action.toUpperCase()}${suffix}`;
-                statusBadge.setAttribute('data-state', 'transitioning');
-            }
-
-            if (action === 'restart') {
-                hideNotification();
-            }
-
-            setTimeout(() => {
-                (async () => {
-                    try {
-                        await exec(`nohup acca -D ${action}`);
-                    } catch (e) {
-                        console.error("Daemon control error:", e);
+            function exec(cmd) {
+                return new Promise(resolve => {
+                    if (typeof ksu === 'undefined' || !ksu.exec) {
+                        resolve({ errno: -1, stdout: "ksu not found" });
+                        return;
                     }
-
-                    setTimeout(async () => {
-                        isTransitioning = false;
-                        await updateStatus();
-                    }, 2500);
-                })();
-            }, 150);
-        }
-
-        function showNotification() {
-            const banner = document.getElementById('restart-banner');
-            if (banner) {
-                banner.style.display = 'flex';
-                requestAnimationFrame(() => {
-                    banner.classList.add('open');
+                    const fullCmd = "export PATH=/data/adb/modules/acc/system/bin:$PATH; " + cmd;
+                    const cbName = "cb_" + Math.random().toString(36).substr(2, 9);
+                    window[cbName] = (errno, stdout = "", stderr = "") => {
+                        resolve({ errno, stdout: stdout.trim() });
+                        delete window[cbName];
+                    };
+                    try {
+                        ksu.exec(fullCmd, '{}', cbName);
+                    } catch (e) {
+                        resolve({ errno: -2, stdout: "" });
+                    }
                 });
             }
-        }
 
-        function hideNotification() {
-            const banner = document.getElementById('restart-banner');
-            if (banner) {
-                banner.classList.remove('open');
-                setTimeout(() => {
-                    if (!banner.classList.contains('open')) {
-                        banner.style.display = 'none';
-                    }
-                }, 400);
+            function syncSliderFill(slider) {
+                if (!slider) return;
+                const min = parseInt(slider.min) || 1;
+                const max = parseInt(slider.max) || 100;
+                const perc = ((parseInt(slider.value) - min) / (max - min)) * 100;
+                slider.parentElement.style.setProperty('--value-percent', perc + '%');
             }
-        }
 
-        async function saveRawConfig() {
-            const text = document.getElementById('config-textarea').value.replace(/'/g, "'\\''");
-            await exec(`echo '${text}' > ${configPath}`);
+            function handleSliderChange(type, el) {
+                const start = document.getElementById('thresh-start');
+                const stop = document.getElementById('thresh-stop');
+                let s = parseInt(start.value), p = parseInt(stop.value);
 
-            initialLoad = true;
-            await updateStatus();
+                if (type === 'start' && s >= p) start.value = s = p - 1;
+                if (type === 'stop' && p <= s) stop.value = p = s + 1;
 
-            showNotification();
-        }
+                document.getElementById('label-start').innerText = s + '%';
+                document.getElementById('label-stop').innerText = p + '%';
+                syncSliderFill(start);
+                syncSliderFill(stop);
 
-        async function toggleEditor() {
-            const area = document.getElementById('editor-area');
-            const arrow = document.getElementById('arrow-editor');
-            if (area.classList.contains('open')) {
-                area.classList.remove('open');
-                arrow.style.transform = 'rotate(0deg)';
-            } else {
-                const res = await exec(`cat ${configPath} 2>/dev/null`);
-                document.getElementById('config-textarea').value = res.stdout || "";
-                area.classList.add('open');
-                arrow.style.transform = 'rotate(180deg)';
+                clearTimeout(el.dataset.timeout);
+                el.dataset.timeout = setTimeout(updateThresholds, 450);
             }
-        }
 
-        async function toggleLogs() {
-            const area = document.getElementById('logs-area');
-            const content = document.getElementById('logs-content');
-            const arrow = document.getElementById('arrow-logs');
+            async function updateStatus() {
+                const [healthRes, tempRes, voltRes, currRes, statRes, cfgRes] = await Promise.all([
+                    exec('cat /sys/class/power_supply/battery/health 2>/dev/null || echo 0'),
+                    exec('cat /sys/class/power_supply/battery/temp 2>/dev/null || echo 0'),
+                    exec('cat /sys/class/power_supply/battery/voltage_now 2>/dev/null || echo 0'),
+                    exec('cat /sys/class/power_supply/battery/current_now 2>/dev/null || echo 0'),
+                    exec('acc -D'),
+                    exec(`cat ${configPath} 2>/dev/null`)
+                ]);
 
-            if (area.classList.contains('open')) {
-                area.classList.remove('open');
-                arrow.style.transform = 'rotate(0deg)';
-            } else {
-                content.innerText = "Reading logs...";
-                area.classList.add('open');
-                arrow.style.transform = 'rotate(180deg)';
+                let healthValue = healthRes.stdout.trim();
+                let tempStr = tempRes.stdout.trim();
+                let voltStr = voltRes.stdout.trim();
+                let currStr = currRes.stdout.trim();
 
-                async function pollLogs() {
-                    const res = await exec("tail -n 50 /data/adb/vr25/acc-data/logs/*.log");
-                    content.innerText = res.stdout || "Empty.";
-                    if (area.classList.contains('open')) {
-                        setTimeout(pollLogs, 2000);
+                if (healthValue === "ksu not found" || !healthValue || healthValue === "0") {
+                    healthValue = "N/A";
+                    tempStr = "0";
+                    voltStr = "0";
+                    currStr = "0";
+                }
+
+                document.getElementById('bat-health').innerText = healthValue;
+
+                const temp = parseInt(tempStr);
+                document.getElementById('bat-temp').innerText = (temp > 100 ? (temp / 10).toFixed(1) : temp) + " °C";
+
+                const rawVolt = parseInt(voltStr);
+                const volt = rawVolt > 100000 ? rawVolt / 1000000 : rawVolt / 1000;
+                document.getElementById('bat-voltage').innerText = volt.toFixed(2) + " V";
+
+                const curr = Math.floor(parseInt(currStr) / 1000);
+                document.getElementById('bat-current').innerText = curr + " mA";
+
+                const configText = cfgRes.stdout || "";
+                const capacityMatch = configText.match(/capacity=\(([^)]+)\)/);
+                const resetBattStatsMatch = configText.match(/resetBattStats=\(([^)]+)\)/);
+
+                let resumeMatch = null;
+                let pauseMatch = null;
+
+                if (capacityMatch && capacityMatch[1]) {
+                    const parts = capacityMatch[1].trim().split(/\s+/);
+                    resumeMatch = parseInt(parts[2]);
+                    pauseMatch = parseInt(parts[3]);
+
+
+                    const bannerTxt = document.getElementById('banner-percentage-text');
+                    if (bannerTxt && !isNaN(pauseMatch)) {
+                        bannerTxt.textContent = pauseMatch + "%";
                     }
                 }
-                pollLogs();
+
+                const isRunning = (statRes.stdout || "").toLowerCase().includes("is running");
+                const statusBadge = document.getElementById('bat-status');
+
+                if (statusBadge) {
+                    if (!isTransitioning) {
+                        statusBadge.innerText = isRunning ? "Running" : "Stopped";
+                        statusBadge.setAttribute('data-state', isRunning ? 'running' : 'stopped');
+
+                        document.getElementById('btn-start').disabled = isRunning;
+                        document.getElementById('btn-stop').disabled = !isRunning;
+                        document.getElementById('btn-restart').disabled = !isRunning;
+                    } else {
+                        document.getElementById('btn-start').disabled = true;
+                        document.getElementById('btn-stop').disabled = true;
+                        document.getElementById('btn-restart').disabled = true;
+                    }
+                }
+
+                if (initialLoad && configText) {
+
+                    if (resumeMatch !== null && pauseMatch !== null && !isNaN(resumeMatch) && !isNaN(pauseMatch)) {
+                        const startSlider = document.getElementById('thresh-start');
+                        const stopSlider = document.getElementById('thresh-stop');
+
+                        startSlider.value = resumeMatch;
+                        stopSlider.value = pauseMatch;
+
+                        document.getElementById('label-start').innerText = resumeMatch + "%";
+                        document.getElementById('label-stop').innerText = pauseMatch + "%";
+
+                        syncSliderFill(startSlider);
+                        syncSliderFill(stopSlider);
+                    }
+
+                    if (resetBattStatsMatch && resetBattStatsMatch[1]) {
+                        const params = resetBattStatsMatch[1].trim().split(/\s+/);
+                        const pauseStat = params[0] || "false";
+                        const plugStat = params[1] || "false";
+                        const unplugStat = params[2] || "false";
+
+                        document.getElementById('toggle-stats-pause').checked = pauseStat.includes('true');
+                        document.getElementById('toggle-stats-plug').checked = plugStat.includes('true');
+                        document.getElementById('toggle-stats-unplug').checked = unplugStat.includes('true');
+                    }
+
+                    const configTextArea = document.getElementById('config-textarea');
+                    if (configTextArea) configTextArea.value = configText;
+
+                    initialLoad = false;
+                }
             }
-        }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            detectEnvironment();
-
-            const startSlider = document.getElementById('thresh-start');
-            const stopSlider = document.getElementById('thresh-stop');
-            const pauseToggle = document.getElementById('toggle-stats-pause');
-            const plugToggle = document.getElementById('toggle-stats-plug');
-            const unplugToggle = document.getElementById('toggle-stats-unplug');
-
-            if (startSlider) syncSliderFill(startSlider);
-            if (stopSlider) syncSliderFill(stopSlider);
-
-            if (startSlider) startSlider.addEventListener('input', (e) => handleSliderChange('start', e.target));
-            if (stopSlider) stopSlider.addEventListener('input', (e) => handleSliderChange('stop', e.target));
-
-            if (pauseToggle) pauseToggle.addEventListener('change', (e) => toggleSetting('rbsp', e.target.checked));
-            if (plugToggle) plugToggle.addEventListener('change', (e) => toggleSetting('rbspl', e.target.checked));
-            if (unplugToggle) unplugToggle.addEventListener('change', (e) => toggleSetting('rbsu', e.target.checked));
-
-            const btnStart = document.getElementById('btn-start');
-            const btnStop = document.getElementById('btn-stop');
-            const btnRestart = document.getElementById('btn-restart');
-            const btnBannerRestart = document.getElementById('btn-banner-restart');
-
-            if (btnStart) {
-                btnStart.onclick = null;
-                btnStart.addEventListener('click', (e) => { e.preventDefault(); controlDaemon('start'); });
-            }
-            if (btnStop) {
-                btnStop.onclick = null;
-                btnStop.addEventListener('click', (e) => { e.preventDefault(); controlDaemon('stop'); });
-            }
-            if (btnRestart) {
-                btnRestart.onclick = null;
-                btnRestart.addEventListener('click', (e) => { e.preventDefault(); controlDaemon('restart'); });
-            }
-            if (btnBannerRestart) {
-                btnBannerRestart.onclick = null;
-                btnBannerRestart.addEventListener('click', (e) => { e.preventDefault(); controlDaemon('restart'); });
+            async function updateThresholds() {
+                const start = document.getElementById('thresh-start').value;
+                const stop = document.getElementById('thresh-stop').value;
+                await exec(`acca -s rc=${start} pc=${stop}`);
+                showNotification();
             }
 
-            updateStatus();
-            setInterval(updateStatus, 3500);
-        });
-    </script>
+            async function toggleSetting(key, checked) {
+                await exec(`acca -s ${key}=${checked ? 'true' : 'false'}`);
+                showNotification();
+            }
+
+            function controlDaemon(action) {
+                isTransitioning = true;
+
+                document.getElementById('btn-start').disabled = true;
+                document.getElementById('btn-stop').disabled = true;
+                document.getElementById('btn-restart').disabled = true;
+
+                const statusBadge = document.getElementById('bat-status');
+                if (statusBadge) {
+                    const suffix = action === 'stop' ? 'PING...' : 'ING...';
+                    statusBadge.innerText = `${action.toUpperCase()}${suffix}`;
+                    statusBadge.setAttribute('data-state', 'transitioning');
+                }
+
+                if (action === 'restart') {
+                    hideNotification();
+                }
+
+                setTimeout(() => {
+                    (async () => {
+                        try {
+                            await exec(`nohup acca -D ${action}`);
+                        } catch (e) {
+                            console.error("Daemon control error:", e);
+                        }
+
+                        setTimeout(async () => {
+                            isTransitioning = false;
+                            await updateStatus();
+                        }, 2500);
+                    })();
+                }, 150);
+            }
+
+            function showNotification() {
+                const banner = document.getElementById('restart-banner');
+                if (banner) {
+                    banner.style.display = 'flex';
+                    requestAnimationFrame(() => {
+                        banner.classList.add('open');
+                    });
+                }
+            }
+
+            function hideNotification() {
+                const banner = document.getElementById('restart-banner');
+                if (banner) {
+                    banner.classList.remove('open');
+                    setTimeout(() => {
+                        if (!banner.classList.contains('open')) {
+                            banner.style.display = 'none';
+                        }
+                    }, 400);
+                }
+            }
+
+            async function saveRawConfig() {
+                const text = document.getElementById('config-textarea').value.replace(/'/g, "'\\''");
+                await exec(`echo '${text}' > ${configPath}`);
+
+                initialLoad = true;
+                await updateStatus();
+
+                showNotification();
+            }
+
+            async function toggleEditor() {
+                const area = document.getElementById('editor-area');
+                const arrow = document.getElementById('arrow-editor');
+                if (area.classList.contains('open')) {
+                    area.classList.remove('open');
+                    arrow.style.transform = 'rotate(0deg)';
+                } else {
+                    const res = await exec(`cat ${configPath} 2>/dev/null`);
+                    document.getElementById('config-textarea').value = res.stdout || "";
+                    area.classList.add('open');
+                    arrow.style.transform = 'rotate(180deg)';
+                }
+            }
+
+            async function toggleLogs() {
+                const area = document.getElementById('logs-area');
+                const content = document.getElementById('logs-content');
+                const arrow = document.getElementById('arrow-logs');
+
+                if (area.classList.contains('open')) {
+                    area.classList.remove('open');
+                    arrow.style.transform = 'rotate(0deg)';
+                } else {
+                    content.innerText = "Reading logs...";
+                    area.classList.add('open');
+                    arrow.style.transform = 'rotate(180deg)';
+
+                    async function pollLogs() {
+                        const res = await exec("tail -n 50 /data/adb/vr25/acc-data/logs/*.log");
+                        content.innerText = res.stdout || "Empty.";
+                        if (area.classList.contains('open')) {
+                            setTimeout(pollLogs, 2000);
+                        }
+                    }
+                    pollLogs();
+                }
+            }
+
+            document.addEventListener("DOMContentLoaded", () => {
+                detectEnvironment();
+
+                const startSlider = document.getElementById('thresh-start');
+                const stopSlider = document.getElementById('thresh-stop');
+                const pauseToggle = document.getElementById('toggle-stats-pause');
+                const plugToggle = document.getElementById('toggle-stats-plug');
+                const unplugToggle = document.getElementById('toggle-stats-unplug');
+
+                if (startSlider) syncSliderFill(startSlider);
+                if (stopSlider) syncSliderFill(stopSlider);
+
+                if (startSlider) startSlider.addEventListener('input', (e) => handleSliderChange('start', e.target));
+                if (stopSlider) stopSlider.addEventListener('input', (e) => handleSliderChange('stop', e.target));
+
+                if (pauseToggle) pauseToggle.addEventListener('change', (e) => toggleSetting('rbsp', e.target.checked));
+                if (plugToggle) plugToggle.addEventListener('change', (e) => toggleSetting('rbspl', e.target.checked));
+                if (unplugToggle) unplugToggle.addEventListener('change', (e) => toggleSetting('rbsu', e.target.checked));
+
+                const btnStart = document.getElementById('btn-start');
+                const btnStop = document.getElementById('btn-stop');
+                const btnRestart = document.getElementById('btn-restart');
+                const btnBannerRestart = document.getElementById('btn-banner-restart');
+
+                if (btnStart) {
+                    btnStart.onclick = null;
+                    btnStart.addEventListener('click', (e) => { e.preventDefault(); controlDaemon('start'); });
+                }
+                if (btnStop) {
+                    btnStop.onclick = null;
+                    btnStop.addEventListener('click', (e) => { e.preventDefault(); controlDaemon('stop'); });
+                }
+                if (btnRestart) {
+                    btnRestart.onclick = null;
+                    btnRestart.addEventListener('click', (e) => { e.preventDefault(); controlDaemon('restart'); });
+                }
+                if (btnBannerRestart) {
+                    btnBannerRestart.onclick = null;
+                    btnBannerRestart.addEventListener('click', (e) => { e.preventDefault(); controlDaemon('restart'); });
+                }
+
+                updateStatus();
+                setInterval(updateStatus, 3500);
+            });
+        </script>
 </body>
 
 </html>
