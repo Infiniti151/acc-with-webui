@@ -168,7 +168,9 @@ $KSU || { [ ! -f /data/adb/*/bin/busybox ] || KSU=true; }
 mkdir -p $installDir/$id
 cp -R $srcDir/install/* $installDir/$id/
 installDir=$(readlink -f $installDir/$id)
+cp -R $srcDir/webroot $installDir/
 cp $srcDir/module.prop $installDir/
+cp $srcDir/banner.jpg $installDir/
 cp -f $srcDir/README.* $data_dir/
 
 

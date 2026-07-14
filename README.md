@@ -1,5 +1,8 @@
 # Advanced Charging Controller (ACC)
 
+> [!important]
+> WebUI is the only addition in this fork. No backend code has been changed. Why not just use the AccA app? Coz I don't want to install a separate app to control a module. Also, it has been abandoned since 2022. It was built before the advent of root manager WebUIs and WebUIs are the standard now for module GUIs.
+>
 
 ---
 - [DESCRIPTION](#description)
