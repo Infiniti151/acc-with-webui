@@ -69,7 +69,7 @@ jobs:
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "version_code=${VERSION_CODE}" >> $GITHUB_OUTPUT
           echo "id=${ID}-with-webui" >> $GITHUB_OUTPUT
-          echo "basename=${ID}_${VERSION}_${VERSION_CODE}" >> $GITHUB_OUTPUT
+          echo "basename=${ID}-with-webui_${VERSION}_${VERSION_CODE}" >> $GITHUB_OUTPUT
           
           awk '
             NR==1 && /^###/ { print; next }
