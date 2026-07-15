@@ -1,6 +1,7 @@
 #!/system/bin/sh
 # $id Installer/Upgrader
 # Copyright 2019-2024, VR25
+# Copyright 2026, Infiniti151
 # License: GPLv3+
 #
 # devs: triple hashtags (###) mark non-generic code
@@ -168,7 +169,6 @@ $KSU || { [ ! -f /data/adb/*/bin/busybox ] || KSU=true; }
 mkdir -p $installDir/$id
 cp -R $srcDir/install/* $installDir/$id/
 installDir=$(readlink -f $installDir/$id)
-cp -R $srcDir/webroot $installDir/
 cp $srcDir/module.prop $installDir/
 cp $srcDir/banner.jpg $installDir/
 cp -f $srcDir/README.* $data_dir/
@@ -291,14 +291,10 @@ esac
 set +eu
 printf "Done\n\n\n"
 
-
-# print links and changelog
-sed -En "\|^## LINKS|,\$p" $srcDir/README.md \
-  | grep -v '^---' | sed 's/^## //'
+printf "─────────────[ ACC ⚡ WebUI ]─────────────\n\n"
 
 printf "\n\nCHANGELOG\n\n"
-cat $srcDir/changelog.md
-
+cat $srcDir/changelog-webui.md
 
 _echo() {
   echo "$@" | tee -a $tmpd/.install-notes

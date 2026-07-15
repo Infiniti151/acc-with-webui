@@ -1,6 +1,8 @@
 #!/system/bin/sh
-# ${1:-$id} Tarball Installer
+#
+# ${1:-$id} Tarball Installer (Infiniti151 Fork)
 # Copyright 2019-2022, VR25
+# Copyright 2026, Infiniti151
 # License: GPLv3+
 #
 # this file must be in the same directory as the tarball
@@ -55,7 +57,7 @@ set -e
 
 # this runs on exit if the installer is launched by a front-end app
 copy_log() {
-  rm -rf ${1-$id}[-_]*/ 2>/dev/null
+  rm -rf ${1-$id}[-_]*/ acc-with-webui[-_]*/ 2>/dev/null
   case "$PWD" in
     /data/data/*|/data/user/*)
       mkdir -p logs
@@ -68,16 +70,28 @@ copy_log() {
 trap copy_log EXIT
 
 # extract tarball
-rm -rf ${1:-$id}[-_]*/ 2>/dev/null
-test -f ${1:-$id}[-_]*.tar.gz && ext=tar.gz || ext=tgz
-tar -xf ${1:-$id}[-_]*.$ext
-unset ext
+rm -rf ${1:-$id}[-_]*/ acc-with-webui[-_]*/ 2>/dev/null
+
+if test -f acc-with-webui[-_]*.*tar.gz || test -f acc-with-webui[-_]*.tgz; then
+  target_archive=$(ls acc-with-webui[-_]*.*tar.gz acc-with-webui[-_]*.tgz 2>/dev/null | head -n 1)
+else
+  target_archive=$(ls ${1:-$id}[-_]*.*tar.gz ${1:-$id}[-_]*.tgz 2>/dev/null | head -n 1)
+fi
+
+[ -n "$target_archive" ] || {
+  echo "Tarball not found!"
+  exit 5
+}
+
+tar -xf "$target_archive"
+unset target_archive
 
 # prevent frontends from downgrading/reinstalling modules
 case "$PWD" in
   /data/data/*|/data/user/*)
     get_ver() { sed -n '/^versionCode=/s/.*=//p' ${1}module.prop 2>/dev/null || echo 0; }
-    bundled_ver=$(get_ver ${1:-$id}[-_]*/)
+    extracted_dir=$(ls -d acc-with-webui[-_]*/ ${1:-$id}[-_]*/ 2>/dev/null | head -n 1)
+    bundled_ver=$(get_ver "$extracted_dir")
     regular_ver=$(get_ver /data/adb/$domain/${1:-$id}/)
     if [ $bundled_ver -le $regular_ver ] && [ $regular_ver -ne 0 ]; then
       ln -s $(readlink -f /data/adb/$domain/${1:-$id}) .
@@ -88,6 +102,8 @@ esac
 
 # install ${1:-$id}
 export installDir="$2"
-/system/bin/sh ${1:-$id}[-_]*/install.sh
+
+target_install_dir=$(ls -d acc-with-webui[-_]*/ ${1:-$id}[-_]*/ 2>/dev/null | head -n 1)
+/system/bin/sh "${target_install_dir}install.sh"
 
 exit 0

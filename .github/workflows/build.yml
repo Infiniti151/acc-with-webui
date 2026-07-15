@@ -1,0 +1,115 @@
+name: Build and Release Assets
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - 'changelog-webui.md'
+      - 'install/webroot/**'
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Create a GitHub Release and Tag?'
+        type: boolean
+        required: true
+        default: true
+
+permissions:
+  contents: write
+  id-token: write           # Required for OIDC identity token generation (Sigstore)
+  attestations: write       # Required for committing the generated attestations
+  artifact-metadata: write  # Required for creating GitHub's backend artifact storage record
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Check for Dual Changes
+        id: filter
+        if: ${{ github.event_name == 'push' }}
+        uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
+        with:
+          filters: |
+            changelog:
+              - 'changelog-webui.md'
+            webroot:
+              - 'install/webroot/**'
+
+      - name: Verify Both Paths Changed
+        if: ${{ github.event_name == 'push' && !(steps.filter.outputs.changelog == 'true' && steps.filter.outputs.webroot == 'true') }}
+        run: |
+          echo "Workflow skipped because changes were not present in both changelog-webui.md AND install/webroot/"
+          exit 0
+
+      - name: Set up Environment & Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zip gzip markdown
+          chmod +x build.sh
+          [ -f check-syntax.sh ] && chmod +x check-syntax.sh || true
+
+      - name: Build Module Assets
+        run: |
+          ./build.sh
+
+      - name: Parse Module Metadata & Topmost Changelog Entry
+        id: metadata
+        run: |
+          VERSION=$(sed -n '1s/### \(v[0-9.]*\).*/\1/p' changelog-webui.md)
+          VERSION_CODE=$(sed -n '1s/.*(\([0-9]*\)).*/\1/p' changelog-webui.md)
+          ID=$(sed -n "s/^id=//p" module.prop)
+          
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "version_code=${VERSION_CODE}" >> $GITHUB_OUTPUT
+          echo "id=${ID}-with-webui" >> $GITHUB_OUTPUT
+          echo "basename=${ID}_${VERSION}_${VERSION_CODE}" >> $GITHUB_OUTPUT
+          
+          awk '
+            NR==1 && /^###/ { print; next }
+            /^###/ { exit }
+            { print }
+          ' changelog-webui.md > latest-release-note.md
+
+      - name: Generate cryptographic attestations
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4
+        with:
+          subject-path: |
+            _builds/${{ steps.metadata.outputs.basename }}/${{ steps.metadata.outputs.basename }}.zip
+            _builds/${{ steps.metadata.outputs.basename }}/${{ steps.metadata.outputs.basename }}.tgz
+            _builds/${{ steps.metadata.outputs.basename }}/install-online.sh
+            _builds/${{ steps.metadata.outputs.basename }}/install-tarball.sh
+            _builds/${{ steps.metadata.outputs.basename }}/${{ steps.metadata.outputs.id }}_flashable_uninstaller.zip
+
+      - name: Commit & Push Updated Files
+        if: ${{ github.event_name == 'push' || inputs.create_release }}
+        uses: suzuki-shunsuke/commit-action@06e3b49d4706498d325d29bd85adc82ecf2f5d8f # v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          commit_message: "🤖 Automated version bump to ${{ steps.metadata.outputs.version }} [skip ci]"
+
+      - name: Create GitHub Release
+        if: ${{ github.event_name == 'push' || inputs.create_release }}
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3
+        with:
+          tag_name: ${{ steps.metadata.outputs.version }}
+          name: Release ${{ steps.metadata.outputs.version }} (${{ steps.metadata.outputs.version_code }})
+          body_path: latest-release-note.md
+          draft: false
+          prerelease: false
+          files: |
+            _builds/${{ steps.metadata.outputs.basename }}/${{ steps.metadata.outputs.basename }}.zip
+            _builds/${{ steps.metadata.outputs.basename }}/${{ steps.metadata.outputs.basename }}.tgz
+            _builds/${{ steps.metadata.outputs.basename }}/install-online.sh
+            _builds/${{ steps.metadata.outputs.basename }}/install-tarball.sh
+            _builds/${{ steps.metadata.outputs.basename }}/${{ steps.metadata.outputs.id }}_flashable_uninstaller.zip
+            module.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

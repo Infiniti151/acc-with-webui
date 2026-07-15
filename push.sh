@@ -7,9 +7,8 @@
 # k is for KaiOS
 
 id=$(sed -n "s/^id=//p" module.prop)
-version="$(sed -n 1p changelog.md | sed 's/[*()]//g')"
-versionCode=${version#* }
-version=${version% *}
+version=$(sed -n '1s/### \(v[0-9.]*\).*/\1/p' changelog-webui.md)
+versionCode=$(sed -n '1s/.*(\([0-9]*\)).*/\1/p' changelog-webui.md)
 zip=${id}_${version}_$versionCode
 zip=$(echo _builds/$zip/$zip*zip)
 dest=/sdcard/Download/acc.zip

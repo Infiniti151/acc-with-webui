@@ -1,13 +1,13 @@
 #!/usr/bin/env sh
 # Installation Archives Builder
 # Copyright 2018-2024, VR25
+# Copyright 2026, Infiniti151
 # License: GPLv3+
 #
 # usage: $0 [any_random_arg]
 #   e.g.,
 #     build.sh (builds $id and generates installable archives)
 #     build.sh any_random_arg (only builds $id)
-
 
 (cd ${0%/*} 2>/dev/null
 
@@ -18,41 +18,31 @@ set_prop() {
     ${3:-module.prop} 2>/dev/null
 }
 
-
 id=$(sed -n "s/^id=//p" module.prop)
-
 domain=$(sed -n "s/^domain=//p" module.prop)
-
-version="$(sed -n 1p changelog.md | sed 's/[*()]//g')"
-
-versionCode=${version#* }
-
-version=${version% *}
-
-basename=${id}_${version}_$versionCode
-
+version=$(sed -n '1s/### \(v[0-9.]*\).*/\1/p' changelog-webui.md)
+versionCode=$(sed -n '1s/.*(\([0-9]*\)).*/\1/p' changelog-webui.md)
+basename=${id}-with-webui_${version}_$versionCode
 tmpDir=.tmp/META-INF/com/google/android
 
-
 # update module info
-[ changelog.md -ot module.prop ] || {
+[ module.prop -ot changelog-webui.md ] && {
   set_prop version $version
   set_prop versionCode $versionCode
   cat << EOF > module.json
 {
     "busybox": "https://github.com/Magisk-Modules-Repo/busybox-ndk",
-    "changelog": "https://raw.githubusercontent.com/VR-25/$id/master/changelog.md",
     "curl": "https://github.com/Zackptg5/Cross-Compiled-Binaries-Android/tree/master/curl",
-    "onlineInstaller": "https://github.com/VR-25/$id/releases/download/$version/install-online.sh",
-    "tgz": "https://github.com/VR-25/$id/releases/download/$version/${basename}.tgz",
-    "tgzInstaller": "https://github.com/VR-25/$id/releases/download/$version/install-tarball.sh",
-    "version": "$version",
-    "versionCode": $versionCode,
-    "zipUrl": "https://github.com/VR-25/$id/releases/download/$version/${basename}.zip"
+    "onlineInstaller": "https://github.com/Infiniti151/acc-with-webui/releases/download/${version}/install-online.sh",
+    "tgz": "https://github.com/Infiniti151/acc-with-webui/releases/download/${version}/${basename}.tgz",
+    "tgzInstaller": "https://github.com/Infiniti151/acc-with-webui/releases/download/${version}/install-tarball.sh",
+    "version": "${version}",
+    "versionCode": ${versionCode},
+    "zipUrl": "https://github.com/Infiniti151/acc-with-webui/releases/download/${version}/${basename}.zip",
+    "changelog": "https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/changelog-webui.md"
 }
 EOF
 }
-
 
 # set ID
 for file in ./install*.sh ./install/*.sh ./bundle.sh; do
@@ -61,14 +51,12 @@ for file in ./install*.sh ./install/*.sh ./bundle.sh; do
   fi
 done
 
-
 # set domain
 for file in ./install*.sh ./install/*.sh ./bundle.sh; do
   if [ -f "$file" ] && grep -Eq '(^|\()domain=' $file; then
     grep -Eq "(^|\()domain=$domain" $file || set_prop domain $domain $file
   fi
 done
-
 
 # update README
 
@@ -89,7 +77,6 @@ then
   markdown README.md > README.html 2>/dev/null || :
 fi
 
-
 # update busybox config (from install/setup-busybox.sh) in install/uninstall.sh and install scripts
 set -e
 for file in ./install/uninstall.sh ./install*.sh; do
@@ -102,26 +89,23 @@ for file in ./install/uninstall.sh ./install*.sh; do
 done
 set +e
 
-
 # unify installers for flashable zip (customize.sh and update-binary are copies of install.sh)
 { cp -u install.sh customize.sh
 cp -u install.sh META-INF/com/google/android/update-binary; } 2>/dev/null
 
-
-if [ bin/${id}_flashable_uninstaller.zip -ot install/uninstall.sh ] || [ ! -f bin/${id}_flashable_uninstaller.zip ]; then
+if [ bin/${id}-with-webui_flashable_uninstaller.zip -ot install/uninstall.sh ] || [ ! -f bin/${id}-with-webui_flashable_uninstaller.zip ]; then
   # generate $id uninstaller flashable zip
-  echo "=> bin/${id}_flashable_uninstaller.zip"
-  rm -rf bin/${id}_flashable_uninstaller.zip $tmpDir 2>/dev/null
+  echo "=> bin/${id}-with-webui_flashable_uninstaller.zip"
+  rm -rf bin/${id}-with-webui_flashable_uninstaller.zip $tmpDir 2>/dev/null
   mkdir -p bin $tmpDir
   sed 's|#!/system/bin/sh|#!/sbin/sh|' install/uninstall.sh > $tmpDir/update-binary
   echo "#MAGISK" > $tmpDir/updater-script
   (cd .tmp
-  zip -r9 ../bin/${id}_flashable_uninstaller.zip * \
+  zip -r9 ../bin/${id}-with-webui_flashable_uninstaller.zip * \
     | sed 's|.*adding: ||' | grep -iv 'zip warning:')
   rm -rf .tmp
   echo
 fi
-
 
 [ -z "$1" ] && {
 
@@ -129,7 +113,7 @@ fi
   rm -rf _builds/${basename}/ 2>/dev/null
   mkdir -p _builds/${basename}/${basename}
 
-  cp bin/${id}_flashable_uninstaller.zip install-online.sh install-tarball.sh _builds/${basename}/
+  cp bin/${id}-with-webui_flashable_uninstaller.zip install-online.sh install-tarball.sh _builds/${basename}/
 
   # generate $id flashable zip
   case $version in

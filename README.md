@@ -1,7 +1,7 @@
 # Advanced Charging Controller (ACC)
 
 > [!important]
-> WebUI is the only addition in this fork. No backend code has been changed. Why not just use the AccA app? Coz I don't want to install a separate app to control a module. Also, it has been abandoned since 2022. It was built before the advent of root manager WebUIs and WebUIs are the standard now for module GUIs.
+> WebUI is the only addition in this fork. No backend code has been changed. Why not just use the AccA app? Coz I don't want to install a separate app to control a module. Also, it has been abandoned since 2022. It was built before the advent of root manager WebUIs and WebUIs are the standard now for module GUIs. This has been tested in KernelSU Next, but should work fine in APatch and Magisk with MMRL/WebUI X: Portable. Only open issues regarding WebUI here. All issues regarding acc must be opened upstream. This is based on acc dev branch in order to get the latest acc updates.
 >
 
 ---
@@ -9,7 +9,6 @@
 - [LICENSE](#license)
 - [DISCLAIMER](#disclaimer)
 - [WARNINGS](#warnings)
-- [DONATIONS](#donations)
 - [PREREQUISITES](#prerequisites)
 - [QUICK START GUIDE](#quick-start-guide)
   - [Notes](#notes)
@@ -52,8 +51,6 @@
   - [Override Battery mAh Capacity](override_battery_mah_capacity)
   - [Override Broken Temperature Sensor](override_broken_temperature_sensor)
 - [FREQUENTLY ASKED QUESTIONS (FAQ)](#frequently-asked-questions-faq)
-- [LINKS](#links)
-
 
 ---
 ## DESCRIPTION
@@ -115,14 +112,6 @@ ACC daemon initializes 60 seconds after the boot animation stops.
 This gives plenty of time to run `pkill -9 -f accd` to kill the waiting process or `accd -x` to generate persistent logs (`/sdcard/accd-*.log`) for debugging the bootloop.
 `accd -x` also sets the disable flag (`/data/adb/vr25/acc-data/disable`). This file prevents the daemon from starting again. It's removed manually or by the installer.
 `acc -t` always implies `-x` and tries to auto-blacklist switches that trigger unwanted reboots.
-
-
----
-## DONATIONS
-
-Please, support the project with donations ([links](#links) at the bottom).
-As the project gets bigger and more popular, the need for coffee goes up as well.
-
 
 ---
 ## PREREQUISITES
@@ -191,9 +180,9 @@ The initialization script is `/data/adb/vr25/acc/service.sh`.
 
 ### Build Tarballs and Flashable Zips
 
-1. Download and extract the source code: `git clone https://github.com/VR-25/acc.git`
-or `wget  https://github.com/VR-25/acc/archive/master.tar.gz -O - | tar -xz`
-or `curl -L#  https://github.com/VR-25/acc/archive/master.tar.gz | tar -xz`
+1. Download and extract the source code: `git clone https://github.com/Infiniti151/acc-with-webui.git`
+or `wget  https://github.com/Infiniti151/acc-with-webui/archive/master.tar.gz -O - | tar -xz`
+or `curl -L#  https://github.com/Infiniti151/acc-with-webui/archive/master.tar.gz | tar -xz`
 
 2. `cd acc*`
 
@@ -217,13 +206,13 @@ The order of arguments doesn't matter.
 For upgrades, if `%parent install dir%` is not supplied, the original/current is used.
 
 - `sh install-tarball.sh [module id, default: acc] [parent install dir (e.g., /data/data/mattecarra.accapp/files)]` installs the tarball (`acc*gz`) from the script's location.
-The archive must be in the same directory as this script - and obtained from GitHub: https://github.com/VR-25/acc/archive/$commit.tar.gz (`$commit` examples: `master`, `dev`, `v2020.5.20-rc`).
+The archive must be in the same directory as this script - and obtained from GitHub: https://github.com/Infiniti151/acc-with-webui/archive/$commit.tar.gz (`$commit` examples: `master`, `dev`, `v2020.5.20-rc`).
 
 - One can also use a single command to download and install acc:
 
-`curl -sSL https://raw.githubusercontent.com/VR-25/acc/dev/install-online.sh | /system/bin/sh -s dev`
+`curl -sSL https://raw.githubusercontent.com/Infiniti151/acc-with-webui/install-online.sh | /system/bin/sh -s dev`
 
-`wget -qO- https://raw.githubusercontent.com/VR-25/acc/dev/install-online.sh | /system/bin/sh -s dev`
+`wget -qO- https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/install-online.sh | /system/bin/sh -s dev`
 
 
 #### Notes
@@ -1157,6 +1146,30 @@ Do not parse the config file directly.
 Use `--set --print ['regex']` and `--set --print-default ['regex']`.
 Refer back to [terminal commands](#terminal-commands) for details.
 
+### WebUI
+
+WebUI currently includes:
+- Battery stats monitor (health, temperature, current and voltage)
+- Daemon (accd) control panel
+- Charging threshold sliders
+- Reset battery stats toggles
+- Config file editor
+- Logs viewer
+
+<p align="center">
+  <a href="./images/1.png" target="_blank">
+    <img src="./images/1.png" alt="ACC WebUI Banner" style="max-width: 24%; height: auto;" />
+  </a>
+  <a href="./images/2.png" target="_blank">
+    <img src="./images/2.png" alt="ACC WebUI Sliders" style="max-width: 24%; height: auto;" />
+  </a>
+  <a href="./images/3.png" target="_blank">
+    <img src="./images/3.png" alt="ACC WebUI Config Editor" style="max-width: 24%; height: auto;" />
+  </a>
+  <a href="./images/4.png" target="_blank">
+    <img src="./images/4.png" alt="ACC Module Logs Viewer" style="max-width: 24%; height: auto;" />
+  </a>
+</p>
 
 ---
 ## TROUBLESHOOTING
@@ -1410,7 +1423,9 @@ If your battery's thermistor always reports a negative value, and charging is ve
 
 > How do I report issues?
 
-Open issues on GitHub or contact the developer on Telegram (preferred) or XDA (links below).
+**For WebUI**: Open issues on GitHub. Include screenshots or screencasts of the issue.
+
+**For ACC**: Open issues on upstream GitHub (VR-25/acc) or contact the developer on Telegram (preferred) or XDA (links below).
 Always provide as much information as possible.
 Attach `/sdcard/Download/acc-logs-*.tgz` - generated by `acc -le` _right after_ the problem occurs.
 Refer back to `TROUBLESHOOTING > Diagnostics/Logs` for additional details.
@@ -1532,19 +1547,3 @@ Configure day and night profiles:
 
 
 ---
-## LINKS
-
-- [Donate - Credit/Debit Card](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=iprj25@gmail.com&lc=US&item_name=VR25+is+creating+free+and+open+source+software.+Donate+to+suppport+their+work.&no_note=0&cn=&currency_code=USD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted)
-- [Donate - Liberapay](https://liberapay.com/vr25)
-- [Donate - Patreon](https://patreon.com/vr25)
-- [Donate - PayPal Me](https://paypal.me/vr25xda)
-
-- [Must Read - How to Prolong Lithium Ion Batteries Lifespan](https://batteryuniversity.com/article/bu-808-how-to-prolong-lithium-based-batteries)
-
-- [Telegram Channel](https://t.me/vr25_xda)
-- [Telegram Group](https://t.me/acc_group)
-- [Telegram Profile](https://t.me/vr25xda)
-
-- [Upstream Repository](https://github.com/VR-25/acc)
-
-- [XDA Thread](https://forum.xda-developers.com/apps/magisk/module-magic-charging-switch-cs-v2017-9-t3668427)
