@@ -1148,7 +1148,7 @@ Refer back to [terminal commands](#terminal-commands) for details.
 
 ### WebUI
 
-WebUI currently includes:
+WebUI features:
 - Battery stats monitor (health, temperature, current and voltage)
 - Daemon (accd) control panel
 - Charging threshold sliders
@@ -1157,17 +1157,17 @@ WebUI currently includes:
 - Logs viewer
 
 <p align="center">
-  <a href="./images/1.png" target="_blank">
-    <img src="./images/1.png" alt="ACC WebUI Banner" style="max-width: 24%; height: auto;" />
+  <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/1.png">
+    <img src="./images/1.png" height="300">
   </a>
-  <a href="./images/2.png" target="_blank">
-    <img src="./images/2.png" alt="ACC WebUI Sliders" style="max-width: 24%; height: auto;" />
+  <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/2.png">
+    <img src="./images/2.png" height="300">
   </a>
-  <a href="./images/3.png" target="_blank">
-    <img src="./images/3.png" alt="ACC WebUI Config Editor" style="max-width: 24%; height: auto;" />
+  <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png">
+    <img src="./images/3.png" height="300">
   </a>
-  <a href="./images/4.png" target="_blank">
-    <img src="./images/4.png" alt="ACC Module Logs Viewer" style="max-width: 24%; height: auto;" />
+  <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png">
+    <img src="./images/4.png" height="300">
   </a>
 </p>
 
