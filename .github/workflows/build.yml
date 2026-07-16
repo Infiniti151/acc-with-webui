@@ -85,14 +85,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: |
-            !check-syntax.sh
-            !latest-release-note.md
+            .
+            :(exclude)check-syntax.sh
+            :(exclude)latest-release-note.md
           commit_message: "🤖 Automated version bump to ${{ steps.metadata.outputs.version }} [skip ci]"
           fail_on_self_push: false
           empty_commit: false
 
       - name: Fail if no changes were committed
-        if: steps.create_commit.outputs.pushed == 'false'
+        if: steps.create_commit.conclusion == 'success' && steps.create_commit.outputs.pushed == 'false'
         run: |
           echo "❌ Error: Working directory is clean. No changes found to commit!"
           exit 1
