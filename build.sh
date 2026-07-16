@@ -18,15 +18,19 @@ set_prop() {
     ${3:-module.prop} 2>/dev/null
 }
 
-id=$(sed -n "s/^id=//p" module.prop)
-domain=$(sed -n "s/^domain=//p" module.prop)
+get_prop() {
+  sed -n "s/^$1=//p" "${2:-module.prop}" 2>/dev/null
+}
+
+id=$(get_prop id)
+domain=$(get_prop domain)
 version=$(sed -n '1s/### \(v[0-9.]*\).*/\1/p' changelog-webui.md)
 versionCode=$(sed -n '1s/.*(\([0-9]*\)).*/\1/p' changelog-webui.md)
 basename=${id}-with-webui_${version}_$versionCode
 tmpDir=.tmp/META-INF/com/google/android
 
 # update module info
-[ module.prop -ot changelog-webui.md ] && {
+[ "$(get_prop version)" != "$version" ] && {
   set_prop version $version
   set_prop versionCode $versionCode
   cat << EOF > module.json

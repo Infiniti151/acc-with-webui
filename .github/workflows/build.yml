@@ -77,13 +77,8 @@ jobs:
             { print }
           ' changelog-webui.md > latest-release-note.md
 
-      - name: Generate cryptographic attestations
-        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4
-        with:
-          subject-path: |
-            _builds/${{ steps.metadata.outputs.basename }}/*
-
       - name: Commit & Push Updated Files
+        id: create_commit
         if: ${{ github.event_name == 'push' || inputs.create_release }}
         uses: suzuki-shunsuke/commit-action@06e3b49d4706498d325d29bd85adc82ecf2f5d8f # v1.0.0
         env:
@@ -94,6 +89,19 @@ jobs:
             !latest-release-note.md
           commit_message: "🤖 Automated version bump to ${{ steps.metadata.outputs.version }} [skip ci]"
           fail_on_self_push: false
+          empty_commit: false
+
+      - name: Fail if no changes were committed
+        if: steps.create_commit.outputs.pushed == 'false'
+        run: |
+          echo "❌ Error: Working directory is clean. No changes found to commit!"
+          exit 1
+
+      - name: Generate cryptographic attestations
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4
+        with:
+          subject-path: |
+            _builds/${{ steps.metadata.outputs.basename }}/*
 
       - name: Create GitHub Release
         if: ${{ github.event_name == 'push' || inputs.create_release }}
