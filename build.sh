@@ -127,7 +127,8 @@ fi
   echo "=> _builds/${basename}/${basename_}.zip"
   zip -r9 _builds/${basename}/${basename_}.zip \
     * .gitattributes .gitignore .github \
-    -x _\*/\* | sed 's|.*adding: ||' | grep -iv 'zip warning:'
+    -x _\*/\* "images/*" "images" \
+    | sed 's|.*adding: ||' | grep -iv 'zip warning:'
   echo
 
   # prepare files to be included in $id installable tarball
