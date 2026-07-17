@@ -244,7 +244,7 @@ fi
 
 
 # install binaries
-cp -f $srcDir/bin/${id}_flashable_uninstaller.zip $data_dir/
+cp -f $srcDir/bin/${id}-with-webui_flashable_uninstaller.zip $data_dir/
 
 
 # Termux, fix shebang
