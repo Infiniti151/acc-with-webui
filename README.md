@@ -1,4 +1,4 @@
-# Advanced Charging Controller (ACC)
+# Advanced Charging Controller (ACC) with WebUI
 [![Build](https://img.shields.io/github/actions/workflow/status/Infiniti151/acc-with-webui/build.yml?branch=dev&style=for-the-badge&logo=github-actions&logoColor=white&label=Build)](https://github.com/Infiniti151/acc-with-webui/actions/workflows/build.yml) [![Latest Release](https://img.shields.io/github/v/release/Infiniti151/acc-with-webui?style=for-the-badge&logo=github&logoColor=white&label=Release)](https://github.com/Infiniti151/acc-with-webui/releases) [![Svelte](https://img.shields.io/badge/Svelte-5.56.5-orange?style=for-the-badge&logo=svelte&logoColor=white)](https://github.com/Infiniti151/acc-with-webui/blob/dev/webui/package.json) [![License](https://img.shields.io/github/license/Infiniti151/acc-with-webui?style=for-the-badge&logo=spdx&logoColor=white&color=yellow&label=License)](https://github.com/Infiniti151/acc-with-webui/blob/dev/License.md)
 
 > [!important]
