@@ -1,8 +1,8 @@
 id=acc
 domain=vr25
 name=Advanced Charging Controller (ACC) with WebUI
-version=v2025.5.18-dev
-versionCode=202505180
+version=v1.0.0
+versionCode=10000
 author=VR25, Infiniti151
 description=Extend your battery's service life by controlling charging current, temperature, and voltage. Any root solution is supported. The installation is always "systemless". Works on Android and KaiOS.
 updateJson=https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/module.json
