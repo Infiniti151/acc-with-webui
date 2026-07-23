@@ -5,7 +5,7 @@ on:
     branches:
       - dev
     paths:
-      - 'install/webroot/**'
+      - 'webui/src/App.svelte'
   workflow_dispatch:
     inputs:
       create_release:
@@ -24,7 +24,7 @@ jobs:
   check-paths:
     runs-on: ubuntu-latest
     outputs:
-      run_main: ${{ github.event_name == 'workflow_dispatch' || (steps.filter.outputs.changelog == 'true' && steps.filter.outputs.webroot == 'true') }}
+      run_main: ${{ github.event_name == 'workflow_dispatch' || (steps.filter.outputs.changelog == 'true' && steps.filter.outputs.webui == 'true') }}
     steps:
       - name: Checkout Code
         if: ${{ github.event_name == 'push' }}
@@ -38,8 +38,8 @@ jobs:
           filters: |
             changelog:
               - 'changelog-webui.md'
-            webroot:
-              - 'install/webroot/**'
+            webui:
+              - 'webui/src/App.svelte'
 
   build-and-deploy:
     needs: check-paths
