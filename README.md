@@ -1,7 +1,11 @@
 # Advanced Charging Controller (ACC)
 
 > [!important]
-> [WebUI](#webui) is the only addition in this fork. No backend code has been changed. Why not just use the AccA app? Coz I don't want to install a separate app to control a module. Also, it has been abandoned since 2022. It was built before the advent of root manager WebUIs and WebUIs are the standard now for module GUIs. This has been tested in KernelSU Next, but should work fine in APatch and Magisk with WebUI X: Portable. Only open issues regarding WebUI here. All issues regarding acc must be opened upstream. This is based on acc dev branch in order to get the latest acc updates.
+> [WebUI](#webui) is the only addition in this fork. No backend code has been changed. Why not just use the AccA app? Coz I don't want to install a separate app to control a module. Also, it has been abandoned since 2022. It was built before the advent of root manager WebUIs and WebUIs are the standard now for module GUIs. Only open issues regarding WebUI here. All issues regarding acc must be opened upstream. This is based on acc dev branch in order to get the latest acc updates.
+>
+
+> [!warning]
+> WebUI is tested in KernelSU Next manager (v3.1.0), but should work fine in KernelSU manager. It is untested for Magisk and Apatch.
 >
 
 ---
