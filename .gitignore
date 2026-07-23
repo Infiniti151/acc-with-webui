@@ -1,4 +1,10 @@
+# Custom Build & Editor Exclusions
 _builds
 _misc
 .directory
 *.kate-swp
+
+# WebUI Dependencies & Build Outputs
+webui/node_modules/
+webui/dist/
+webui/build/

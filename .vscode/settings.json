@@ -1,0 +1,3 @@
+{
+  "svelte.plugin.svelte.configPath": "webui-src/svelte.config.js"
+}

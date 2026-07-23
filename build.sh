@@ -9,6 +9,10 @@
 #     build.sh (builds $id and generates installable archives)
 #     build.sh any_random_arg (only builds $id)
 
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
 (cd ${0%/*} 2>/dev/null
 
 . ./check-syntax.sh || exit $?
@@ -29,6 +33,10 @@ versionCode=$(sed -n '1s/.*(\([0-9]*\)).*/\1/p' changelog-webui.md)
 basename=${id}-with-webui_${version}_$versionCode
 tmpDir=.tmp/META-INF/com/google/android
 
+echo -e "${CYAN}--------------------------------------------------"
+echo "Updating module.json..."
+echo -e "--------------------------------------------------${NC}\n"
+
 # update module info
 [ "$(get_prop version)" != "$version" ] && {
   set_prop version $version
@@ -48,7 +56,16 @@ tmpDir=.tmp/META-INF/com/google/android
 EOF
 }
 
-# set ID
+echo -e "${CYAN}--------------------------------------------------"
+echo "Building WebUI..."
+echo -e "--------------------------------------------------${NC}\n"
+# update package.json version and build WebUI
+sed -i -E "s/(\"version\": *\")[^\"]*(\")/\1${version#v}\2/" webui/package.json
+(npm install --prefix=webui && npm run build --prefix=webui) || exit $?
+
+echo -e "${CYAN}--------------------------------------------------"
+echo "Updating ID and domain in install scripts..."
+echo -e "--------------------------------------------------${NC}\n"
 for file in ./install*.sh ./install/*.sh ./bundle.sh; do
   if [ -f "$file" ] && grep -Eq '(^|\()id=' $file; then
     grep -Eq "(^|\()id=$id" $file || set_prop id $id $file
@@ -62,7 +79,9 @@ for file in ./install*.sh ./install/*.sh ./bundle.sh; do
   fi
 done
 
-# update README
+echo -e "${CYAN}--------------------------------------------------"
+echo "Generating README.html..."
+echo -e "--------------------------------------------------${NC}\n"
 
 if [ README.md -ot install/default-config.txt ] \
   || [ README.md -ot install/strings.sh ] \
@@ -81,6 +100,9 @@ then
   markdown README.md > README.html 2>/dev/null || :
 fi
 
+echo -e "${CYAN}--------------------------------------------------"
+echo "Updating busybox config in install scripts..."
+echo -e "--------------------------------------------------${NC}\n"
 # update busybox config (from install/setup-busybox.sh) in install/uninstall.sh and install scripts
 set -e
 for file in ./install/uninstall.sh ./install*.sh; do
@@ -93,7 +115,10 @@ for file in ./install/uninstall.sh ./install*.sh; do
 done
 set +e
 
-# unify installers for flashable zip (customize.sh and update-binary are copies of install.sh)
+echo -e "${CYAN}--------------------------------------------------"
+echo "Building uninstaller zip..."
+echo -e "--------------------------------------------------${NC}\n"
+
 { cp -u install.sh customize.sh
 cp -u install.sh META-INF/com/google/android/update-binary; } 2>/dev/null
 
@@ -119,7 +144,9 @@ fi
 
   cp bin/${id}-with-webui_flashable_uninstaller.zip install-online.sh install-tarball.sh _builds/${basename}/
 
-  # generate $id flashable zip
+  echo -e "${CYAN}--------------------------------------------------"
+  echo "Building installable archives..."
+  echo -e "--------------------------------------------------${NC}\n"
   case $version in
     *-*) basename_=${basename}_$(date +%H%M);;
     *) basename_=$basename;;
@@ -127,7 +154,7 @@ fi
   echo "=> _builds/${basename}/${basename_}.zip"
   zip -r9 _builds/${basename}/${basename_}.zip \
     * .gitattributes .gitignore .github \
-    -x _\*/\* "images/*" "images" \
+    -x _\*/\* "images/*" "webui/*" \
     | sed 's|.*adding: ||' | grep -iv 'zip warning:'
   echo
 
@@ -143,5 +170,8 @@ fi
   rm -rf ${basename}/
   echo
 
+  echo -e "${GREEN}--------------------------------------------------"
+  echo "Done"
+  echo -e "--------------------------------------------------${NC}\n"
 })
 exit 0
