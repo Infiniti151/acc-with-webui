@@ -6,7 +6,7 @@
 >
 
 > [!warning]
-> WebUI is tested in KernelSU Next manager (v3.1.0), but should work fine in KernelSU manager. It is untested for Magisk and Apatch.
+> WebUI is tested in KernelSU Next manager (v3.1.0), but should work fine in KernelSU manager. It is untested for Apatch and Magisk with WebUI X: Portable.
 >
 
 ---
