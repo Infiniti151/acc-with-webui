@@ -1163,16 +1163,16 @@ Features:
 
 <p align="center">
   <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/1.png">
-    <img src="./images/1.png" height="300">
+    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/1.png" height="300">
   </a>
   <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/2.png">
-    <img src="./images/2.png" height="300">
+    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/2.png" height="300">
   </a>
   <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png">
-    <img src="./images/3.png" height="300">
+    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png" height="300">
   </a>
   <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png">
-    <img src="./images/4.png" height="300">
+    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png" height="300">
   </a>
 </p>
 
