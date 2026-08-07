@@ -59,7 +59,7 @@ jobs:
       - name: Set up Environment & Tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y zip gzip markdown
+          sudo apt-get install -y markdown
           chmod +x build.sh
           [ -f check-syntax.sh ] && chmod +x check-syntax.sh || true
 

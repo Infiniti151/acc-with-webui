@@ -151,7 +151,8 @@ fi
 
 ###
 echo "$name $version ($versionCode)
-Copyright 2017-2024, $author
+Copyright 2017-2024, $(echo "$author" | cut -d',' -f1 | tr -d ' ')
+Copyright 2026, $(echo "$author" | cut -d',' -f2 | tr -d ' ')
 GPLv3+
 
 Installing in $installDir/$id/..."
