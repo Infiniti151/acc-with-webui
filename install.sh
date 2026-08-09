@@ -171,6 +171,7 @@ mkdir -p $installDir/$id
 cp -R $srcDir/install/* $installDir/$id/
 installDir=$(readlink -f $installDir/$id)
 cp $srcDir/module.prop $installDir/
+cp $srcDir/action.sh $installDir/
 cp $srcDir/banner.jpg $installDir/
 cp -f $srcDir/README.* $data_dir/
 

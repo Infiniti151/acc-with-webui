@@ -5,9 +5,9 @@ import { resolve } from 'path';
 
 export default defineConfig({
     plugins: [svelte(), viteSingleFile()],
-    root: resolve(__dirname),
+    root: resolve(import.meta.dirname),
     build: {
-        outDir: resolve(__dirname, '../install/webroot'),
+        outDir: resolve(import.meta.dirname, '../install/webroot'),
         emptyOutDir: true,
         minify: 'terser',
         terserOptions: {

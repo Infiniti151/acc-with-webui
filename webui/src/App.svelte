@@ -43,10 +43,10 @@
   let voltage = $state("--");
   let current = $state("--");
 
+  // Daemon (accd) Status
   let isRunning = $state(false);
   let isTransitioning = $state(false);
   let daemonStatus = $state("Stopped");
-
   let currentState = $derived(
     isTransitioning ? "transitioning" : isRunning ? "running" : "stopped",
   );
@@ -54,6 +54,7 @@
   // Thresholds
   let resumeThresh = $state(85);
   let pauseThresh = $state(90);
+  let shutdownThresh = $state(5);
 
   // Reset Battery Stats Toggle Settings
   let rbsp = $state(false);
@@ -63,10 +64,15 @@
   // Config Editor
   let configText = $state("");
   let isEditorOpen = $state(false);
+  let originalConfigText = $state("");
+  let isSaving = $state(false);
+  let saveButtonText = $state("Save Config");
+  let isConfigDirty = $derived(configText !== originalConfigText);
 
   // Logs
   let isLogsOpen = $state(false);
   let logsContent = $state("Loading logs...");
+  let isExportingLogs = $state(false);
   let logPollInterval = null;
 
   // Notification Banner Visibility
@@ -75,10 +81,16 @@
   // Background Polling Timer
   let statusPollInterval = null;
 
-  const configPath = "/data/adb/vr25/acc-data/config.txt";
+  // Toast notification state
+  let toastMessage = $state("");
+  let isToastVisible = $state(false);
+  let toastTimeout = null;
 
-  let startPercent = $derived(((resumeThresh - 1) / 99) * 100);
-  let stopPercent = $derived(((pauseThresh - 1) / 99) * 100);
+  // --- Global File & Path Constants ---
+  const EXPORT_FLAG = "/data/local/tmp/acc_export_done";
+  const RESTART_FLAG = "/data/local/tmp/acc_restart_required";
+  const CONFIG_PATH = "/data/adb/vr25/acc-data/config.txt";
+  const PROP_PATH = "/data/adb/modules/acc/module.prop";
 
   // --- Global Android Bridge Integration ---
   function exec(cmd, timeoutMs = 10000) {
@@ -88,9 +100,7 @@
         return;
       }
 
-      const fullCmd = `export PATH=/data/adb/modules/acc/system/bin:$PATH; ${cmd}`;
       const cbName = `cb_${Math.random().toString(36).slice(2, 11)}_${Date.now()}`;
-
       let timer = null;
 
       const cleanup = () => {
@@ -113,7 +123,7 @@
       }, timeoutMs);
 
       try {
-        ksu.exec(fullCmd, "{}", cbName);
+        ksu.exec(cmd, "{}", cbName);
       } catch (e) {
         cleanup();
         resolve({
@@ -261,7 +271,7 @@
           "cat /sys/class/power_supply/battery/current_now 2>/dev/null || echo 0",
         ),
         exec("acc -D"),
-        exec(`cat ${configPath} 2>/dev/null`),
+        exec(`cat ${CONFIG_PATH} 2>/dev/null`),
       ]);
 
     let healthValue = healthRes.stdout.trim();
@@ -298,11 +308,12 @@
 
     let resumeVal = null;
     let pauseVal = null;
-
+    let shutdownVal = null;
     if (capacityMatch?.[1]) {
       const parts = capacityMatch[1].trim().split(/\s+/);
       resumeVal = parseInt(parts[2]);
       pauseVal = parseInt(parts[3]);
+      shutdownVal = parseInt(parts[0]);
     }
 
     isRunning = (statRes.stdout || "").toLowerCase().includes("is running");
@@ -317,11 +328,14 @@
       if (
         resumeVal !== null &&
         pauseVal !== null &&
+        shutdownVal !== null &&
         !isNaN(resumeVal) &&
-        !isNaN(pauseVal)
+        !isNaN(pauseVal) &&
+        !isNaN(shutdownVal)
       ) {
         resumeThresh = resumeVal;
         pauseThresh = pauseVal;
+        shutdownThresh = shutdownVal;
       }
 
       if (resetBattStatsMatch?.[1]) {
@@ -335,28 +349,75 @@
   }
 
   let debounceTimeout;
+
   function handleSliderChange(type) {
-    if (type === "start" && resumeThresh >= pauseThresh) {
-      resumeThresh = pauseThresh - 1;
+    if (type === "shutdown") {
+      if (shutdownThresh > 20) shutdownThresh = 20;
+      if (shutdownThresh < 0) shutdownThresh = 0;
+
+      if (resumeThresh <= shutdownThresh) {
+        resumeThresh = shutdownThresh + 1;
+      }
+
+      if (pauseThresh <= resumeThresh) {
+        pauseThresh = resumeThresh + 1;
+        if (pauseThresh > 100) pauseThresh = 100;
+      }
     }
-    if (type === "stop" && pauseThresh <= resumeThresh) {
-      pauseThresh = resumeThresh + 1;
+
+    if (type === "resume") {
+      if (resumeThresh < 1) resumeThresh = 1;
+      if (resumeThresh > 99) resumeThresh = 99;
+
+      if (pauseThresh <= resumeThresh) {
+        pauseThresh = resumeThresh + 1;
+        if (pauseThresh > 100) {
+          pauseThresh = 100;
+          resumeThresh = 99;
+        }
+      }
+
+      if (shutdownThresh >= resumeThresh) {
+        shutdownThresh = resumeThresh - 1;
+        if (shutdownThresh < 0) shutdownThresh = 0;
+      }
+    }
+
+    if (type === "pause") {
+      if (pauseThresh < 2) pauseThresh = 2;
+      if (pauseThresh > 100) pauseThresh = 100;
+
+      if (resumeThresh >= pauseThresh) {
+        resumeThresh = pauseThresh - 1;
+
+        if (shutdownThresh >= resumeThresh) {
+          shutdownThresh = resumeThresh - 1;
+          if (shutdownThresh < 0) shutdownThresh = 0;
+        }
+      }
     }
 
     clearTimeout(debounceTimeout);
     debounceTimeout = setTimeout(async () => {
-      await exec(`acca -s rc=${resumeThresh} pc=${pauseThresh}`);
+      const res = await exec(
+        `/dev/acca -s sc=${shutdownThresh} rc=${resumeThresh} pc=${pauseThresh}`,
+      );
+      if (res.errno === 0) {
+        await requireDaemonRestart();
+      }
     }, 450);
   }
 
   async function toggleSetting(key, checked) {
     const val = checked ? "true" : "false";
 
-    const res = await exec(`acca -s ${key}=${val}`);
+    const res = await exec(`/dev/acca -s ${key}=${val}`);
 
     if (res.errno !== 0) {
       console.error(`Failed to set ${key}:`, res.stderr);
       await updateStatus();
+    } else {
+      await requireDaemonRestart();
     }
   }
 
@@ -364,38 +425,102 @@
     isTransitioning = true;
     daemonStatus = `${action.toUpperCase()}${action === "stop" ? "PING..." : "ING..."}`;
 
-    isBannerOpen = false;
+    clearDaemonRestart();
 
     setTimeout(() => {
       const runExec = async () => {
         try {
-          await exec(`nohup acca -D ${action}`);
+          if (action === "stop") {
+            await exec("/dev/acca -D stop");
+          } else {
+            await exec(`
+              nohup /dev/acca -D ${action} >/dev/null 2>&1 &
+              sleep 0.5
+
+              pgrep -f accd | while read -r PID; do
+                if [ -n "$PID" ]; then
+                  # 1. Move to Root Cgroup (Unified / Freezer)
+                  echo $PID > /sys/fs/cgroup/cgroup.procs 2>/dev/null || \
+                  echo $PID > /dev/freezer/tasks 2>/dev/null || \
+                  echo $PID > /sys/fs/cgroup/freezer/tasks 2>/dev/null || true
+
+                  # 2. Force cpuset to Root (:/)
+                  echo $PID > /dev/cpuset/tasks 2>/dev/null || \
+                  echo $PID > /sys/fs/cgroup/cpuset/tasks 2>/dev/null || true
+
+                  # 3. Force schedtune / stune to Root (:/)
+                  echo $PID > /dev/stune/tasks 2>/dev/null || \
+                  echo $PID > /dev/schedtune/tasks 2>/dev/null || \
+                  echo $PID > /sys/fs/cgroup/schedtune/tasks 2>/dev/null || true
+                fi
+              done
+            `);
+          }
         } catch (e) {
           console.error("Daemon control error:", e);
         }
+
         setTimeout(async () => {
           isTransitioning = false;
           await updateStatus();
+
+          await updateModuleDescription(action === "stop" ? "❌" : "✅");
         }, 2500);
       };
       runExec();
     }, 150);
   }
 
+  async function updateModuleDescription(status) {
+    try {
+      await exec(`
+        sed -i "/^description=/ {
+          s@^description=.*Extend@description=[accd ${status}] | 🟢 ${resumeThresh}% | 🟡 ${pauseThresh}% | 🔴 ${shutdownThresh}% | Extend@
+        }" "${PROP_PATH}"
+      `);
+    } catch (e) {
+      console.error("Failed to update module description:", e);
+    }
+  }
+
   async function toggleEditor() {
     isEditorOpen = !isEditorOpen;
     if (isEditorOpen) {
-      const res = await exec(`cat ${configPath} 2>/dev/null`);
+      const res = await exec(`cat ${CONFIG_PATH} 2>/dev/null`);
       configText = res.stdout || "";
+      originalConfigText = configText;
     }
   }
 
   async function saveRawConfig() {
-    const sanitizedText = configText.replace(/'/g, "'\\''");
-    await exec(`echo '${sanitizedText}' > ${configPath}`);
-    initialLoad = true;
-    await updateStatus();
-    isBannerOpen = true;
+    if (isSaving) return;
+
+    if (!isConfigDirty) {
+      showToast("No changes to save.");
+      return;
+    }
+
+    isSaving = true;
+    saveButtonText = "Saving...";
+
+    try {
+      const sanitizedText = configText.replace(/'/g, "'\\''");
+      await exec(`echo '${sanitizedText}' > ${CONFIG_PATH}`);
+      initialLoad = true;
+      await updateStatus();
+      await requireDaemonRestart();
+
+      originalConfigText = configText;
+      saveButtonText = "Saved! ✓";
+    } catch (e) {
+      console.error("Failed to save config:", e);
+      saveButtonText = "Error Saving";
+    } finally {
+      setTimeout(() => {
+        saveButtonText = "Save Config";
+        isSaving = false;
+      }, 2000);
+    }
   }
 
   async function toggleLogs() {
@@ -428,9 +553,85 @@
     }
   }
 
+  async function exportLogs() {
+    if (isExportingLogs) return;
+
+    isExportingLogs = true;
+
+    try {
+      await exec(`rm -f ${EXPORT_FLAG}`);
+
+      await exec(
+        `sh -c '(/dev/acca -le; touch ${EXPORT_FLAG}) >/dev/null 2>&1 &'`,
+      );
+
+      let attempts = 0;
+      const maxAttempts = 60;
+
+      while (attempts < maxAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        attempts++;
+
+        const checkFlag = await exec(
+          `[ -f ${EXPORT_FLAG} ] && echo "done" || true`,
+        );
+
+        if (checkFlag.stdout?.trim() === "done") {
+          break;
+        }
+      }
+
+      await exec(`rm -f ${EXPORT_FLAG}`);
+
+      const checkFile = await exec(
+        "find /storage/emulated/0/Download /sdcard/Download -name 'acc-logs*' -mmin -2 2>/dev/null | head -n 1",
+      );
+
+      const archive_path = checkFile.stdout ? checkFile.stdout.trim() : "";
+
+      if (archive_path) {
+        showToast(`Exported to ${archive_path}`);
+      } else {
+        showToast("Export failed (no archive created)");
+      }
+    } catch (e) {
+      showToast("Error exporting logs");
+    } finally {
+      isExportingLogs = false;
+    }
+  }
+
+  function showToast(message, duration = 4000) {
+    if (toastTimeout) clearTimeout(toastTimeout);
+    toastMessage = message;
+    isToastVisible = true;
+
+    toastTimeout = setTimeout(() => {
+      isToastVisible = false;
+    }, duration);
+  }
+
+  async function checkBannerState() {
+    const res = await exec(`[ -f ${RESTART_FLAG} ] && echo "yes"`);
+    if (res.stdout?.trim() === "yes") {
+      isBannerOpen = true;
+    }
+  }
+
+  async function requireDaemonRestart() {
+    isBannerOpen = true;
+    await exec(`touch ${RESTART_FLAG}`);
+  }
+
+  async function clearDaemonRestart() {
+    isBannerOpen = false;
+    await exec(`rm -f ${RESTART_FLAG}`);
+  }
+
   onMount(() => {
     setupComplementaryColors();
     detectEnvironment();
+    checkBannerState();
     updateStatus();
     statusPollInterval = setInterval(updateStatus, 3500);
   });
@@ -660,6 +861,7 @@
     </div>
   </div>
 
+  <!-- Daemon (accd) -->
   <section class="m3-card">
     <div class="header-row">
       <div class="title-group">
@@ -693,6 +895,7 @@
     </div>
   </section>
 
+  <!-- Charging Thresholds -->
   <section class="m3-card">
     <div class="header-group">
       <span class="mi-icon">battery_charging_full</span>
@@ -701,22 +904,17 @@
 
     <div class="slider-wrapper">
       <div class="flex justify-between">
-        <div class="label-text">Resume Charging At</div>
-        <div class="thresh-label" style="color: var(--start-electric);">
-          {resumeThresh}%
-        </div>
+        <div class="label-text">Resume At</div>
+        <div class="thresh-label">{resumeThresh}%</div>
       </div>
-      <div
-        class="slider-container"
-        style="--percent: {startPercent}%; --neon-glow: rgba(0, 255, 102, 0.4); --electric-gradient: linear-gradient(to right, #006622, var(--start-electric), #a3ffc2, var(--start-electric), #006622);"
-      >
+      <div class="slider-container resume" style="--percent: {resumeThresh}%;">
         <input
           type="range"
-          min="1"
+          min="0"
           max="100"
           step="1"
           bind:value={resumeThresh}
-          oninput={() => handleSliderChange("start")}
+          oninput={() => handleSliderChange("resume")}
         />
         <div class="slider-track-visual">
           <div class="slider-track-fill"></div>
@@ -726,22 +924,40 @@
 
     <div class="slider-wrapper stop-spacing">
       <div class="flex justify-between">
-        <div class="label-text">Pause Charging At</div>
-        <div class="thresh-label" style="color: var(--stop-electric);">
-          {pauseThresh}%
-        </div>
+        <div class="label-text">Pause At</div>
+        <div class="thresh-label">{pauseThresh}%</div>
       </div>
-      <div
-        class="slider-container"
-        style="--percent: {stopPercent}%; --neon-glow: rgba(255, 0, 85, 0.4); --electric-gradient: linear-gradient(to right, #660022, var(--stop-electric), #ffb3cc, var(--stop-electric), #660022);"
-      >
+      <div class="slider-container pause" style="--percent: {pauseThresh}%;">
         <input
           type="range"
-          min="1"
+          min="0"
           max="100"
           step="1"
           bind:value={pauseThresh}
-          oninput={() => handleSliderChange("stop")}
+          oninput={() => handleSliderChange("pause")}
+        />
+        <div class="slider-track-visual">
+          <div class="slider-track-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slider-wrapper stop-spacing">
+      <div class="flex justify-between">
+        <div class="label-text">Shutdown At</div>
+        <div class="thresh-label">{shutdownThresh}%</div>
+      </div>
+      <div
+        class="slider-container shutdown"
+        style="--percent: {shutdownThresh}%;"
+      >
+        <input
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          bind:value={shutdownThresh}
+          oninput={() => handleSliderChange("shutdown")}
         />
         <div class="slider-track-visual">
           <div class="slider-track-fill"></div>
@@ -750,6 +966,7 @@
     </div>
   </section>
 
+  <!-- Reset Battery Stats -->
   <section class="m3-card">
     <div class="header-group">
       <span class="mi-icon">loop</span>
@@ -796,6 +1013,7 @@
     </div>
   </section>
 
+  <!-- Config File -->
   <section class="m3-card">
     <div
       class="flex justify-between items-center"
@@ -835,19 +1053,24 @@
       >
         <textarea
           id="config-textarea"
-          class="editor-textarea"
+          class="editor-textarea viewer-spacing"
           spellcheck="false"
           bind:value={configText}
         ></textarea>
-        <div class="btn-row" style="padding-bottom: 4px;">
-          <button onclick={saveRawConfig} class="m3-btn btn-primary"
-            >Save Config</button
+        <div class="btn-row">
+          <button
+            onclick={saveRawConfig}
+            class="m3-btn btn-primary m3-btn-centered m3-btn-full"
+            disabled={isSaving}
           >
+            <span>{saveButtonText}</span>
+          </button>
         </div>
       </div>
     {/if}
   </section>
 
+  <!-- Logs -->
   <section class="m3-card">
     <div
       class="flex justify-between items-center"
@@ -885,7 +1108,26 @@
             });
         }}
       >
-        <div id="logs-content" class="log-box">{logsContent}</div>
+        <div id="logs-content" class="log-box viewer-spacing">
+          {logsContent}
+        </div>
+
+        <div class="btn-row">
+          <button
+            onclick={exportLogs}
+            disabled={isExportingLogs}
+            class="m3-btn btn-primary m3-btn-centered m3-btn-full"
+          >
+            {#if isExportingLogs}
+              <span class="btn-leading-icon">
+                <span class="m3-spinner"></span>
+              </span>
+              <span>Exporting...</span>
+            {:else}
+              <span>Export Logs</span>
+            {/if}
+          </button>
+        </div>
       </div>
     {/if}
   </section>
@@ -920,6 +1162,27 @@
     </div>
   </a>
 
+  {#if isToastVisible}
+    <div
+      class="m3-toast"
+      style="bottom: {isBannerOpen
+        ? 'calc(var(--window-inset-bottom, 0px) + 96px)'
+        : 'calc(var(--window-inset-bottom, 0px) + 16px)'}; transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);"
+      transition:fly={{ y: 100, duration: 300, easing: cubicOut }}
+    >
+      <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+        <span
+          class="mi-icon"
+          style="font-size: 20px; color: var(--md-sys-color-primary); flex-shrink: 0;"
+        >
+          info
+        </span>
+        <span style="flex-grow: 1; word-break: break-word;">{toastMessage}</span
+        >
+      </div>
+    </div>
+  {/if}
+
   {#if isBannerOpen}
     <div
       id="restart-banner"
@@ -927,7 +1190,12 @@
       transition:fly={{ y: 100, duration: 300, easing: cubicOut }}
     >
       <div class="notification-content">
-        <span class="mi-icon warning-icon">warning</span>
+        <span
+          class="mi-icon"
+          style="font-size: 20px; color: var(--md-sys-color-primary);"
+        >
+          restart_alt
+        </span>
         <span class="notification-text"
           >Daemon restart required to apply changes.</span
         >
@@ -945,6 +1213,9 @@
 </div>
 
 <style>
+  /* =========================================
+     1. Variables & Global Resets
+     ========================================= */
   :global(:root) {
     --md-sys-color-bg: var(--background, #0c0a0f);
     --md-sys-color-surface: var(--surface, #16151a);
@@ -966,11 +1237,10 @@
     --warning-icon: var(--md-sys-color-primary);
     --dynamic-editor-text: var(--md-sys-color-tertiary);
     --dynamic-log-text: var(--md-sys-color-tertiary);
-    --start-electric: var(--primary, #fbc02d);
-    --stop-electric: var(--primary, #fbc02d);
   }
 
-  :global(html) {
+  :global(html),
+  :global(body) {
     margin: 0;
     padding: 0;
     min-height: 100%;
@@ -979,10 +1249,8 @@
   :global(body) {
     background-color: var(--md-sys-color-bg) !important;
     color: var(--md-sys-color-on-background);
-    margin: 0;
     padding: 12px;
     box-sizing: border-box;
-    min-height: 100%;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -1003,55 +1271,9 @@
     outline: none;
   }
 
-  .ambient-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    pointer-events: none;
-    overflow: hidden;
-    opacity: 0.6;
-    contain: paint;
-  }
-
-  .blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    -webkit-filter: blur(80px);
-    mix-blend-mode: screen;
-    will-change: transform;
-  }
-
-  .blob-1 {
-    top: -10%;
-    left: -20%;
-    width: 300px;
-    height: 300px;
-    background: var(--md-sys-color-primary, #fbc02d);
-    animation: floatBlobOne 25s infinite alternate ease-in-out;
-  }
-
-  .blob-2 {
-    bottom: 10%;
-    right: -10%;
-    width: 350px;
-    height: 350px;
-    background: var(--md-sys-color-tertiary, #7d5260);
-    animation: floatBlobTwo 30s infinite alternate ease-in-out;
-  }
-
-  .blob-3 {
-    bottom: -15%;
-    left: -10%;
-    width: 320px;
-    height: 320px;
-    background: var(--md-sys-color-secondary, #00796b);
-    animation: floatBlobThree 28s infinite alternate ease-in-out;
-  }
-
+  /* =========================================
+     2. Layout Utilities
+     ========================================= */
   .main-layout-wrapper {
     width: 100%;
     max-width: 600px;
@@ -1065,15 +1287,12 @@
   .flex {
     display: flex;
   }
-
   .grid {
     display: grid;
   }
-
   .justify-between {
     justify-content: space-between;
   }
-
   .items-center {
     align-items: center;
   }
@@ -1084,12 +1303,50 @@
     margin-bottom: 12px;
   }
 
-  .module-banner-wrap {
-    width: 100%;
-    border-radius: 24px;
-    overflow: hidden;
-    margin-bottom: 12px;
+  .card-header,
+  .header-row,
+  .setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
 
+  .card-header {
+    margin-bottom: 8px;
+  }
+  .header-row {
+    width: 100%;
+    margin-bottom: 12px;
+  }
+  .setting-row {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--md-sys-color-outline);
+  }
+  .setting-row:last-child {
+    border-bottom: none;
+  }
+
+  .title-group,
+  .header-group,
+  .notification-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .notification-content {
+    gap: 12px;
+  }
+  .header-group {
+    margin-bottom: 12px;
+  }
+
+  /* =========================================
+     3. Shared Glassmorphic Surfaces
+     ========================================= */
+  /* A. Base Cards & Banners (45% Opacity) */
+  .module-banner-wrap,
+  .m3-card,
+  .github-footer-banner {
     background: color-mix(
       in srgb,
       var(--md-sys-color-surface-container) 45%,
@@ -1100,8 +1357,15 @@
     border: 1px solid
       color-mix(in srgb, var(--md-sys-color-outline) 25%, transparent);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+    border-radius: 24px;
+    box-sizing: border-box;
+    width: 100%;
+    margin-bottom: 12px;
   }
 
+  .module-banner-wrap {
+    overflow: hidden;
+  }
   .module-banner-wrap svg {
     display: block;
     width: 100%;
@@ -1109,109 +1373,201 @@
   }
 
   .m3-card {
-    background: color-mix(
-      in srgb,
-      var(--md-sys-color-surface-container) 45%,
-      transparent
-    );
-
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-
-    border: 1px solid
-      color-mix(in srgb, var(--md-sys-color-outline) 25%, transparent);
-
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
-
-    border-radius: 24px;
     padding: 20px;
-    margin-bottom: 12px;
     -webkit-user-select: none;
     user-select: none;
   }
 
-  .card-header {
+  .github-footer-banner {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 8px;
+    text-decoration: none;
+    padding: 20px;
+    margin: 0; /* Overrides the base 12px margin */
+    transition:
+      background-color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+      transform 0.1s;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .github-footer-banner:hover {
+    background: color-mix(
+      in srgb,
+      var(--md-sys-color-surface-container) 60%,
+      transparent
+    );
+  }
+  .github-footer-banner:active {
+    transform: scale(0.98);
+    background: color-mix(
+      in srgb,
+      var(--md-sys-color-surface-variant) 70%,
+      transparent
+    );
   }
 
+  /* B. Floating Overlays (88% Opacity) */
+  .notification-banner,
+  .m3-toast {
+    display: flex;
+    align-items: center;
+    position: fixed;
+    bottom: calc(var(--window-inset-bottom, 0px) + 16px);
+    left: 12px;
+    right: 12px;
+    margin: 0 auto;
+    width: auto;
+    max-width: 600px;
+    padding: 16px 20px;
+    box-sizing: border-box;
+    border-radius: 24px;
+    box-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.45);
+    background: color-mix(
+      in srgb,
+      var(--md-sys-color-surface-container) 88%,
+      transparent
+    );
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
+  .notification-banner {
+    justify-content: space-between;
+    gap: 12px;
+    z-index: 999;
+    border: 1px solid
+      color-mix(in srgb, var(--md-sys-color-outline) 50%, transparent);
+  }
+
+  .m3-toast {
+    justify-content: center;
+    z-index: 9999;
+    border: 1px solid
+      color-mix(in srgb, var(--md-sys-color-outline) 50%, transparent);
+    color: var(--md-sys-color-on-surface);
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    pointer-events: none;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+
+  /* =========================================
+     4. Viewers (Textarea & Logs)
+     ========================================= */
+  .collapsible-box {
+    overflow: hidden;
+    width: 100%;
+    margin-top: 12px;
+  }
+
+  /* Consolidate shared viewer properties */
+  .editor-textarea,
+  .log-box {
+    display: block;
+    width: 100%;
+    height: 400px;
+    box-sizing: border-box;
+    padding: 16px;
+    border-radius: 20px;
+    border: 1px solid var(--md-sys-color-outline);
+    background: var(--md-sys-color-surface-variant) !important;
+    font-family: "SF Mono", "Roboto Mono", monospace;
+    outline: none;
+    margin-bottom: 0;
+  }
+
+  .editor-textarea {
+    color: var(--dynamic-editor-text) !important;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: vertical;
+    transition: border-color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .editor-textarea:focus {
+    border-color: var(--md-sys-color-primary) !important;
+    box-shadow: 0 0 0 1px var(--md-sys-color-primary) !important;
+  }
+
+  .log-box {
+    color: var(--dynamic-log-text);
+    font-size: 13px;
+    line-height: 1.45;
+    overflow-y: auto;
+    white-space: pre-wrap;
+  }
+
+  .viewer-spacing {
+    margin-bottom: 0 !important;
+  }
+
+  /* =========================================
+     5. Typography & Text Labels
+     ========================================= */
   .card-title {
     font-size: 14px;
     color: var(--md-sys-color-on-surface-variant);
     font-weight: 500;
   }
-
   .card-value {
     font-size: 24px;
     font-weight: 700;
     color: var(--md-sys-color-primary);
   }
-
   .section-title {
     font-size: 22px;
     font-weight: 700;
     color: var(--md-sys-color-secondary);
     letter-spacing: -0.4px;
   }
-
   .label-text {
     font-weight: 500;
     color: var(--md-sys-color-tertiary);
   }
-
-  .btn-row {
-    display: flex;
-    gap: 8px;
-  }
-
-  .m3-btn {
-    flex: 1;
-    border: none;
-    border-radius: 100px;
-    padding: 14px 12px;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .m3-btn:active:not(:disabled) {
-    transform: scale(0.95);
-  }
-
-  .header-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    margin-bottom: 12px;
-  }
-
-  .title-group,
-  .header-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .header-group {
-    margin-bottom: 12px;
-  }
-
-  .slider-wrapper {
-    margin-bottom: 16px;
-  }
-
-  .stop-spacing {
-    margin-top: 24px;
-    margin-bottom: 0;
-  }
-
   .thresh-label {
     font-weight: 700;
+    color: var(--md-sys-color-primary);
+  }
+
+  .repo-details {
+    display: flex;
+    flex-direction: column;
+  }
+  .repo-name {
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: -0.2px;
+    color: var(--md-sys-color-secondary);
+  }
+  .repo-action-label {
+    font-size: 12px;
+    color: var(--md-sys-color-tertiary);
+    opacity: 0.7;
+  }
+
+  .version-tag {
+    font-family: monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--md-sys-color-on-surface-variant);
+    background-color: color-mix(
+      in srgb,
+      var(--md-sys-color-surface-variant) 50%,
+      transparent
+    );
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid
+      color-mix(in srgb, var(--md-sys-color-outline) 20%, transparent);
+  }
+
+  .notification-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-error-container);
   }
 
   #bat-status {
@@ -1225,87 +1581,127 @@
       color 0.15s ease;
   }
 
+  /* =========================================
+     6. Buttons
+     ========================================= */
+  .btn-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px !important;
+    margin-bottom: 4px !important;
+    padding-bottom: 0 !important;
+  }
+
+  .m3-btn {
+    flex: 1;
+    border: none;
+    border-radius: 100px;
+    padding: 14px 12px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .m3-btn:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  .m3-btn-centered {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    padding: 0 24px;
+    box-sizing: border-box;
+  }
+  .m3-btn-centered .btn-leading-icon {
+    position: absolute;
+    left: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .m3-btn-full {
+    width: 100%;
+  }
+
   .btn-primary {
     background-color: var(--md-sys-color-primary);
     color: var(--md-sys-color-on-primary);
   }
-
   .btn-danger {
     background-color: var(--md-sys-color-error);
     color: var(--md-sys-color-on-error);
   }
 
   .btn-restart-action {
-    background-color: color-mix(
+    background: color-mix(
       in srgb,
       var(--md-sys-color-surface-variant) 30%,
       transparent
     );
     color: var(--md-sys-color-primary);
-
     border: 1px solid
       color-mix(in srgb, var(--md-sys-color-outline) 35%, transparent);
-
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
   }
 
-  .transitioning {
-    color: #f59e0b;
-    background-color: rgba(245, 158, 11, 0.1);
-    animation: status-pulse-transitioning 1.5s infinite ease-in-out both;
+  .btn-notification-action {
+    background: color-mix(
+      in srgb,
+      var(--md-sys-color-primary) 85%,
+      transparent
+    );
+    color: var(--md-sys-color-on-primary);
+    border: 1px solid
+      color-mix(in srgb, var(--md-sys-color-outline) 30%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.2);
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 100px;
+    cursor: pointer;
+    flex: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .btn-notification-action:active:not(:disabled) {
+    transform: scale(0.95);
+    background: var(--md-sys-color-primary);
   }
 
-  .running {
-    color: #00ff66;
-    background-color: rgba(0, 255, 102, 0.1);
-    animation: status-pulse-running 3s infinite ease-in-out;
+  /* Disabled States */
+  button:disabled,
+  .btn-notification-action:disabled,
+  #btn-banner-restart:disabled,
+  #btn-notification-restart:disabled {
+    cursor: not-allowed;
   }
-
-  .stopped {
-    color: var(--danger, #ef4444);
-    background-color: rgba(255, 180, 171, 0.1);
-    animation: status-pulse-stopped 5s infinite ease-in-out;
+  button:disabled {
+    opacity: 0.25 !important;
   }
-
+  .btn-notification-action:disabled,
   #btn-banner-restart:disabled,
   #btn-notification-restart:disabled {
     pointer-events: none;
     opacity: 0.5;
-    cursor: not-allowed;
   }
 
-  .mi-icon {
-    font-family: "Material Icons";
-    font-size: 20px;
-    color: var(--md-sys-color-primary);
-    opacity: 0.9;
-  }
-
-  button:disabled {
-    opacity: 0.25 !important;
-    cursor: not-allowed;
-  }
-
-  .setting-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--md-sys-color-outline);
-  }
-
-  .setting-row:last-child {
-    border-bottom: none;
-  }
-
+  /* =========================================
+     7. Controls (Switches & Sliders)
+     ========================================= */
   .m3-switch {
     position: relative;
     display: inline-block;
     width: 52px;
     height: 32px;
   }
-
   .m3-switch .slider {
     position: absolute;
     cursor: pointer;
@@ -1318,7 +1714,6 @@
     border-radius: 100px;
     border: 2px solid var(--md-sys-color-outline);
   }
-
   .m3-switch .slider:before {
     position: absolute;
     content: "";
@@ -1330,12 +1725,10 @@
     transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
     border-radius: 50%;
   }
-
   .m3-switch input:checked + .slider {
     background-color: var(--md-sys-color-primary);
     border-color: var(--md-sys-color-primary);
   }
-
   .m3-switch input:checked + .slider:before {
     transform: translateX(20px);
     background-color: var(--md-sys-color-on-primary);
@@ -1344,13 +1737,21 @@
     left: 4px;
     bottom: 4px;
   }
-
   .m3-switch input {
     opacity: 0;
     width: 0;
     height: 0;
   }
 
+  .slider-wrapper {
+    margin-bottom: 16px;
+  }
+  .stop-spacing {
+    margin-top: 24px;
+    margin-bottom: 0;
+  }
+
+  /* Base Slider Container */
   .slider-container {
     position: relative;
     width: 100%;
@@ -1358,6 +1759,45 @@
     height: 24px;
     display: flex;
     align-items: center;
+  }
+
+  /* Resume Slider Electric Effect */
+  .slider-container.resume {
+    --neon-glow: rgba(0, 255, 102, 0.4);
+    --electric-gradient: linear-gradient(
+      to right,
+      var(--md-sys-color-primary),
+      #00ff66,
+      #e0ffec,
+      #00ff66,
+      var(--md-sys-color-primary)
+    );
+  }
+
+  /* Pause Slider Electric Effect */
+  .slider-container.pause {
+    --neon-glow: rgba(255, 235, 59, 0.5);
+    --electric-gradient: linear-gradient(
+      to right,
+      var(--md-sys-color-primary),
+      #ffea00,
+      #ffffcc,
+      #ffea00,
+      var(--md-sys-color-primary)
+    );
+  }
+
+  /* Shutdown Slider Electric Effect */
+  .slider-container.shutdown {
+    --neon-glow: rgba(255, 0, 85, 0.4);
+    --electric-gradient: linear-gradient(
+      to right,
+      var(--md-sys-color-primary),
+      #ff0055,
+      #ffe0eb,
+      #ff0055,
+      var(--md-sys-color-primary)
+    );
   }
 
   input[type="range"] {
@@ -1370,7 +1810,6 @@
     z-index: 3;
     margin: 0;
   }
-
   .slider-track-visual {
     position: absolute;
     left: 0;
@@ -1383,7 +1822,6 @@
     z-index: 1;
     pointer-events: none;
   }
-
   .slider-track-fill {
     position: absolute;
     left: 0;
@@ -1399,6 +1837,7 @@
     pointer-events: none;
   }
 
+  /* Must keep webkit and moz separate */
   input[type="range"]::-webkit-slider-thumb {
     pointer-events: auto;
     appearance: none;
@@ -1414,7 +1853,6 @@
       transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
       background-color 0.15s;
   }
-
   input[type="range"]:active::-webkit-slider-thumb {
     transform: scaleX(2.8) scaleY(1.15);
     background: var(--md-sys-color-primary);
@@ -1434,168 +1872,23 @@
       transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
       background-color 0.15s;
   }
-
   input[type="range"]:active::-moz-range-thumb {
     transform: scaleX(2.8) scaleY(1.15);
     background: var(--md-sys-color-primary);
   }
 
-  .collapsible-box {
-    overflow: hidden;
-    width: 100%;
-    margin-top: 12px;
-  }
-
-  .editor-textarea {
-    width: 100%;
-    box-sizing: border-box;
-    height: 400px;
-    background: var(--md-sys-color-surface-variant) !important;
-    color: var(--dynamic-editor-text) !important;
-    border: 1px solid var(--md-sys-color-outline);
-    font-family: "SF Mono", "Roboto Mono", monospace;
-    font-size: 14px;
-    line-height: 1.5;
-    padding: 16px;
-    border-radius: 20px;
-    resize: vertical;
-    outline: none;
-    margin-bottom: 12px;
-    transition: border-color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-
-  .editor-textarea:focus {
-    border-color: var(--md-sys-color-primary) !important;
-    box-shadow: 0 0 0 1px var(--md-sys-color-primary) !important;
-  }
-
-  .log-box {
-    background: var(--md-sys-color-surface-variant);
-    color: var(--dynamic-log-text);
-    font-family: monospace;
-    font-size: 13px;
-    line-height: 1.45;
-    padding: 16px;
-    height: 400px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-    border: 1px solid var(--md-sys-color-outline);
-    border-radius: 20px;
-    box-sizing: border-box;
-  }
-
-  .notification-banner {
-    display: flex;
-    position: fixed;
-    bottom: 24px;
-    left: 12px;
-    right: 12px;
-    margin: 0 auto;
-    width: auto;
-    max-width: 100%;
-    z-index: 999;
-    padding: 16px 20px;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    background: var(--md-sys-color-error-container);
-    border: 1px solid var(--md-sys-color-outline);
-    border-radius: 24px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-sizing: border-box;
-  }
-
-  .notification-content {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .warning-icon {
-    color: var(--md-sys-color-on-error-container);
-  }
-
-  .notification-text {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--md-sys-color-on-error-container);
-  }
-
-  .btn-notification-action {
-    background-color: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
-    border: none;
-    font-weight: 700;
-    padding: 8px 16px;
-    border-radius: 100px;
-    cursor: pointer;
-    flex: none;
-    transition: opacity 0.2s ease;
-  }
-
-  .btn-notification-action:active:not(:disabled) {
-    opacity: 0.8;
-  }
-
-  .btn-notification-action:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .github-footer-banner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    text-decoration: none;
-
-    background: color-mix(
-      in srgb,
-      var(--md-sys-color-surface-container) 45%,
-      transparent
-    );
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid
-      color-mix(in srgb, var(--md-sys-color-outline) 25%, transparent);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
-
-    width: 100%;
-    box-sizing: border-box;
-    border-radius: 24px;
-    padding: 20px;
-
-    margin: 0;
-
-    transition:
-      background-color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
-      transform 0.1s;
-    -webkit-user-select: none;
-    user-select: none;
-  }
-
-  .github-footer-banner:hover {
-    background-color: color-mix(
-      in srgb,
-      var(--md-sys-color-surface-container) 60%,
-      transparent
-    );
-  }
-
-  .github-footer-banner:active {
-    transform: scale(0.98);
-    background-color: color-mix(
-      in srgb,
-      var(--md-sys-color-surface-variant) 70%,
-      transparent
-    );
-  }
-
+  /* =========================================
+     8. Misc (Icons, Spinners, Ambient Background)
+     ========================================= */
   .footer-left-group {
     display: flex;
     align-items: center;
     gap: 16px;
+  }
+  .footer-right-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .github-icon-container {
@@ -1604,7 +1897,6 @@
     justify-content: center;
     width: 40px;
     height: 40px;
-
     background-color: color-mix(
       in srgb,
       var(--md-sys-color-surface-variant) 50%,
@@ -1614,57 +1906,121 @@
       color-mix(in srgb, var(--md-sys-color-outline) 15%, transparent);
     border-radius: 12px;
   }
-
   .github-footer-banner :global(svg) {
     color: var(--md-sys-color-primary);
   }
 
-  .repo-details {
-    display: flex;
-    flex-direction: column;
+  .mi-icon,
+  .open-icon {
+    font-family: "Material Icons";
+    color: var(--md-sys-color-primary);
   }
-
-  .repo-name {
-    font-weight: 700;
-    font-size: 15px;
-    letter-spacing: -0.2px;
-    color: var(--md-sys-color-secondary);
+  .mi-icon {
+    font-size: 20px;
+    opacity: 0.9;
   }
-
-  .repo-action-label {
-    font-size: 12px;
-    color: var(--md-sys-color-tertiary);
-    opacity: 0.7;
-  }
-
-  .footer-right-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .version-tag {
-    font-family: monospace;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--md-sys-color-on-surface-variant);
-
-    background-color: color-mix(
-      in srgb,
-      var(--md-sys-color-surface-variant) 50%,
-      transparent
-    );
-    padding: 4px 8px;
-    border-radius: 8px;
-    border: 1px solid
-      color-mix(in srgb, var(--md-sys-color-outline) 20%, transparent);
-  }
-
   .open-icon {
     font-size: 20px;
-    color: var(--md-sys-color-primary);
     opacity: 0.8;
     padding-right: 4px;
+  }
+  .warning-icon {
+    color: var(--md-sys-color-on-error-container);
+  }
+
+  .m3-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2.5px solid rgba(255, 255, 255, 0.2);
+    border-top-color: currentColor;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    will-change: transform;
+    transform: translateZ(0);
+    animation: m3-spin 0.8s linear infinite;
+  }
+
+  .ambient-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+    opacity: 0.6;
+    contain: paint;
+  }
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    -webkit-filter: blur(80px);
+    mix-blend-mode: screen;
+    will-change: transform;
+  }
+  .blob-1 {
+    top: -10%;
+    left: -20%;
+    width: 300px;
+    height: 300px;
+    background: var(--md-sys-color-primary, #fbc02d);
+    animation: floatBlobOne 25s infinite alternate ease-in-out;
+  }
+  .blob-2 {
+    bottom: 10%;
+    right: -10%;
+    width: 350px;
+    height: 350px;
+    background: var(--md-sys-color-tertiary, #7d5260);
+    animation: floatBlobTwo 30s infinite alternate ease-in-out;
+  }
+  .blob-3 {
+    bottom: -15%;
+    left: -10%;
+    width: 320px;
+    height: 320px;
+    background: var(--md-sys-color-secondary, #00796b);
+    animation: floatBlobThree 28s infinite alternate ease-in-out;
+  }
+
+  /* Status Pill Colors */
+  .transitioning {
+    color: #f59e0b;
+    background-color: rgba(245, 158, 11, 0.1);
+    animation: status-pulse-transitioning 1.5s infinite ease-in-out both;
+  }
+  .running {
+    color: #00ff66;
+    background-color: rgba(0, 255, 102, 0.1);
+    animation: status-pulse-running 3s infinite ease-in-out;
+  }
+  .stopped {
+    color: var(--danger, #ef4444);
+    background-color: rgba(255, 180, 171, 0.1);
+    animation: status-pulse-stopped 5s infinite ease-in-out;
+  }
+
+  /* =========================================
+     9. Keyframes
+     ========================================= */
+  @keyframes m3-spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes electricCurrent {
+    0% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: -200% 50%;
+    }
   }
 
   @keyframes floatBlobOne {
@@ -1678,7 +2034,6 @@
       transform: translate(60px, 180px) scale(0.9);
     }
   }
-
   @keyframes floatBlobTwo {
     0% {
       transform: translate(0px, 0px) scale(1);
@@ -1690,7 +2045,6 @@
       transform: translate(-40px, -60px) scale(1.1);
     }
   }
-
   @keyframes floatBlobThree {
     0% {
       transform: translate(0, 0) scale(1) rotate(0deg);
@@ -1717,7 +2071,6 @@
       box-shadow: 0 0 8px 2px rgba(245, 158, 11, 0.4);
     }
   }
-
   @keyframes status-pulse-running {
     0%,
     100% {
@@ -1729,7 +2082,6 @@
       box-shadow: 0 0 10px 3px rgba(0, 255, 102, 0.35);
     }
   }
-
   @keyframes status-pulse-stopped {
     0%,
     100% {
@@ -1737,15 +2089,6 @@
     }
     50% {
       opacity: 0.5;
-    }
-  }
-
-  @keyframes electricCurrent {
-    0% {
-      background-position: 0% 50%;
-    }
-    100% {
-      background-position: -200% 50%;
     }
   }
 </style>

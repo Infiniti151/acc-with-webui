@@ -1,3 +1,20 @@
+### v1.1.0 (10100) - 2026-08-09
+
+WebUI 🎛️ ->
+- Added action button to quickly toggle `accd` state.
+- Added status indicators for `accd` ✅❌, `resume_capacity` 🟢, `pause_capacity` 🟡, and `shutdown_capacity` 🔴 in the description.
+- Added `shutdown_capacity (sc)` slider to `Charging Thresholds`. It's clamped between 0%-20% (`acc` default is 5%). It shuts down the phone at that threshold to preserve battery health.
+- Added `Export Logs` button in `Logs` to export logs. `acc` exports logs as a .tgz file in `/storage/emulated/0/Download`. It takes about 30 seconds to export, so be patient!
+- Added a notification banner to enforce restarting the daemon on any setting change. Needed to do this as some settings weren't being picked up by the daemon automatically. The banner persists until `accd` restarts or the device reboots.
+- Added a toast to notify config file save status and completion of log export.
+- Fixed issue where daemon started/restarted from the WebUI wouldn't persist due to it being in the manager's cgroup instead of the root cgroup.
+- Updated `Save Config` button to show saved status on successful save.
+- Updated sliders to be cascading to enforce `shutdown_capacity < resume_capacity < pause_capacity` and for better UX.
+- Updated `acca` commands to `/dev/acca` to prevent path lookup.
+- Updated readme with build instructions for the WebUI.
+- Updated CSS into sections for better manageability.
+- Updated npm dependencies.
+
 ### v1.0.1 (10001) - 2026-07-23
 
 WebUI 🎛️ ->

@@ -23,6 +23,7 @@
     - [Notes](#notes-1)
   - [Install from Local Source or GitHub](#install-from-local-source-or-github)
     - [Notes](#notes-2)
+  - [Build WebUI](#build-webui-indexhtml)
 - [DEFAULT CONFIGURATION](#default-configuration)
 - [SETUP/USAGE](#setupusage)
   - [Terminal Commands](#terminal-commands)
@@ -33,6 +34,8 @@
   - [Uninstalling ACC](#uninstalling-acc)
   - [Initializing ACC](#initializing-acc)
   - [Managing ACC](#managing-acc)
+  - [WebUI](#webui)
+  - [Action Button](#action-button)
 - [TROUBLESHOOTING](#troubleshooting)
   - [`acc -t` Results Seem Inconsistent](#acc--t-results-seem-inconsistent)
   - [Charging Switch](#charging-switch)
@@ -70,6 +73,7 @@ Regardless of whether the system is rooted with KernelSU/Magisk, the installatio
 ## LICENSE
 
 Copyright 2017-2024, VR25
+Copyright 2026, Infiniti151
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -236,6 +240,14 @@ In interactive mode, it also asks the user whether they want to download and ins
 
 - You may also want to read [Terminal Commands](#terminal-commands) > `Exit Codes` below.
 
+### Build WebUI (index.html)
+
+For building just the WebUI without the entire zip,
+
+1. Install Node.js 18.0.0+ (though Node.js 20+ LTS is strongly recommended).
+2. `cd webui`
+3. `npm install && npm run build`
+3. index.html will be built at `../install/webroot/`
 
 ---
 ## DEFAULT CONFIGURATION
@@ -1173,6 +1185,22 @@ Features:
   </a>
   <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png">
     <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png" height="300">
+  </a>
+</p>
+
+### Action Button
+
+`accd` can be quickly toggled with the action button.
+
+<p align="center">
+  <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/5.png">
+    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/5.png" height="300">
+  </a>
+  <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/6.png">
+    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/6.png" height="300">
+  </a>
+  <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/7.png">
+    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/7.png" height="300">
   </a>
 </p>
 
