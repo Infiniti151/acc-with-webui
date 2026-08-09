@@ -1,13 +1,13 @@
 <h1>Advanced Charging Controller (ACC) with WebUI</h1>
 
-<p><a href="https://github.com/Infiniti151/acc-with-webui/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/Infiniti151/acc-with-webui/build.yml?branch=dev&amp;style=for-the-badge&amp;logo=github-actions&amp;logoColor=white&amp;label=Build" alt="Build" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/releases"><img src="https://img.shields.io/github/v/release/Infiniti151/acc-with-webui?style=for-the-badge&amp;logo=github&amp;logoColor=white&amp;label=Release" alt="Latest Release" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/blob/dev/webui/package.json"><img src="https://img.shields.io/badge/Svelte-5.56.5-orange?style=for-the-badge&amp;logo=svelte&amp;logoColor=white" alt="Svelte" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/blob/dev/License.md"><img src="https://img.shields.io/github/license/Infiniti151/acc-with-webui?style=for-the-badge&amp;logo=spdx&amp;logoColor=white&amp;color=yellow&amp;label=License" alt="License" title="" /></a></p>
+<p><a href="https://github.com/Infiniti151/acc-with-webui/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/Infiniti151/acc-with-webui/build.yml?branch=dev&amp;style=for-the-badge&amp;logo=github-actions&amp;logoColor=white&amp;label=Build" alt="Build" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/releases"><img src="https://img.shields.io/github/v/release/Infiniti151/acc-with-webui?style=for-the-badge&amp;logo=github&amp;logoColor=white&amp;label=Release" alt="Latest Release" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/blob/dev/webui/package.json"><img src="https://img.shields.io/badge/Svelte-5.56.5-orange?style=for-the-badge&amp;logo=svelte&amp;logoColor=white" alt="Svelte" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/blob/dev/License.md"><img src="https://img.shields.io/github/license/Infiniti151/acc-with-webui?style=for-the-badge&amp;logo=spdx&amp;logoColor=white&amp;color=yellow&amp;label=License" alt="License" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/releases"><img src="https://img.shields.io/github/downloads/Infiniti151/acc-with-webui/total?style=for-the-badge&amp;color=purple&amp;label=Downloads&amp;logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xOSA5aC00VjNIN3Y2SDNMMTIgMTlsOS05ek01IDE4djJoMTR2LTJINXoiLz48L3N2Zz4=" alt="Downloads" title="" /></a></p>
 
 <blockquote>
   <p>[!important]
 <a href="#webui">WebUI</a> is the only addition in this fork. No backend code has been changed. Why not just use the AccA app? Coz I don't want to install a separate app to control a module. Also, it has been abandoned since 2022. It was built before the advent of root manager WebUIs and WebUIs are the standard now for module GUIs. Only open issues regarding WebUI here. All issues regarding acc must be opened upstream. This is based on acc dev branch in order to get the latest acc updates.</p>
 
 <p>[!warning]
-WebUI is tested in KernelSU Next manager (v3.1.0), but should work fine in KernelSU manager. It is untested for Magisk and Apatch.</p>
+WebUI is tested in KernelSU Next manager (v3.1.0), but should work fine in KernelSU manager. It is untested for Apatch and Magisk with WebUI X: Portable.</p>
 </blockquote>
 
 <hr />
@@ -29,6 +29,7 @@ WebUI is tested in KernelSU Next manager (v3.1.0), but should work fine in Kerne
 <li><a href="#notes-1">Notes</a></li>
 <li><a href="#install-from-local-source-or-github">Install from Local Source or GitHub</a></li>
 <li><a href="#notes-2">Notes</a></li>
+<li><a href="#build-webui-indexhtml">Build WebUI</a></li>
 </ul></li>
 <li><a href="#default-configuration">DEFAULT CONFIGURATION</a></li>
 <li><a href="#setupusage">SETUP/USAGE</a>
@@ -43,6 +44,8 @@ WebUI is tested in KernelSU Next manager (v3.1.0), but should work fine in Kerne
 <li><a href="#uninstalling-acc">Uninstalling ACC</a></li>
 <li><a href="#initializing-acc">Initializing ACC</a></li>
 <li><a href="#managing-acc">Managing ACC</a></li>
+<li><a href="#webui">WebUI</a></li>
+<li><a href="#action-button">Action Button</a></li>
 </ul></li>
 <li><a href="#troubleshooting">TROUBLESHOOTING</a>
 <ul>
@@ -86,7 +89,8 @@ Regardless of whether the system is rooted with KernelSU/Magisk, the installatio
 
 <h2>LICENSE</h2>
 
-<p>Copyright 2017-2024, VR25</p>
+<p>Copyright 2017-2024, VR25
+Copyright 2026, Infiniti151</p>
 
 <p>This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -245,6 +249,17 @@ The exception is <code>--non-interactive</code> for front-end apps.</p></li>
 In interactive mode, it also asks the user whether they want to download and install the update.</p></li>
 <li><p>You may also want to read <a href="#terminal-commands">Terminal Commands</a> > <code>Exit Codes</code> below.</p></li>
 </ul>
+
+<h3>Build WebUI (index.html)</h3>
+
+<p>For building just the WebUI without the entire zip,</p>
+
+<ol>
+<li>Install Node.js 18.0.0+ (though Node.js 20+ LTS is strongly recommended).</li>
+<li><code>cd webui</code></li>
+<li><code>npm install &amp;&amp; npm run build</code></li>
+<li>index.html will be built at <code>../install/webroot/</code></li>
+</ol>
 
 <hr />
 
@@ -1446,16 +1461,32 @@ Refer back to <a href="#terminal-commands">terminal commands</a> for details.</p
 
 <p align="center">
   <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/1.png">
-    <img src="./images/1.png" height="300">
+    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/1.png" height="300">
   </a>
   <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/2.png">
-    <img src="./images/2.png" height="300">
+    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/2.png" height="300">
   </a>
   <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png">
-    <img src="./images/3.png" height="300">
+    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png" height="300">
   </a>
   <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png">
-    <img src="./images/4.png" height="300">
+    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png" height="300">
+  </a>
+</p>
+
+<h3>Action Button</h3>
+
+<p><code>accd</code> can be quickly toggled with the action button.</p>
+
+<p align="center">
+  <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/5.png">
+    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/5.png" height="300">
+  </a>
+  <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/6.png">
+    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/6.png" height="300">
+  </a>
+  <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/7.png">
+    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/7.png" height="300">
   </a>
 </p>
 

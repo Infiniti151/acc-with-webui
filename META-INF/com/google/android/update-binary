@@ -151,7 +151,8 @@ fi
 
 ###
 echo "$name $version ($versionCode)
-Copyright 2017-2024, $author
+Copyright 2017-2024, $(echo "$author" | cut -d',' -f1 | tr -d ' ')
+Copyright 2026, $(echo "$author" | cut -d',' -f2 | tr -d ' ')
 GPLv3+
 
 Installing in $installDir/$id/..."
@@ -170,6 +171,7 @@ mkdir -p $installDir/$id
 cp -R $srcDir/install/* $installDir/$id/
 installDir=$(readlink -f $installDir/$id)
 cp $srcDir/module.prop $installDir/
+cp $srcDir/action.sh $installDir/
 cp $srcDir/banner.jpg $installDir/
 cp -f $srcDir/README.* $data_dir/
 
