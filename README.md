@@ -1174,18 +1174,34 @@ Features:
 - Logs viewer
 
 <p align="center">
-  <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/1.png">
-    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/1.png" height="300">
-  </a>
-  <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/2.png">
-    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/2.png" height="300">
-  </a>
-  <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png">
-    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png" height="300">
-  </a>
-  <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png">
-    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png" height="300">
-  </a>
+  <table>
+    <tr>
+      <td align="center">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/1.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/1.png" height="300">
+        </a><br>
+        <em>Battery Stats & Daemon Control</em>
+      </td>
+      <td align="center">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/2.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/2.png" height="300">
+        </a><br>
+        <em>Charging Thresholds & Reset Battery Stats</em>
+      </td>
+      <td align="center">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png" height="300">
+        </a><br>
+        <em>Config File Editor</em>
+      </td>
+      <td align="center">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png" height="300">
+        </a><br>
+        <em>Logs Viewer</em>
+      </td>
+    </tr>
+  </table>
 </p>
 
 ### Action Button
@@ -1193,15 +1209,30 @@ Features:
 `accd` can be quickly toggled with the action button.
 
 <p align="center">
-  <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/5.png">
-    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/5.png" height="300">
-  </a>
-  <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/6.png">
-    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/6.png" height="300">
-  </a>
-  <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/7.png">
-    <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/7.png" height="300">
-  </a>
+  <table>
+    <tr>
+      <td align="center" colspan="2">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/5.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/5.png" height="300">
+        </a><br>
+        <em>Action Button</em>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/6.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/6.png" height="300">
+        </a><br>
+        <em>`accd` Started</em>
+      </td>
+      <td align="center">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/7.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/7.png" height="300">
+        </a><br>
+        <em>`accd` Stopped</em>
+      </td>
+    </tr>
+  </table>
 </p>
 
 ---
