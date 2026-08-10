@@ -1,4 +1,4 @@
-### v1.1.1 (10100) - 2026-08-10
+### v1.1.1 (10101) - 2026-08-10
 
 - Fixed `accd` not showing correct status in WebUI for module's initial install.
 - Fixed capacity fetching in action.sh and service.sh to use a single command instead of three.
