@@ -270,7 +270,7 @@
         exec(
           "cat /sys/class/power_supply/battery/current_now 2>/dev/null || echo 0",
         ),
-        exec("acc -D"),
+        exec("/dev/acc -D"),
         exec(`cat ${CONFIG_PATH} 2>/dev/null`),
       ]);
 

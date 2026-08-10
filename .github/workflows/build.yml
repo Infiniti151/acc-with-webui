@@ -67,23 +67,16 @@ jobs:
         run: |
           ./build.sh
 
-      - name: Parse Module Metadata & Topmost Changelog Entry
+      - name: Parse Module Metadata
         id: metadata
         run: |
-          VERSION=$(sed -n '1s/### \(v[0-9.]*\).*/\1/p' changelog-webui.md)
-          VERSION_CODE=$(sed -n '1s/.*(\([0-9]*\)).*/\1/p' changelog-webui.md)
+          VERSION=$(sed -n "s/^version=//p" module.prop)
+          VERSION_CODE=$(sed -n "s/^versionCode=//p" module.prop)
           ID=$(sed -n "s/^id=//p" module.prop)
 
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "version_code=${VERSION_CODE}" >> $GITHUB_OUTPUT
-          echo "id=${ID}-with-webui" >> $GITHUB_OUTPUT
           echo "basename=${ID}-with-webui_${VERSION}_${VERSION_CODE}" >> $GITHUB_OUTPUT
-
-          awk '
-            NR==1 && /^###/ { print; next }
-            /^###/ { exit }
-            { print }
-          ' changelog-webui.md > latest-release-note.md
 
       - name: Commit & Push Updated Files
         id: create_commit
@@ -95,7 +88,6 @@ jobs:
           files: |
             .
             :(exclude)check-syntax.sh
-            :(exclude)latest-release-note.md
           commit_message: "🤖 Automated version bump to ${{ steps.metadata.outputs.version }} [skip ci]"
           fail_on_self_push: false
           empty_commit: false
@@ -118,7 +110,7 @@ jobs:
         with:
           tag_name: ${{ steps.metadata.outputs.version }}
           name: Release ${{ steps.metadata.outputs.version }} (${{ steps.metadata.outputs.version_code }})
-          body_path: latest-release-note.md
+          body_path: latest-release-notes.md
           draft: false
           prerelease: false
           files: |

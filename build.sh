@@ -29,16 +29,52 @@ get_prop() {
   sed -n "s/^$1=//p" "${2:-module.prop}" 2>/dev/null
 }
 
+getVersionCode() {
+    # Accept version string as argument ($1) or read from changelog-webui.md
+    local ver="${1:-}"
+
+    if [ -z "$ver" ]; then
+        if [ -f "changelog-webui.md" ]; then
+            ver=$(sed -n '1s/### \(v[0-9.]*\).*/\1/p' changelog-webui.md)
+        elif [ -f "module.prop" ]; then
+            ver=$(sed -n 's/^version=//p' module.prop)
+        fi
+    fi
+
+    # Strip leading 'v' if present (e.g., "v1.1.1" -> "1.1.1")
+    ver="${ver#v}"
+
+    # Return 0 if no version could be resolved
+    if [ -z "$ver" ]; then
+        echo "0"
+        return 1
+    fi
+
+    # Split MAJOR.MINOR.PATCH cleanly
+    local major=0 minor=0 patch=0
+    IFS='.' read -r major minor patch <<EOF
+$ver
+EOF
+
+    # Default empty patch values to 0
+    patch="${patch:-0}"
+
+    # Calculate 5-digit versionCode: (MAJOR * 10000) + (MINOR * 100) + PATCH
+    local version_code=$(( (major * 10000) + (minor * 100) + patch ))
+
+    echo "$version_code"
+}
+
 id=$(get_prop id)
 domain=$(get_prop domain)
 version=$(sed -n '1s/### \(v[0-9.]*\).*/\1/p' changelog-webui.md)
-versionCode=$(sed -n '1s/.*(\([0-9]*\)).*/\1/p' changelog-webui.md)
+versionCode=$(getVersionCode "$version")
 basename="${id}-with-webui_${version}_${versionCode}"
 tmpDir=".tmp/META-INF/com/google/android"
 
 echo "${CYAN}--------------------------------------------------"
 echo "Updating module.json..."
-echo "${CYAN}--------------------------------------------------${NC}"
+echo "--------------------------------------------------${NC}"
 echo
 
 # update module info
@@ -55,14 +91,27 @@ if [[ "$(get_prop version)" != "$version" ]]; then
     "version": "${version}",
     "versionCode": ${versionCode},
     "zipUrl": "https://github.com/Infiniti151/acc-with-webui/releases/download/${version}/${basename}.zip",
-    "changelog": "https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/changelog-webui.md"
+    "changelog": "https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/latest-release-notes.md"
 }
 EOF
 fi
 
 echo "${CYAN}--------------------------------------------------"
+echo "Updating latest-release-notes.md..."
+echo "--------------------------------------------------${NC}"
+echo
+
+sed -i -E "1s/(### v[0-9.]+)( \([0-9A-Za-z_]+\))?/\1 (${versionCode})/" changelog-webui.md
+
+awk '
+  NR==1 && /^###/ { print; next }
+  /^###/ { exit }
+  { print }
+' changelog-webui.md > latest-release-notes.md
+
+echo "${CYAN}--------------------------------------------------"
 echo "Building WebUI..."
-echo "${CYAN}--------------------------------------------------${NC}"
+echo "--------------------------------------------------${NC}"
 
 # update package.json version and build WebUI
 sed -i -E "s/(\"version\": *\")[^\"]*(\")/\1${version#v}\2/" webui/package.json
@@ -70,7 +119,7 @@ sed -i -E "s/(\"version\": *\")[^\"]*(\")/\1${version#v}\2/" webui/package.json
 
 echo "${CYAN}--------------------------------------------------"
 echo "Updating ID and domain in install scripts..."
-echo "${CYAN}--------------------------------------------------${NC}"
+echo "--------------------------------------------------${NC}"
 echo
 
 for file in ./install*.sh ./install/*.sh ./bundle.sh; do
@@ -87,9 +136,13 @@ for file in ./install*.sh ./install/*.sh ./bundle.sh; do
 done
 
 echo "${CYAN}--------------------------------------------------"
-echo "Generating README.html..."
-echo "${CYAN}--------------------------------------------------${NC}"
+echo "Updating README.md and Generating README.html..."
+echo "--------------------------------------------------${NC}"
 echo
+
+# Update Svelte version badge
+SVELTE_VERSION=$(grep '"svelte"' webui/package.json | sed -E 's/[^0-9]*([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+sed -i "s/Svelte-[0-9.]*-orange/Svelte-${SVELTE_VERSION}-orange/g" README.md
 
 if [[ README.md -ot install/default-config.txt ]] \
   || [[ README.md -ot install/strings.sh ]] \
@@ -112,7 +165,7 @@ fi
 
 echo "${CYAN}--------------------------------------------------"
 echo "Updating busybox config in install scripts..."
-echo "${CYAN}--------------------------------------------------${NC}"
+echo "--------------------------------------------------${NC}"
 echo
 
 # update busybox config (from install/setup-busybox.sh) in install/uninstall.sh and install scripts
@@ -129,7 +182,7 @@ set +e
 
 echo "${CYAN}--------------------------------------------------"
 echo "Building uninstaller zip..."
-echo "${CYAN}--------------------------------------------------${NC}"
+echo "--------------------------------------------------${NC}"
 echo
 
 { cp -u install.sh customize.sh
@@ -158,7 +211,7 @@ if [[ -z "$1" ]]; then
 
   echo "${CYAN}--------------------------------------------------"
   echo "Building installable archives..."
-  echo "${CYAN}--------------------------------------------------${NC}"
+  echo "--------------------------------------------------${NC}"
   echo
 
   case $version in
@@ -168,8 +221,8 @@ if [[ -z "$1" ]]; then
 
   echo "=> _builds/${basename}/${basename_}.zip"
   zip -r9 "_builds/${basename}/${basename_}.zip" \
-    ./* .gitattributes .gitignore .github \
-    -x _\*/\* "images/*" "webui/*" \
+    customize.sh META-INF/ action.sh banner.jpg bin/ \
+    install/ latest-release-notes.md module.prop README.html \
     | sed 's|.*adding: ||' | grep -iv 'zip warning:'
   echo
 
@@ -187,7 +240,7 @@ if [[ -z "$1" ]]; then
 
   echo "${GREEN}--------------------------------------------------"
   echo "Done"
-  echo "${GREEN}--------------------------------------------------${NC}"
+  echo "--------------------------------------------------${NC}"
   echo
 fi
 

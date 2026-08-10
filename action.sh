@@ -41,14 +41,12 @@ else
 fi
 
 # Get capacities for description update
-RESUME="$(/dev/acca -sp resume_capacity | cut -d= -f2)%"
-PAUSE="$(/dev/acca -sp pause_capacity | cut -d= -f2)%"
-SHUTDOWN="$(/dev/acca -sp shutdown_capacity | cut -d= -f2)%"
+eval "$(/dev/acc -sp capacity 2>/dev/null | grep -E '^(resume|pause|shutdown)_capacity=')"
 
 # --- Update description (cross-compatible) ---
 if [ -f "$PROP_FILE" ]; then
     sed -i "/^description=/ {
-        s@^description=.*Extend@description=[accd ${STATUS}] | 🟢 $RESUME | 🟡 $PAUSE | 🔴 $SHUTDOWN | Extend@
+        s@^description=.*Extend@description=[accd ${STATUS}] | 🟢 ${resume_capacity}% | 🟡 ${pause_capacity}% | 🔴 ${shutdown_capacity}% | Extend@
     }" "$PROP_FILE"
 else
     echo "[!] Error: module.prop not found at $PROP_FILE"

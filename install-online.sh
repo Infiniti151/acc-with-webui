@@ -96,7 +96,7 @@ then
   ! echo "$@" | grep -Eq '\-\-changelog|\-c' || {
     if echo "$@" | grep -Eq '\-\-non-interactive|\-n'; then
       echo $onlineVersion
-      echo "https://github.com/Infiniti151/acc-with-webui/blob/${commit}/changelog-webui.md"
+      echo "https://github.com/Infiniti151/acc-with-webui/blob/${commit}/latest-release-notes.md"
       exit 5 # no update available
     else
       echo

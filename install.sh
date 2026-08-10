@@ -296,7 +296,7 @@ printf "Done\n\n\n"
 printf "─────────────[ ACC ⚡ WebUI ]─────────────\n\n"
 
 printf "\n\nCHANGELOG\n\n"
-cat $srcDir/changelog-webui.md
+cat $srcDir/latest-release-notes.md
 
 _echo() {
   echo "$@" | tee -a $tmpd/.install-notes
