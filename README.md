@@ -1176,28 +1176,38 @@ Features:
 <p align="center">
   <table>
     <tr>
-      <td align="center">
+      <td align="center" width="25%">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/1.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/1.png" height="300">
-        </a><br>
-        <em>Battery Stats & Daemon Control</em>
+        </a>
       </td>
-      <td align="center">
+      <td align="center" width="25%">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/2.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/2.png" height="300">
-        </a><br>
-        <em>Charging Thresholds & Reset Battery Stats</em>
+        </a>
       </td>
-      <td align="center">
+      <td align="center" width="25%">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png" height="300">
-        </a><br>
-        <em>Config File Editor</em>
+        </a>
       </td>
-      <td align="center">
+      <td align="center" width="25%">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png" height="300">
-        </a><br>
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" width="25%">
+        <em>Battery Stats &amp; Daemon Control</em>
+      </td>
+      <td align="center" width="25%">
+        <em>Charging Thresholds &amp; Reset Battery Stats</em>
+      </td>
+      <td align="center" width="25%">
+        <em>Config File Editor</em>
+      </td>
+      <td align="center" width="25%">
         <em>Logs Viewer</em>
       </td>
     </tr>
@@ -1214,7 +1224,11 @@ Features:
       <td align="center" colspan="2">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/5.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/5.png" height="300">
-        </a><br>
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" colspan="2">
         <em>Action Button</em>
       </td>
     </tr>
@@ -1222,13 +1236,19 @@ Features:
       <td align="center">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/6.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/6.png" height="300">
-        </a><br>
-        <em>accd Started</em>
+        </a>
       </td>
       <td align="center">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/7.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/7.png" height="300">
-        </a><br>
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <em>accd Started</em>
+      </td>
+      <td align="center">
         <em>accd Stopped</em>
       </td>
     </tr>
