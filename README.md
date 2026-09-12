@@ -1174,7 +1174,7 @@ Features:
 - Config file editor
 - Logs viewer
 
-<p align="center">
+<div align="center">
   <table>
     <tr>
       <td align="center" width="33%">
@@ -1205,17 +1205,16 @@ Features:
       </td>
     </tr>
   </table>
-</p>
-
-<p align="center">
-  <table>
+</div>
+<div align="center">
+  <table width="680">
     <tr>
-      <td align="center" width="50%">
+      <td align="center">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png" height="300">
         </a>
       </td>
-      <td align="center" width="50%">
+      <td align="center">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png" height="300">
         </a>
@@ -1230,7 +1229,7 @@ Features:
       </td>
     </tr>
   </table>
-</p>
+</div>
 
 ### Action Button
 
