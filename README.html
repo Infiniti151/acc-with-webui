@@ -1,6 +1,6 @@
 <h1>Advanced Charging Controller (ACC) with WebUI</h1>
 
-<p><a href="https://github.com/Infiniti151/acc-with-webui/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/Infiniti151/acc-with-webui/build.yml?branch=dev&amp;style=for-the-badge&amp;logo=github-actions&amp;logoColor=white&amp;label=Build" alt="Build" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/releases"><img src="https://img.shields.io/github/v/release/Infiniti151/acc-with-webui?style=for-the-badge&amp;logo=github&amp;logoColor=white&amp;label=Release" alt="Latest Release" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/blob/dev/webui/package.json"><img src="https://img.shields.io/badge/Svelte-5.56.8-orange?style=for-the-badge&amp;logo=svelte&amp;logoColor=white" alt="Svelte" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/blob/dev/License.md"><img src="https://img.shields.io/github/license/Infiniti151/acc-with-webui?style=for-the-badge&amp;logo=spdx&amp;logoColor=white&amp;color=yellow&amp;label=License" alt="License" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/releases"><img src="https://img.shields.io/github/downloads/Infiniti151/acc-with-webui/total?style=for-the-badge&amp;color=purple&amp;label=Downloads&amp;logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xOSA5aC00VjNIN3Y2SDNMMTIgMTlsOS05ek01IDE4djJoMTR2LTJINXoiLz48L3N2Zz4=" alt="Downloads" title="" /></a></p>
+<p><a href="https://github.com/Infiniti151/acc-with-webui/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/Infiniti151/acc-with-webui/build.yml?branch=dev&amp;style=for-the-badge&amp;logo=github-actions&amp;logoColor=white&amp;label=Build" alt="Build" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/releases"><img src="https://img.shields.io/github/v/release/Infiniti151/acc-with-webui?style=for-the-badge&amp;logo=github&amp;logoColor=white&amp;label=Release" alt="Latest Release" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/blob/dev/webui/package.json"><img src="https://img.shields.io/badge/Svelte-5.57.0-orange?style=for-the-badge&amp;logo=svelte&amp;logoColor=white" alt="Svelte" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/blob/dev/License.md"><img src="https://img.shields.io/github/license/Infiniti151/acc-with-webui?style=for-the-badge&amp;logo=spdx&amp;logoColor=white&amp;color=yellow&amp;label=License" alt="License" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/releases"><img src="https://img.shields.io/github/downloads/Infiniti151/acc-with-webui/total?style=for-the-badge&amp;color=purple&amp;label=Downloads&amp;logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xOSA5aC00VjNIN3Y2SDNMMTIgMTlsOS05ek01IDE4djJoMTR2LTJINXoiLz48L3N2Zz4=" alt="Downloads" title="" /></a></p>
 
 <blockquote>
   <p>[!important]
@@ -1456,34 +1456,62 @@ Refer back to <a href="#terminal-commands">terminal commands</a> for details.</p
 - Daemon (accd) control panel
 - Charging threshold sliders
 - Reset battery stats toggles
+- Idle mode toggles
 - Config file editor
 - Logs viewer</p>
 
 <p align="center">
   <table>
     <tr>
-      <td align="center">
+      <td align="center" width="33%">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/1.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/1.png" height="300">
-        </a><br>
-        <em>Battery Stats & Daemon Control</em>
+        </a>
       </td>
-      <td align="center">
+      <td align="center" width="33%">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/2.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/2.png" height="300">
-        </a><br>
-        <em>Charging Thresholds & Reset Battery Stats</em>
+        </a>
+      </td>
+      <td align="center" width="33%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/8.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/8.png" height="300">
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <em>Battery Stats &amp; Daemon Control</em>
       </td>
       <td align="center">
+        <em>Charging Thresholds &amp; Reset Battery Stats</em>
+      </td>
+      <td align="center">
+        <em>Idle Mode</em>
+      </td>
+    </tr>
+  </table>
+</p>
+
+<p align="center">
+  <table>
+    <tr>
+      <td align="center" width="50%">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png" height="300">
-        </a><br>
+        </a>
+      </td>
+      <td align="center" width="50%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png" height="300">
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
         <em>Config File Editor</em>
       </td>
       <td align="center">
-        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png">
-          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png" height="300">
-        </a><br>
         <em>Logs Viewer</em>
       </td>
     </tr>
@@ -1500,7 +1528,11 @@ Refer back to <a href="#terminal-commands">terminal commands</a> for details.</p
       <td align="center" colspan="2">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/5.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/5.png" height="300">
-        </a><br>
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" colspan="2">
         <em>Action Button</em>
       </td>
     </tr>
@@ -1508,13 +1540,19 @@ Refer back to <a href="#terminal-commands">terminal commands</a> for details.</p
       <td align="center">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/6.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/6.png" height="300">
-        </a><br>
-        <em>accd Started</em>
+        </a>
       </td>
       <td align="center">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/7.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/7.png" height="300">
-        </a><br>
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <em>accd Started</em>
+      </td>
+      <td align="center">
         <em>accd Stopped</em>
       </td>
     </tr>

@@ -1,4 +1,4 @@
-### v1.2.0 (10101) - 2026-09-12
+### v1.2.0 (10200) - 2026-09-12
 
 WebUI 🎛️ ->
 - Added `Idle Mode` section with multiple toggles and idle-apps selector.
