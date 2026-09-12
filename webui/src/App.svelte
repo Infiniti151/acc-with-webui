@@ -61,6 +61,26 @@
   let rbspl = $state(false);
   let rbsu = $state(false);
 
+  // Idle Mode Toggle Settings
+  let aiapc = $state(true);
+  let pbim = $state(true);
+  let om = $state(true);
+  let idleApps = $state([]);
+  let showAppModal = $state(false);
+  let showSystemApps = $state(false);
+  let userAppsList = $state([]);
+  let systemAppsList = $state([]);
+  let selectedApps = $state([]);
+
+  // Combine and sort reactively based on the System Apps toggle
+  const displayedApps = $derived(
+    showSystemApps
+      ? [...userAppsList, ...systemAppsList].sort((a, b) =>
+          a.name.localeCompare(b.name),
+        )
+      : [...userAppsList].sort((a, b) => a.name.localeCompare(b.name)),
+  );
+
   // Config Editor
   let configText = $state("");
   let isEditorOpen = $state(false);
@@ -81,10 +101,17 @@
   // Background Polling Timer
   let statusPollInterval = null;
 
-  // Toast notification state
+  // Toast Notification State
   let toastMessage = $state("");
   let isToastVisible = $state(false);
   let toastTimeout = null;
+
+  // Button Description State
+  let activeDescriptions = $state({});
+
+  function toggleDescription(key) {
+    activeDescriptions[key] = !activeDescriptions[key];
+  }
 
   // --- Global File & Path Constants ---
   const EXPORT_FLAG = "/data/local/tmp/acc_export_done";
@@ -305,6 +332,12 @@
     const resetBattStatsMatch = rawConfigText.match(
       /resetBattStats=\(([^)]+)\)/,
     );
+    const aiapcMatch = rawConfigText.match(/allowIdleAbovePcap=(true|false)/);
+    const pbimMatch = rawConfigText.match(
+      /prioritizeBattIdleMode=(true|false|no)/,
+    );
+    const omMatch = rawConfigText.match(/offMid=(true|false)/);
+    const iaMatch = rawConfigText.match(/idleApps\s*=\s*(.*)/i);
 
     let resumeVal = null;
     let pauseVal = null;
@@ -343,6 +376,33 @@
         rbsp = params[0] === "true"; // Index 0: Pause
         rbsu = params[1] === "true"; // Index 1: Unplug
         rbspl = params[2] === "true"; // Index 2: Plug
+      }
+      if (aiapcMatch?.[1]) {
+        aiapc = aiapcMatch[1] === "true";
+      }
+      if (pbimMatch?.[1]) {
+        pbim = pbimMatch[1] === "true";
+      }
+      if (omMatch?.[1]) {
+        om = omMatch[1] === "true";
+      }
+      if (iaMatch) {
+        let rawVal = iaMatch[1].trim();
+
+        rawVal = rawVal.split("#")[0].trim();
+
+        if (!rawVal || /^(null|""|''|\(\))$/i.test(rawVal)) {
+          idleApps = [];
+        } else {
+          rawVal = rawVal.replace(/^["'(]+|[)"']+$/g, "").trim();
+
+          idleApps = rawVal
+            ? rawVal
+                .split(/[\s,]+/)
+                .map((s) => s.trim())
+                .filter(Boolean)
+            : [];
+        }
       }
       initialLoad = false;
     }
@@ -406,6 +466,72 @@
         await requireDaemonRestart();
       }
     }, 450);
+  }
+
+  // Helper: Turn 'com.google.android.youtube' into 'Youtube'
+  function generateAppName(pkg) {
+    const parts = pkg.split(".");
+    let name = parts[parts.length - 1];
+    if (name === "android" && parts.length > 1) name = parts[parts.length - 2];
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  }
+
+  async function saveIdleApps() {
+    idleApps = [...selectedApps];
+    showAppModal = false;
+
+    const appString = idleApps.length > 0 ? idleApps.join(",") : '""';
+    await exec(`/dev/acca -s ia=${appString}`);
+    await requireDaemonRestart();
+  }
+
+  // --- Modal Controls ---
+  async function openIdleAppsModal() {
+    selectedApps = [...idleApps]; // Clone current config
+    showAppModal = true;
+
+    // Only load the massive package lists once to save CPU
+    if (userAppsList.length === 0) {
+      await loadInstalledApps();
+    }
+  }
+
+  async function loadInstalledApps() {
+    const userRes = await exec('pm list packages -3 | cut -f 2 -d ":"');
+    if (userRes.stdout) {
+      userAppsList = userRes.stdout
+        .split("\n")
+        .filter(Boolean)
+        .map((pkg) => ({
+          pkg,
+          name: generateAppName(pkg),
+          icon: generateAppName(pkg).charAt(0), // First letter for Avatar
+        }));
+    }
+
+    const sysRes = await exec('pm list packages -s | cut -f 2 -d ":"');
+    if (sysRes.stdout) {
+      systemAppsList = sysRes.stdout
+        .split("\n")
+        .filter(Boolean)
+        .map((pkg) => ({
+          pkg,
+          name: generateAppName(pkg),
+          icon: generateAppName(pkg).charAt(0),
+        }));
+    }
+  }
+
+  function toggleApp(pkg) {
+    if (selectedApps.includes(pkg)) {
+      selectedApps = selectedApps.filter((p) => p !== pkg);
+    } else {
+      selectedApps = [...selectedApps, pkg];
+    }
+  }
+
+  function clearAllApps() {
+    selectedApps = [];
   }
 
   async function toggleSetting(key, checked) {
@@ -974,44 +1100,356 @@
     </div>
 
     <!-- On Pause -->
-    <div class="setting-row">
-      <div class="label-text">On Pause</div>
-      <label class="m3-switch">
-        <input
-          type="checkbox"
-          bind:checked={rbsp}
-          onchange={(e) => toggleSetting("rbsp", e.target.checked)}
-        />
-        <span class="slider"></span>
-      </label>
+    <div class="setting-wrapper">
+      <div class="setting-row">
+        <div class="label-group">
+          <div class="label-text">On Pause</div>
+          <button
+            type="button"
+            class="info-btn"
+            onclick={() => toggleDescription("rbsp")}
+            aria-label="Toggle info for On Pause"
+          >
+            <span class="mi-icon">info</span>
+          </button>
+        </div>
+        <label class="m3-switch">
+          <input
+            type="checkbox"
+            bind:checked={rbsp}
+            onchange={(e) => toggleSetting("rbsp", e.target.checked)}
+          />
+          <span class="slider"></span>
+        </label>
+      </div>
+      {#if activeDescriptions.rbsp}
+        <div
+          class="toggle-description"
+          transition:slide={{ duration: 250, easing: cubicOut }}
+        >
+          Resets battery statistics whenever charging reaches the pause
+          threshold.
+        </div>
+      {/if}
     </div>
 
     <!-- On Unplug -->
-    <div class="setting-row">
-      <div class="label-text">On Unplug</div>
-      <label class="m3-switch">
-        <input
-          type="checkbox"
-          bind:checked={rbsu}
-          onchange={(e) => toggleSetting("rbsu", e.target.checked)}
-        />
-        <span class="slider"></span>
-      </label>
+    <div class="setting-wrapper">
+      <div class="setting-row">
+        <div class="label-group">
+          <div class="label-text">On Unplug</div>
+          <button
+            type="button"
+            class="info-btn"
+            onclick={() => toggleDescription("rbsu")}
+            aria-label="Toggle info for On Unplug"
+          >
+            <span class="mi-icon">info</span>
+          </button>
+        </div>
+        <label class="m3-switch">
+          <input
+            type="checkbox"
+            bind:checked={rbsu}
+            onchange={(e) => toggleSetting("rbsu", e.target.checked)}
+          />
+          <span class="slider"></span>
+        </label>
+      </div>
+      {#if activeDescriptions.rbsu}
+        <div
+          class="toggle-description"
+          transition:slide={{ duration: 250, easing: cubicOut }}
+        >
+          Resets battery statistics whenever the charger is unplugged.
+        </div>
+      {/if}
     </div>
 
     <!-- On Plug -->
-    <div class="setting-row">
-      <div class="label-text">On Plug</div>
-      <label class="m3-switch">
-        <input
-          type="checkbox"
-          bind:checked={rbspl}
-          onchange={(e) => toggleSetting("rbspl", e.target.checked)}
-        />
-        <span class="slider"></span>
-      </label>
+    <div class="setting-wrapper">
+      <div class="setting-row">
+        <div class="label-group">
+          <div class="label-text">On Plug</div>
+          <button
+            type="button"
+            class="info-btn"
+            onclick={() => toggleDescription("rbspl")}
+            aria-label="Toggle info for On Plug"
+          >
+            <span class="mi-icon">info</span>
+          </button>
+        </div>
+        <label class="m3-switch">
+          <input
+            type="checkbox"
+            bind:checked={rbspl}
+            onchange={(e) => toggleSetting("rbspl", e.target.checked)}
+          />
+          <span class="slider"></span>
+        </label>
+      </div>
+      {#if activeDescriptions.rbspl}
+        <div
+          class="toggle-description"
+          transition:slide={{ duration: 250, easing: cubicOut }}
+        >
+          Resets battery statistics whenever the charger is plugged in.
+        </div>
+      {/if}
     </div>
   </section>
+
+  <!-- Idle Mode -->
+  <section class="m3-card">
+    <div class="header-group">
+      <span class="mi-icon">energy_savings_leaf</span>
+      <div class="section-title">Idle Mode</div>
+    </div>
+
+    <!-- Allow Idle Above Pause -->
+    <div class="setting-wrapper">
+      <div class="setting-row">
+        <div class="label-group">
+          <div class="label-text">Allow Idle Above Pause</div>
+          <button
+            type="button"
+            class="info-btn"
+            onclick={() => toggleDescription("aiapc")}
+            aria-label="Toggle info for Allow Idle Above Pause"
+          >
+            <span class="mi-icon">info</span>
+          </button>
+        </div>
+        <label class="m3-switch">
+          <input
+            type="checkbox"
+            bind:checked={aiapc}
+            onchange={(e) => toggleSetting("aiapc", e.target.checked)}
+          />
+          <span class="slider"></span>
+        </label>
+      </div>
+      {#if activeDescriptions.aiapc}
+        <div
+          class="toggle-description"
+          transition:slide={{ duration: 250, easing: cubicOut }}
+        >
+          When disabled, ACC avoids idle mode if battery capacity is above the
+          pause threshold to prevent keeping the battery highly charged for
+          extended periods.
+        </div>
+      {/if}
+    </div>
+
+    <!-- Prioritize Idle Mode -->
+    <div class="setting-wrapper">
+      <div class="setting-row">
+        <div class="label-group">
+          <div class="label-text">Prioritize Idle Mode</div>
+          <button
+            type="button"
+            class="info-btn"
+            onclick={() => toggleDescription("pbim")}
+            aria-label="Toggle info for Prioritize Idle Mode"
+          >
+            <span class="mi-icon">info</span>
+          </button>
+        </div>
+        <label class="m3-switch">
+          <input
+            type="checkbox"
+            bind:checked={pbim}
+            onchange={(e) => toggleSetting("pbim", e.target.checked)}
+          />
+          <span class="slider"></span>
+        </label>
+      </div>
+      {#if activeDescriptions.pbim}
+        <div
+          class="toggle-description"
+          transition:slide={{ duration: 250, easing: cubicOut }}
+        >
+          Gives precedence to charging switches that support battery idle mode
+          (powering the device directly off the charger without charging the
+          battery).
+        </div>
+      {/if}
+    </div>
+
+    <!-- Off Mid -->
+    <div class="setting-wrapper">
+      <div class="setting-row">
+        <div class="label-group">
+          <div class="label-text">Off Mid</div>
+          <button
+            type="button"
+            class="info-btn"
+            onclick={() => toggleDescription("om")}
+            aria-label="Toggle info for Off Mid"
+          >
+            <span class="mi-icon">info</span>
+          </button>
+        </div>
+        <label class="m3-switch">
+          <input
+            type="checkbox"
+            bind:checked={om}
+            onchange={(e) => toggleSetting("om", e.target.checked)}
+          />
+          <span class="slider"></span>
+        </label>
+      </div>
+      {#if activeDescriptions.om}
+        <div
+          class="toggle-description"
+          transition:slide={{ duration: 250, easing: cubicOut }}
+        >
+          Turns charging off automatically when ACC starts and the battery
+          capacity is between the resume and pause thresholds.
+        </div>
+      {/if}
+    </div>
+
+    <!-- Idle Apps -->
+    <div class="setting-wrapper">
+      <div
+        class="setting-row interactive"
+        onclick={openIdleAppsModal}
+        onkeydown={(e) => {
+          if (e.key === "Enter" || e.key === " ") openIdleAppsModal();
+        }}
+        tabindex="0"
+        role="button"
+      >
+        <div class="label-group">
+          <div class="label-text">Idle Apps</div>
+          <button
+            type="button"
+            class="info-btn"
+            onclick={(e) => {
+              e.stopPropagation();
+              toggleDescription("ia");
+            }}
+            aria-label="Toggle info for Idle Apps"
+          >
+            <span class="mi-icon">info</span>
+          </button>
+        </div>
+        <div class="idle-apps-value">
+          <span class="idle-apps-count">{idleApps.length} apps</span>
+          <span class="mi-icon">chevron_right</span>
+        </div>
+      </div>
+      {#if activeDescriptions.ia}
+        <div
+          class="toggle-description"
+          transition:slide={{ duration: 250, easing: cubicOut }}
+        >
+          Matches Android app package names. When a matched app is running in
+          the foreground, ACC automatically enables idle mode. Idle mode is not
+          triggered in split‑screen unless both visible apps match the list, and
+          it does not trigger when the app is running in the background.
+        </div>
+      {/if}
+    </div>
+  </section>
+
+  <!-- Idle Apps Modal -->
+  {#if showAppModal}
+    <div
+      class="modal-backdrop"
+      transition:fly={{ y: 40, duration: 280, easing: cubicOut }}
+    >
+      <div class="m3-modal">
+        <!-- Header -->
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="mi-icon">apps</span>
+            <h3 class="modal-title">Select Idle Apps</h3>
+          </div>
+          <button
+            class="modal-close-btn"
+            onclick={() => (showAppModal = false)}
+            aria-label="Close"
+          >
+            <span class="mi-icon">close</span>
+          </button>
+        </div>
+
+        <!-- Top Controls -->
+        <div class="modal-top-bar">
+          <button class="m3-btn-text" onclick={clearAllApps}>
+            Clear All
+          </button>
+
+          <label class="sys-toggle">
+            <span class="sys-toggle-label">System Apps</span>
+            <label class="m3-switch">
+              <input type="checkbox" bind:checked={showSystemApps} />
+              <span class="slider"></span>
+            </label>
+          </label>
+        </div>
+
+        <!-- Scrollable App List -->
+        <div class="app-list">
+          {#each displayedApps as app (app.pkg)}
+            <label
+              class="app-item"
+              class:selected={selectedApps.includes(app.pkg)}
+            >
+              <div class="app-avatar">
+                {app.icon}
+              </div>
+
+              <div class="app-info">
+                <span class="app-name">{app.name}</span>
+                <span class="app-pkg">{app.pkg}</span>
+              </div>
+
+              <div class="app-checkbox">
+                <input
+                  type="checkbox"
+                  checked={selectedApps.includes(app.pkg)}
+                  onchange={() => toggleApp(app.pkg)}
+                />
+                <span class="checkmark">
+                  <span class="mi-icon">check</span>
+                </span>
+              </div>
+            </label>
+          {/each}
+
+          {#if displayedApps.length === 0}
+            <div class="empty-state">
+              <span class="mi-icon">inbox</span>
+              <p>No apps found</p>
+            </div>
+          {/if}
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer">
+          <button
+            class="m3-btn btn-secondary modal-action-btn"
+            onclick={() => (showAppModal = false)}
+          >
+            Cancel
+          </button>
+          <button
+            class="m3-btn btn-primary modal-action-btn"
+            onclick={saveIdleApps}
+          >
+            Confirm
+            {#if selectedApps.length > 0}
+              <span class="selection-count">{selectedApps.length}</span>
+            {/if}
+          </button>
+        </div>
+      </div>
+    </div>
+  {/if}
 
   <!-- Config File -->
   <section class="m3-card">
@@ -1081,7 +1519,7 @@
       style="cursor: pointer; -webkit-user-select: none; user-select: none;"
     >
       <div style="display: flex; align-items: center; gap: 8px;">
-        <span class="mi-icon">notes</span>
+        <span class="mi-icon">terminal</span>
         <div class="section-title">Logs</div>
       </div>
       <div
@@ -2004,7 +2442,399 @@
   }
 
   /* =========================================
-     9. Keyframes
+     9. Idle Apps Modal
+     ========================================= */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background: color-mix(in srgb, var(--md-sys-color-bg) 55%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 12px;
+    padding-bottom: calc(var(--window-inset-bottom, 0px) + 12px);
+  }
+
+  .m3-modal {
+    width: 100%;
+    max-width: 520px;
+    max-height: min(82vh, 720px);
+    display: flex;
+    flex-direction: column;
+    background: color-mix(
+      in srgb,
+      var(--md-sys-color-surface-container) 88%,
+      transparent
+    );
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid
+      color-mix(in srgb, var(--md-sys-color-outline) 45%, transparent);
+    border-radius: 28px;
+    box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px 12px;
+  }
+
+  .modal-title-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .modal-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--md-sys-color-secondary);
+    letter-spacing: -0.3px;
+  }
+
+  .modal-close-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: color-mix(
+      in srgb,
+      var(--md-sys-color-surface-variant) 50%,
+      transparent
+    );
+    color: var(--md-sys-color-on-surface-variant);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .modal-close-btn:active {
+    background: color-mix(
+      in srgb,
+      var(--md-sys-color-surface-variant) 80%,
+      transparent
+    );
+  }
+
+  .modal-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 20px 12px;
+  }
+
+  .sys-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sys-toggle-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .m3-btn-text {
+    background: transparent;
+    border: none;
+    color: var(--md-sys-color-primary);
+    font-weight: 600;
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .m3-btn-text:active {
+    background: color-mix(
+      in srgb,
+      var(--md-sys-color-primary) 12%,
+      transparent
+    );
+  }
+
+  .app-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 12px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .app-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 10px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    margin-bottom: 2px;
+  }
+
+  .app-item:hover {
+    background: color-mix(
+      in srgb,
+      var(--md-sys-color-surface-variant) 40%,
+      transparent
+    );
+  }
+
+  .app-item.selected {
+    background: color-mix(
+      in srgb,
+      var(--md-sys-color-primary) 12%,
+      transparent
+    );
+  }
+
+  .app-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: color-mix(
+      in srgb,
+      var(--md-sys-color-primary) 18%,
+      transparent
+    );
+    color: var(--md-sys-color-primary);
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+    border: 1px solid
+      color-mix(in srgb, var(--md-sys-color-primary) 25%, transparent);
+  }
+
+  .app-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .app-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-background);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .app-pkg {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0.75;
+  }
+
+  /* Custom Checkbox */
+  .app-checkbox {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .app-checkbox input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .checkmark {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    border: 2px solid var(--md-sys-color-outline);
+    background: transparent;
+    display: grid;
+    place-items: center;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .checkmark .mi-icon {
+    font-size: 16px;
+    color: var(--md-sys-color-on-primary);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .app-checkbox input:checked + .checkmark {
+    background: var(--md-sys-color-primary);
+    border-color: var(--md-sys-color-primary);
+  }
+
+  .app-checkbox input:checked + .checkmark .mi-icon {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 20px;
+    color: var(--md-sys-color-on-surface-variant);
+    gap: 8px;
+  }
+
+  .empty-state .mi-icon {
+    font-size: 36px;
+    opacity: 0.5;
+  }
+
+  .modal-footer {
+    display: flex;
+    gap: 10px;
+    padding: 16px 20px 20px;
+    border-top: 1px solid
+      color-mix(in srgb, var(--md-sys-color-outline) 30%, transparent);
+  }
+
+  .modal-action-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 48px;
+    padding: 0 16px;
+    font-weight: 600;
+    border-radius: 100px;
+  }
+
+  .selection-count {
+    background: color-mix(
+      in srgb,
+      var(--md-sys-color-on-primary) 22%,
+      transparent
+    );
+    color: var(--md-sys-color-on-primary);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 100px;
+    line-height: 1.3;
+  }
+
+  .btn-secondary {
+    background: color-mix(
+      in srgb,
+      var(--md-sys-color-surface-variant) 45%,
+      transparent
+    );
+    color: var(--md-sys-color-on-surface);
+    border: 1px solid
+      color-mix(in srgb, var(--md-sys-color-outline) 35%, transparent);
+  }
+
+  .btn-secondary:active:not(:disabled) {
+    transform: scale(0.96);
+    background: color-mix(
+      in srgb,
+      var(--md-sys-color-surface-variant) 70%,
+      transparent
+    );
+  }
+
+  .setting-row.interactive {
+    cursor: pointer;
+  }
+
+  .setting-row.interactive:active {
+    opacity: 0.85;
+  }
+
+  .idle-apps-value {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .idle-apps-count {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  /* =========================================
+     10. Info Button & Descriptions
+     ========================================= */
+
+  .setting-wrapper {
+    border-bottom: 1px solid var(--md-sys-color-outline);
+  }
+  .setting-wrapper:last-child {
+    border-bottom: none;
+  }
+  .setting-wrapper .setting-row {
+    border-bottom: none;
+  }
+
+  .label-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .info-btn {
+    background: transparent;
+    border: none;
+    padding: 2px;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 50%;
+    color: var(--md-sys-color-on-surface-variant);
+    transition:
+      color 0.2s ease,
+      transform 0.15s ease;
+  }
+
+  .info-btn:hover,
+  .info-btn:focus-visible {
+    color: var(--md-sys-color-primary);
+  }
+
+  .info-btn:active {
+    transform: scale(0.9);
+  }
+
+  .info-btn .mi-icon {
+    font-size: 18px;
+    opacity: 0.8;
+  }
+
+  .toggle-description {
+    padding: 0 0 12px 0;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--md-sys-color-on-surface-variant);
+    opacity: 0.85;
+  }
+
+  /* =========================================
+     11. Keyframes
      ========================================= */
   @keyframes m3-spin {
     0% {
