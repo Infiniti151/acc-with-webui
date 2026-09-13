@@ -250,6 +250,7 @@ For building just the WebUI without the entire zip,
     - Linux / macOS:
       ```bash
       chmod +x build.sh
+
       ./build.sh -W
       # or
       ./build.sh --webui
@@ -261,7 +262,7 @@ For building just the WebUI without the entire zip,
       # or
       build.bat --webui
       ```
-      (*Or via Git Bash/WSL directly*: bash build.sh -W)
+      (*Or via Git Bash/WSL directly*: `bash build.sh -W`)
 3. `index.html` will be built at `install/webroot/`
 
 ---
