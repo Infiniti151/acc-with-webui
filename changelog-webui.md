@@ -1,4 +1,4 @@
-### v1.3.0 (10200) - 2026-09-13
+### v1.3.0 (10300) - 2026-09-13
 
 WebUI 🎛️ ->
 - Added search functionality inside Idle Apps modal.

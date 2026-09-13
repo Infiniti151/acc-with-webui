@@ -256,9 +256,29 @@ In interactive mode, it also asks the user whether they want to download and ins
 
 <ol>
 <li>Install Node.js 18.0.0+ (though Node.js 20+ LTS is strongly recommended).</li>
-<li><code>cd webui</code></li>
-<li><code>npm install &amp;&amp; npm run build</code></li>
-<li>index.html will be built at <code>../install/webroot/</code></li>
+<li><p>Run the build script with the WebUI flag from the repository root:</p>
+
+<ul>
+<li><p>Linux / macOS:
+```bash
+chmod +x build.sh
+./build.sh -W</p>
+
+<h1>or</h1>
+
+<p>./build.sh --webui
+```</p></li>
+<li><p>Windows (Command Prompt / PowerShell):
+```DOS
+build.bat -W</p>
+
+<h1>or</h1>
+
+<p>build.bat --webui
+```
+(<em>Or via Git Bash/WSL directly</em>: bash build.sh -W)</p></li>
+</ul></li>
+<li>index.html will be built at <code>install/webroot/</code></li>
 </ol>
 
 <hr />
@@ -1460,7 +1480,7 @@ Refer back to <a href="#terminal-commands">terminal commands</a> for details.</p
 - Config file editor
 - Logs viewer</p>
 
-<p align="center">
+<div align="center">
   <table>
     <tr>
       <td align="center" width="33%">
@@ -1491,17 +1511,17 @@ Refer back to <a href="#terminal-commands">terminal commands</a> for details.</p
       </td>
     </tr>
   </table>
-</p>
+</div>
 
-<p align="center">
-  <table>
+<div align="center">
+  <table width="680">
     <tr>
-      <td align="center" width="50%">
+      <td align="center">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png" height="300">
         </a>
       </td>
-      <td align="center" width="50%">
+      <td align="center">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png" height="300">
         </a>
@@ -1516,7 +1536,7 @@ Refer back to <a href="#terminal-commands">terminal commands</a> for details.</p
       </td>
     </tr>
   </table>
-</p>
+</div>
 
 <h3>Action Button</h3>
 
