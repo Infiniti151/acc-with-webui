@@ -240,7 +240,7 @@ In interactive mode, it also asks the user whether they want to download and ins
 
 - You may also want to read [Terminal Commands](#terminal-commands) > `Exit Codes` below.
 
-### Build WebUI (index.html)
+### Build WebUI (`index.html`)
 
 For building just the WebUI without the entire zip,
 
@@ -262,7 +262,7 @@ For building just the WebUI without the entire zip,
       build.bat --webui
       ```
       (*Or via Git Bash/WSL directly*: bash build.sh -W)
-3. index.html will be built at `install/webroot/`
+3. `index.html` will be built at `install/webroot/`
 
 ---
 ## DEFAULT CONFIGURATION
@@ -1224,22 +1224,22 @@ Features:
 <div align="center">
   <table width="680">
     <tr>
-      <td align="center">
+      <td align="center" width="50%">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png" height="300">
         </a>
       </td>
-      <td align="center">
+      <td align="center" width="50%">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png" height="300">
         </a>
       </td>
     </tr>
     <tr>
-      <td align="center">
+      <td align="center" width="50%">
         <em>Config File Editor</em>
       </td>
-      <td align="center">
+      <td align="center" width="50%">
         <em>Logs Viewer</em>
       </td>
     </tr>
