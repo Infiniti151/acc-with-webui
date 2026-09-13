@@ -68,17 +68,43 @@
   let idleApps = $state([]);
   let showAppModal = $state(false);
   let showSystemApps = $state(false);
+  let searchQuery = $state("");
   let userAppsList = $state([]);
   let systemAppsList = $state([]);
   let selectedApps = $state([]);
 
-  // Combine and sort reactively based on the System Apps toggle
+  // Combine, filter by search query, and sort reactively based on the System Apps toggle
   const displayedApps = $derived(
-    showSystemApps
-      ? [...userAppsList, ...systemAppsList].sort((a, b) =>
-          a.name.localeCompare(b.name),
-        )
-      : [...userAppsList].sort((a, b) => a.name.localeCompare(b.name)),
+    (showSystemApps
+      ? [...userAppsList, ...systemAppsList]
+      : [
+          ...userAppsList,
+          ...systemAppsList.filter(
+            (app) =>
+              idleApps.includes(app.pkg) || selectedApps.includes(app.pkg),
+          ),
+        ]
+    )
+      .filter((app) => {
+        const query = searchQuery.trim().toLowerCase();
+        if (!query) return true;
+        return (
+          app.name.toLowerCase().includes(query) ||
+          app.pkg.toLowerCase().includes(query)
+        );
+      })
+      .sort((a, b) => {
+        // Compare against the saved state (idleApps)
+        const aSelected = idleApps.includes(a.pkg);
+        const bSelected = idleApps.includes(b.pkg);
+
+        // Push already-saved apps above unselected apps
+        if (aSelected && !bSelected) return -1;
+        if (!aSelected && bSelected) return 1;
+
+        // Fallback to alphabetical sorting by name
+        return a.name.localeCompare(b.name);
+      }),
   );
 
   // Config Editor
@@ -488,7 +514,9 @@
   // --- Modal Controls ---
   async function openIdleAppsModal() {
     selectedApps = [...idleApps]; // Clone current config
+    searchQuery = "";
     showAppModal = true;
+    showSystemApps = false;
 
     // Only load the massive package lists once to save CPU
     if (userAppsList.length === 0) {
@@ -533,6 +561,33 @@
   function clearAllApps() {
     selectedApps = [];
   }
+
+  function checkOverflow(node) {
+    const determineOverflow = () => {
+      if (node.scrollWidth > node.clientWidth) {
+        node.classList.add("is-overflowing");
+      } else {
+        node.classList.remove("is-overflowing");
+      }
+    };
+
+    const observer = new ResizeObserver(determineOverflow);
+    observer.observe(node);
+
+    return {
+      destroy() {
+        observer.disconnect();
+      },
+    };
+  }
+
+  $effect(() => {
+    if (showAppModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+  });
 
   async function toggleSetting(key, checked) {
     const val = checked ? "true" : "false";
@@ -1383,6 +1438,27 @@
             Clear All
           </button>
 
+          <!-- Search Input -->
+          <div class="search-input-wrapper">
+            <span class="mi-icon search-icon">search</span>
+            <input
+              type="text"
+              class="search-input"
+              placeholder="Search apps..."
+              bind:value={searchQuery}
+            />
+            {#if searchQuery}
+              <button
+                type="button"
+                class="clear-search-btn"
+                onclick={() => (searchQuery = "")}
+                aria-label="Clear search"
+              >
+                <span class="mi-icon">close</span>
+              </button>
+            {/if}
+          </div>
+
           <label class="sys-toggle">
             <span class="sys-toggle-label">System Apps</span>
             <label class="m3-switch">
@@ -1405,7 +1481,10 @@
 
               <div class="app-info">
                 <span class="app-name">{app.name}</span>
-                <span class="app-pkg">{app.pkg}</span>
+
+                <div class="app-pkg-ticker" use:checkOverflow>
+                  <span class="app-pkg">{app.pkg}</span>
+                </div>
               </div>
 
               <div class="app-checkbox">
@@ -2461,7 +2540,8 @@
   .m3-modal {
     width: 100%;
     max-width: 520px;
-    max-height: min(82vh, 720px);
+    height: 80svh;
+    max-height: 800px;
     display: flex;
     flex-direction: column;
     background: color-mix(
@@ -2476,6 +2556,9 @@
     border-radius: 28px;
     box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.45);
     overflow: hidden;
+    -webkit-user-select: none; /* Safari & Android WebView */
+    user-select: none; /* Standard */
+    -webkit-touch-callout: none; /* Disables long-press context menu popup */
   }
 
   .modal-header {
@@ -2528,7 +2611,89 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 4px 20px 12px;
+    padding: 4px 16px 12px;
+    gap: 8px;
+  }
+
+  /* Search Input Styles */
+  .search-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: color-mix(
+      in srgb,
+      var(--md-sys-color-surface-variant) 60%,
+      transparent
+    );
+    border: 1px solid var(--md-sys-color-outline);
+    border-radius: 100px;
+    padding: 4px 10px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .search-input-wrapper .search-icon {
+    font-size: 18px;
+    color: var(--md-sys-color-on-surface-variant);
+    flex-shrink: 0;
+  }
+
+  .search-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--md-sys-color-on-background);
+    font-size: 13px;
+    width: 100%;
+    padding: 2px 0;
+  }
+
+  .search-input::placeholder {
+    color: var(--md-sys-color-on-surface-variant);
+    opacity: 0.7;
+  }
+
+  .clear-search-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--md-sys-color-on-surface-variant);
+    flex-shrink: 0;
+  }
+
+  .clear-search-btn .mi-icon {
+    font-size: 16px;
+  }
+
+  .app-pkg-ticker {
+    width: 100%;
+    overflow: hidden;
+    container-type: inline-size;
+    /* Static text properties for when the package name fits */
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  /* Only apply the fade mask if the text is overflowing */
+  .app-pkg-ticker:global(.is-overflowing) {
+    mask-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      #000 10%,
+      #000 90%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      #000 10%,
+      #000 90%,
+      transparent 100%
+    );
   }
 
   .sys-toggle {
@@ -2566,8 +2731,10 @@
   .app-list {
     flex: 1;
     overflow-y: auto;
-    padding: 4px 12px;
-    -webkit-overflow-scrolling: touch;
+    min-height: 0;
+    padding: 0 8px;
+    margin-top: 0;
+    margin-bottom: 0;
   }
 
   .app-item {
@@ -2622,6 +2789,7 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
+    overflow: hidden;
   }
 
   .app-name {
@@ -2634,12 +2802,17 @@
   }
 
   .app-pkg {
+    display: inline-block;
     font-size: 12px;
     color: var(--md-sys-color-on-surface-variant);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
     opacity: 0.75;
+    white-space: nowrap;
+  }
+
+  /* Only apply the animation if the text is overflowing */
+  .app-pkg-ticker:global(.is-overflowing) .app-pkg {
+    animation: ticker-rtl 12s linear infinite;
+    will-change: transform;
   }
 
   /* Custom Checkbox */
@@ -2919,6 +3092,15 @@
     }
     50% {
       opacity: 0.5;
+    }
+  }
+
+  @keyframes ticker-rtl {
+    0% {
+      transform: translateX(100cqi);
+    }
+    100% {
+      transform: translateX(-100%);
     }
   }
 </style>

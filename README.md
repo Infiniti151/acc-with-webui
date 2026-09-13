@@ -245,9 +245,24 @@ In interactive mode, it also asks the user whether they want to download and ins
 For building just the WebUI without the entire zip,
 
 1. Install Node.js 18.0.0+ (though Node.js 20+ LTS is strongly recommended).
-2. `cd webui`
-3. `npm install && npm run build`
-3. index.html will be built at `../install/webroot/`
+2. Run the build script with the WebUI flag from the repository root:
+
+    - Linux / macOS:
+      ```bash
+      chmod +x build.sh
+      ./build.sh -W
+      # or
+      ./build.sh --webui
+      ```
+
+    - Windows (Command Prompt / PowerShell):
+      ```DOS
+      build.bat -W
+      # or
+      build.bat --webui
+      ```
+      (*Or via Git Bash/WSL directly*: bash build.sh -W)
+3. index.html will be built at `install/webroot/`
 
 ---
 ## DEFAULT CONFIGURATION

@@ -1,2 +1,3 @@
-bash build.sh
+@echo off
+bash build.sh %*
 PAUSE

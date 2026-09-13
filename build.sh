@@ -8,6 +8,7 @@
 #   e.g.,
 #     build.sh (builds $id and generates installable archives)
 #     build.sh any_random_arg (only builds $id)
+#     build.sh -W|--webui (only builds the WebUI)
 
 # Bash built-in escape handling for colors
 CYAN=$'\033[0;36m'
@@ -19,6 +20,14 @@ cd "${0%/*}" 2>/dev/null || exit 1
 
 # shellcheck disable=SC1091
 source ./check-syntax.sh || exit $?
+
+add_header() {
+  local color="${2:-$CYAN}"
+  echo "${color}--------------------------------------------------${NC}"
+  echo "${color}$1${NC}"
+  echo "${color}--------------------------------------------------${NC}"
+  echo
+}
 
 set_prop() {
   sed -i -e "s/^($1=.*/($1=$2/" -e "s/^$1=.*/$1=$2/" \
@@ -65,6 +74,24 @@ EOF
     echo "$version_code"
 }
 
+build_webui() {
+  add_header "Building WebUI..."
+
+  # update package.json version and build WebUI
+  sed -i -E "s/(\"version\": *\")[^\"]*(\")/\1${version#v}\2/" webui/package.json
+  (npm install --prefix=webui && npm run build --prefix=webui) || exit $?
+}
+
+BUILD_WEBUI_ONLY=false
+SKIP_ARCHIVES=false
+
+for arg in "$@"; do
+  case $arg in
+    -W|--webui) BUILD_WEBUI_ONLY=true ;;
+    *) SKIP_ARCHIVES=true ;;
+  esac
+done
+
 id=$(get_prop id)
 domain=$(get_prop domain)
 version=$(sed -n '1s/### \(v[0-9.]*\).*/\1/p' changelog-webui.md)
@@ -72,10 +99,13 @@ versionCode=$(getVersionCode "$version")
 basename="${id}-with-webui_${version}_${versionCode}"
 tmpDir=".tmp/META-INF/com/google/android"
 
-echo "${CYAN}--------------------------------------------------"
-echo "Updating module.json..."
-echo "--------------------------------------------------${NC}"
-echo
+if [[ "$BUILD_WEBUI_ONLY" == true ]]; then
+  build_webui
+  add_header "Done" "$GREEN"
+  exit 0
+fi
+
+add_header "Updating module.json..."
 
 # update module info
 if [[ "$(get_prop version)" != "$version" ]]; then
@@ -96,10 +126,7 @@ if [[ "$(get_prop version)" != "$version" ]]; then
 EOF
 fi
 
-echo "${CYAN}--------------------------------------------------"
-echo "Updating latest-release-notes.md..."
-echo "--------------------------------------------------${NC}"
-echo
+add_header "Updating latest-release-notes.md..."
 
 sed -i -E "1s/(### v[0-9.]+)( \([0-9A-Za-z_]+\))?/\1 (${versionCode})/" changelog-webui.md
 
@@ -109,18 +136,9 @@ awk '
   { print }
 ' changelog-webui.md > latest-release-notes.md
 
-echo "${CYAN}--------------------------------------------------"
-echo "Building WebUI..."
-echo "--------------------------------------------------${NC}"
+build_webui
 
-# update package.json version and build WebUI
-sed -i -E "s/(\"version\": *\")[^\"]*(\")/\1${version#v}\2/" webui/package.json
-(npm install --prefix=webui && npm run build --prefix=webui) || exit $?
-
-echo "${CYAN}--------------------------------------------------"
-echo "Updating ID and domain in install scripts..."
-echo "--------------------------------------------------${NC}"
-echo
+add_header "Updating ID and domain in install scripts..."
 
 for file in ./install*.sh ./install/*.sh ./bundle.sh; do
   if [[ -f "$file" ]] && grep -Eq '(^|\()id=' "$file"; then
@@ -135,10 +153,7 @@ for file in ./install*.sh ./install/*.sh ./bundle.sh; do
   fi
 done
 
-echo "${CYAN}--------------------------------------------------"
-echo "Updating README.md and Generating README.html..."
-echo "--------------------------------------------------${NC}"
-echo
+add_header "Updating README.md and Generating README.html..."
 
 # Update Svelte version badge
 SVELTE_VERSION=$(grep '"svelte"' webui/package.json | sed -E 's/[^0-9]*([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
@@ -163,10 +178,7 @@ then
   markdown README.md > README.html 2>/dev/null || :
 fi
 
-echo "${CYAN}--------------------------------------------------"
-echo "Updating busybox config in install scripts..."
-echo "--------------------------------------------------${NC}"
-echo
+add_header "Updating busybox config in install scripts..."
 
 # update busybox config (from install/setup-busybox.sh) in install/uninstall.sh and install scripts
 set -e
@@ -180,10 +192,7 @@ for file in ./install/uninstall.sh ./install*.sh; do
 done
 set +e
 
-echo "${CYAN}--------------------------------------------------"
-echo "Building uninstaller zip..."
-echo "--------------------------------------------------${NC}"
-echo
+add_header "Building uninstaller zip..."
 
 { cp -u install.sh customize.sh
   cp -u install.sh META-INF/com/google/android/update-binary; } 2>/dev/null
@@ -201,7 +210,7 @@ if [[ bin/${id}-with-webui_flashable_uninstaller.zip -ot install/uninstall.sh ]]
   echo
 fi
 
-if [[ -z "$1" ]]; then
+if [[ "$SKIP_ARCHIVES" == false ]]; then
 
   # cleanup
   rm -rf "_builds/${basename:?}/" 2>/dev/null
@@ -209,10 +218,7 @@ if [[ -z "$1" ]]; then
 
   cp "bin/${id}-with-webui_flashable_uninstaller.zip" install-online.sh install-tarball.sh "_builds/${basename}/"
 
-  echo "${CYAN}--------------------------------------------------"
-  echo "Building installable archives..."
-  echo "--------------------------------------------------${NC}"
-  echo
+  add_header "Building installable archives..."
 
   case $version in
     *-*) basename_="${basename}_$(date +%H%M)" ;;
@@ -238,10 +244,7 @@ if [[ -z "$1" ]]; then
   rm -rf "${basename:?}/"
   echo
 
-  echo "${GREEN}--------------------------------------------------"
-  echo "Done"
-  echo "--------------------------------------------------${NC}"
-  echo
+  add_header "Done" "$GREEN"
 fi
 
 exit 0
