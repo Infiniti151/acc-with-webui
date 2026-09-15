@@ -15,7 +15,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/gpl-3.0.html>.
 -->
 <script>
-  import { onMount, onDestroy } from "svelte";
+  import { onMount, onDestroy, tick } from "svelte";
   import { fly, slide } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
   import { version } from "../package.json";
@@ -117,9 +117,11 @@
 
   // Logs
   let isLogsOpen = $state(false);
+  let activeLogType = $state("");
   let logsContent = $state("Loading logs...");
   let isExportingLogs = $state(false);
   let logPollInterval = null;
+  let logContainer = $state();
 
   // Notification Banner Visibility
   let isBannerOpen = $state(false);
@@ -704,13 +706,21 @@
     }
   }
 
-  async function toggleLogs() {
-    isLogsOpen = !isLogsOpen;
-    if (isLogsOpen) {
-      logsContent = "Reading logs...";
-      startPollingLogs();
-    } else {
+  async function switchLogs(type) {
+    if (isLogsOpen && activeLogType === type) {
+      isLogsOpen = false;
       stopPollingLogs();
+    } else {
+      activeLogType = type;
+      if (!isLogsOpen) {
+        isLogsOpen = true;
+      }
+      logsContent = "Loading logs...";
+      startPollingLogs();
+      await tick();
+      if (logContainer) {
+        logContainer.scrollTop = 0;
+      }
     }
   }
 
@@ -718,8 +728,15 @@
     stopPollingLogs();
     async function poll() {
       if (!isLogsOpen) return;
-      const res = await exec("tail -n 50 /data/adb/vr25/acc-data/logs/*.log");
+
+      const path =
+        activeLogType === "volatile"
+          ? "/dev/.vr25/acc/*.log"
+          : "/data/adb/vr25/acc-data/logs/*.log";
+
+      const res = await exec(`tail -n 50 ${path} 2>/dev/null`);
       logsContent = res.stdout || "Empty.";
+
       if (isLogsOpen) {
         logPollInterval = setTimeout(poll, 2000);
       }
@@ -1591,23 +1608,31 @@
   <section class="m3-card">
     <div
       class="flex justify-between items-center"
-      onclick={toggleLogs}
-      role="button"
-      tabindex="0"
-      onkeydown={(e) => e.key === "Enter" && toggleLogs()}
-      style="cursor: pointer; -webkit-user-select: none; user-select: none;"
+      style="-webkit-user-select: none; user-select: none;"
     >
       <div style="display: flex; align-items: center; gap: 8px;">
         <span class="mi-icon">terminal</span>
         <div class="section-title">Logs</div>
       </div>
-      <div
-        id="arrow-logs"
-        style="transform: rotate({isLogsOpen
-          ? '180deg'
-          : '0deg'}); transition: transform 0.25s ease;"
-      >
-        ▼
+
+      <!-- Segmented Control Button -->
+      <div class="log-type-selector">
+        <button
+          class="log-tab-btn {isLogsOpen && activeLogType === 'volatile'
+            ? 'active'
+            : ''}"
+          onclick={() => switchLogs("volatile")}
+        >
+          Volatile
+        </button>
+        <button
+          class="log-tab-btn {isLogsOpen && activeLogType === 'persistent'
+            ? 'active'
+            : ''}"
+          onclick={() => switchLogs("persistent")}
+        >
+          Persistent
+        </button>
       </div>
     </div>
 
@@ -1625,7 +1650,7 @@
             });
         }}
       >
-        <div id="logs-content" class="log-box viewer-spacing">
+        <div class="log-box viewer-spacing" bind:this={logContainer}>
           {logsContent}
         </div>
 
@@ -2015,6 +2040,8 @@
     line-height: 1.45;
     overflow-y: auto;
     white-space: pre-wrap;
+    -webkit-user-select: text;
+    user-select: text;
   }
 
   .viewer-spacing {
@@ -3007,7 +3034,50 @@
   }
 
   /* =========================================
-     11. Keyframes
+     11. Logs Button Group
+     ========================================= */
+  .log-type-selector {
+    display: flex;
+    background: color-mix(
+      in srgb,
+      var(--md-sys-color-surface-variant) 50%,
+      transparent
+    );
+    border-radius: 100px;
+    border: 1px solid var(--md-sys-color-outline);
+    overflow: hidden;
+  }
+
+  .log-tab-btn {
+    background: transparent;
+    color: var(--md-sys-color-on-surface-variant);
+    border: none;
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .log-tab-btn.active {
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+  }
+
+  .log-tab-btn:active:not(.active) {
+    background: color-mix(
+      in srgb,
+      var(--md-sys-color-surface-variant) 80%,
+      transparent
+    );
+  }
+
+  .log-tab-btn:not(:last-child) {
+    border-right: 1px solid var(--md-sys-color-outline);
+  }
+
+  /* =========================================
+     12. Keyframes
      ========================================= */
   @keyframes m3-spin {
     0% {
