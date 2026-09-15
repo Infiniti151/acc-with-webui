@@ -1,4 +1,4 @@
-### v1.4.0 (10300) - 2026-09-15
+### v1.4.0 (10400) - 2026-09-15
 
 WebUI 🎛️ ->
 - Added volatile logs (`/dev/.vr25/acc/*.log`) to `Logs` section.
