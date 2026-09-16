@@ -128,7 +128,7 @@ fi
 
 add_header "Updating latest-release-notes.md..."
 
-sed -i -E "1s/(### v[0-9.]+)( \([0-9A-Za-z_]+\))?/\1 (${versionCode})/" changelog-webui.md
+sed -i -E "1s/^(### v[0-9.]+).*/\1 (${versionCode}) - $(date +%Y-%m-%d)/" changelog-webui.md
 
 awk '
   NR==1 && /^###/ { print; next }
