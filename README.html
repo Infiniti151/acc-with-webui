@@ -1,13 +1,13 @@
 <h1>Advanced Charging Controller (ACC) with WebUI</h1>
 
-<p><a href="https://github.com/Infiniti151/acc-with-webui/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/Infiniti151/acc-with-webui/build.yml?branch=dev&amp;style=for-the-badge&amp;logo=github-actions&amp;logoColor=white&amp;label=Build" alt="Build" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/releases"><img src="https://img.shields.io/github/v/release/Infiniti151/acc-with-webui?style=for-the-badge&amp;logo=github&amp;logoColor=white&amp;label=Release" alt="Latest Release" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/blob/dev/webui/package.json"><img src="https://img.shields.io/badge/Svelte-5.57.0-orange?style=for-the-badge&amp;logo=svelte&amp;logoColor=white" alt="Svelte" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/blob/dev/License.md"><img src="https://img.shields.io/github/license/Infiniti151/acc-with-webui?style=for-the-badge&amp;logo=spdx&amp;logoColor=white&amp;color=yellow&amp;label=License" alt="License" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/releases"><img src="https://img.shields.io/github/downloads/Infiniti151/acc-with-webui/total?style=for-the-badge&amp;color=purple&amp;label=Downloads&amp;logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xOSA5aC00VjNIN3Y2SDNMMTIgMTlsOS05ek01IDE4djJoMTR2LTJINXoiLz48L3N2Zz4=" alt="Downloads" title="" /></a></p>
+<p><a href="https://github.com/Infiniti151/acc-with-webui/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/Infiniti151/acc-with-webui/build.yml?branch=dev&amp;style=for-the-badge&amp;logo=github-actions&amp;logoColor=white&amp;label=Build" alt="Build" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/releases"><img src="https://img.shields.io/github/v/release/Infiniti151/acc-with-webui?style=for-the-badge&amp;logo=github&amp;logoColor=white&amp;label=Release" alt="Latest Release" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/blob/dev/webui/package.json"><img src="https://img.shields.io/badge/Svelte-5.57.2-orange?style=for-the-badge&amp;logo=svelte&amp;logoColor=white" alt="Svelte" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/blob/dev/License.md"><img src="https://img.shields.io/github/license/Infiniti151/acc-with-webui?style=for-the-badge&amp;logo=spdx&amp;logoColor=white&amp;color=yellow&amp;label=License" alt="License" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/releases"><img src="https://img.shields.io/github/downloads/Infiniti151/acc-with-webui/total?style=for-the-badge&amp;color=purple&amp;label=Downloads&amp;logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xOSA5aC00VjNIN3Y2SDNMMTIgMTlsOS05ek01IDE4djJoMTR2LTJINXoiLz48L3N2Zz4=" alt="Downloads" title="" /></a></p>
 
 <blockquote>
   <p>[!important]
-<a href="#webui">WebUI</a> is the only addition in this fork. No backend code has been changed. Why not just use the AccA app? Coz I don't want to install a separate app to control a module. Also, it has been abandoned since 2022. It was built before the advent of root manager WebUIs and WebUIs are the standard now for module GUIs. Only open issues regarding WebUI here. All issues regarding acc must be opened upstream. This is based on acc dev branch in order to get the latest acc updates.</p>
+<a href="#webui">WebUI</a> and <a href="#action-button">Action button</a> are the only additions in this fork. No backend code has been changed. Why not just use the AccA app? Coz I don't want to install a separate app to control a module. Also, it has been abandoned since 2022. It was built before the advent of root manager WebUIs and WebUIs are the standard now for module GUIs. Only open issues regarding WebUI here. All issues regarding ACC must be opened upstream. This is based on ACC dev branch in order to get the latest ACC updates.</p>
 
 <p>[!warning]
-WebUI is tested in KernelSU Next manager (v3.1.0), but should work fine in KernelSU manager. It is untested for Apatch and Magisk with WebUI X: Portable.</p>
+<strong>Compatibility:</strong> This WebUI was developed and tested on <a href="https://crdroid.net/">crDroid</a> v12.13 with <a href="https://github.com/KernelSU-Next/KernelSU-Next">KernelSU Next</a> v3.4.0. <a href="https://github.com/MMRLApp/WebUI-X-Portable">WebUI X: Portable</a> v608 was tested using the KernelSU Next platform. While it is expected to work with official KernelSU, APatch, and most KernelSU-based derivatives, compatibility with these platforms has not been formally verified. Compatibility with Magisk through <em>WebUI X: Portable</em> has also not been tested.</p>
 </blockquote>
 
 <hr />
@@ -233,7 +233,7 @@ The archive must be in the same directory as this script - and obtained from Git
 <li><p>One can also use a single command to download and install acc:</p></li>
 </ul>
 
-<p><code>curl -sSL https://raw.githubusercontent.com/Infiniti151/acc-with-webui/install-online.sh | /system/bin/sh -s dev</code></p>
+<p><code>curl -sSL https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/install-online.sh | /system/bin/sh -s dev</code></p>
 
 <p><code>wget -qO- https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/install-online.sh | /system/bin/sh -s dev</code></p>
 
@@ -250,36 +250,71 @@ In interactive mode, it also asks the user whether they want to download and ins
 <li><p>You may also want to read <a href="#terminal-commands">Terminal Commands</a> > <code>Exit Codes</code> below.</p></li>
 </ul>
 
-<h3>Build WebUI (<code>index.html</code>)</h3>
+<h3>Build &amp; Deploy WebUI (<code>index.html</code>)</h3>
 
-<p>For building just the WebUI without the entire zip,</p>
+<p>For building or live-deploying the WebUI without packaging the full module zip:</p>
+
+<h4>Prerequisites</h4>
+
+<ul>
+<li><strong>Node.js</strong>: <code>18.0.0+</code> (Node.js <code>20+</code> LTS strongly recommended).</li>
+<li><strong>ADB &amp; Root Access</strong> <em>(only required if using the <code>-d</code> / <code>--deploy</code> flag)</em>:
+<ul>
+<li>Enable <strong>USB Debugging</strong> in Android Developer Options.</li>
+<li><strong>Wired Connection (USB)</strong>: Connect via USB cable and allow the debugging prompt on your phone. Run <code>adb root</code> or ensure <code>su</code> access is granted in your root manager app to Android Shell (com.android.shell).</li>
+<li><strong>Wireless Connection (Wi-Fi)</strong>:</li>
+<li>Enable <strong>Wireless Debugging</strong> in Developer Options.</li>
+<li>Pair and connect your device (<code>adb pair &lt;ip&gt;:&lt;port&gt;</code> and <code>adb connect &lt;ip&gt;:&lt;port&gt;</code>).</li>
+<li><em>Note for Wireless ADB</em>: Ensure the phone is on the same local network as your PC.</li>
+<li>Files are pushed via staging (<code>/data/local/tmp/</code>) and moved into place using <code>su</code>.</li>
+</ul></li>
+</ul>
+
+<h4>Building &amp; Deploying</h4>
 
 <ol>
-<li>Install Node.js 18.0.0+ (though Node.js 20+ LTS is strongly recommended).</li>
 <li><p>Run the build script with the WebUI flag from the repository root:</p>
 
 <ul>
-<li><p>Linux / macOS:
+<li><p><strong>Linux / macOS</strong>:
 ```bash
 chmod +x build.sh</p>
 
-<p>./build.sh -W</p>
+<h1>Build WebUI bundle (output to install/webroot/index.html)</h1>
+
+<p>./build.sh -w</p>
 
 <h1>or</h1>
 
-<p>./build.sh --webui
+<p>./build.sh --webui</p>
+
+<h1>Build AND automatically push to connected device (Wired or Wireless ADB)</h1>
+
+<p>./build.sh -d</p>
+
+<h1>or</h1>
+
+<p>./build.sh --deploy
 ```</p></li>
-<li><p>Windows (Command Prompt / PowerShell):
-```DOS
-build.bat -W</p>
+<li><p><strong>Windows (Command Prompt / PowerShell)</strong>:
+```cmd</p>
 
-<h1>or</h1>
+<h1>Build WebUI bundle</h1>
 
-<p>build.bat --webui
+<p>build.bat -w</p>
+
+<h1>Build AND push to device</h1>
+
+<p>build.bat -d
 <code>``
-(*Or via Git Bash/WSL directly*:</code>bash build.sh -W`)</p></li>
+(*Or via Git Bash/WSL directly*:</code>bash build.sh -w/-d`)</p></li>
 </ul></li>
-<li><code>index.html</code> will be built at <code>install/webroot/</code></li>
+<li><p><strong>Output Locations</strong>:</p>
+
+<ul>
+<li>Local build artifact: <code>install/webroot/index.html</code></li>
+<li>Active device location (when using <code>-d</code>): <code>/data/adb/modules/acc/webroot/index.html</code></li>
+</ul></li>
 </ol>
 
 <hr />
@@ -1472,15 +1507,6 @@ Refer back to <a href="#terminal-commands">terminal commands</a> for details.</p
 
 <h3>WebUI</h3>
 
-<p>Features:
-- Battery stats monitor (health, temperature, current and voltage)
-- Daemon (accd) control panel
-- Charging threshold sliders
-- Reset battery stats toggles
-- Idle mode toggles
-- Config file editor
-- Logs viewer</p>
-
 <div align="center">
   <table>
     <tr>
@@ -1511,28 +1537,31 @@ Refer back to <a href="#terminal-commands">terminal commands</a> for details.</p
         <em>Idle Mode</em>
       </td>
     </tr>
-  </table>
-</div>
-
-<div align="center">
-  <table width="680">
     <tr>
-      <td align="center" width="50%">
+      <td align="center" width="33%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/9.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/9.png" height="300">
+        </a>
+      </td>
+      <td align="center" width="33%">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png" height="300">
         </a>
       </td>
-      <td align="center" width="50%">
+      <td align="center" width="33%">
         <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png">
           <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png" height="300">
         </a>
       </td>
     </tr>
     <tr>
-      <td align="center" width="50%">
+      <td align="center">
+        <em>Charging Switch</em>
+      </td>
+      <td align="center">
         <em>Config File Editor</em>
       </td>
-      <td align="center" width="50%">
+      <td align="center">
         <em>Logs Viewer</em>
       </td>
     </tr>

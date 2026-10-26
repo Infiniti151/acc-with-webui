@@ -1,8 +1,9 @@
 #!/system/bin/sh
+#
 # $id Installer/Upgrader
-# Copyright 2019-2024, VR25
-# Copyright 2026, Infiniti151
-# License: GPLv3+
+# SPDX-FileCopyrightText: 2019-2024 VR25
+# SPDX-FileCopyrightText: 2026 Infiniti151
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
 # devs: triple hashtags (###) mark non-generic code
 
@@ -171,8 +172,6 @@ mkdir -p $installDir/$id
 cp -R $srcDir/install/* $installDir/$id/
 installDir=$(readlink -f $installDir/$id)
 cp $srcDir/module.prop $installDir/
-cp $srcDir/action.sh $installDir/
-cp $srcDir/banner.jpg $installDir/
 cp -f $srcDir/README.* $data_dir/
 
 
@@ -296,7 +295,7 @@ printf "Done\n\n\n"
 printf "─────────────[ ACC ⚡ WebUI ]─────────────\n\n"
 
 printf "\n\nCHANGELOG\n\n"
-cat $srcDir/latest-release-notes.md
+cat $srcDir/install/latest-release-notes.md
 
 _echo() {
   echo "$@" | tee -a $tmpd/.install-notes
