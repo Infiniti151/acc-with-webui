@@ -207,11 +207,12 @@ set +e
 
 add_header "Building uninstaller zip..."
 
-{ cp -u install.sh customize.sh
-  cp -u install.sh META-INF/com/google/android/update-binary; } 2>/dev/null
+[[ ! -f customize.sh ]] || ! cmp -s install.sh customize.sh && cp install.sh customize.sh
+
+[[ ! -f META-INF/com/google/android/update-binary ]] || ! cmp -s install.sh META-INF/com/google/android/update-binary && cp install.sh META-INF/com/google/android/update-binary
 
 if [[ bin/${id}-with-webui_flashable_uninstaller.zip -ot install/uninstall.sh ]] || [[ ! -f bin/${id}-with-webui_flashable_uninstaller.zip ]]; then
-  # generate $id uninstaller flashable zip
+  # generate $id-with-webui uninstaller flashable zip
   echo "=> bin/${id}-with-webui_flashable_uninstaller.zip"
   rm -rf "bin/${id}-with-webui_flashable_uninstaller.zip" "$tmpDir" 2>/dev/null
   mkdir -p bin "$tmpDir"
