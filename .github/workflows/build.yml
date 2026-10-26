@@ -2,48 +2,24 @@ name: Build and Release Assets
 
 on:
   push:
-    branches:
-      - dev
-    paths:
-      - 'webui/src/App.svelte'
+    tags:
+      - "v*"
   workflow_dispatch:
     inputs:
       create_release:
-        description: 'Create a GitHub Release and Tag?'
+        description: "Create a GitHub Release and Tag?"
         type: boolean
         required: true
         default: true
 
 permissions:
   contents: write
-  id-token: write           # Required for OIDC identity token generation (Sigstore)
-  attestations: write       # Required for committing the generated attestations
-  artifact-metadata: write  # Required for creating GitHub's backend artifact storage record
+  id-token: write # Required for OIDC identity token generation (Sigstore)
+  attestations: write # Required for committing the generated attestations
+  artifact-metadata: write # Required for creating GitHub's backend artifact storage record
 
 jobs:
-  check-paths:
-    runs-on: ubuntu-latest
-    outputs:
-      run_main: ${{ github.event_name == 'workflow_dispatch' || (steps.filter.outputs.changelog == 'true' && steps.filter.outputs.webui == 'true') }}
-    steps:
-      - name: Checkout Code
-        if: ${{ github.event_name == 'push' }}
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-
-      - name: Check for Dual Changes
-        id: filter
-        if: ${{ github.event_name == 'push' }}
-        uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
-        with:
-          filters: |
-            changelog:
-              - 'changelog-webui.md'
-            webui:
-              - 'webui/src/App.svelte'
-
   build-and-deploy:
-    needs: check-paths
-    if: ${{ needs.check-paths.outputs.run_main == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -70,13 +46,35 @@ jobs:
       - name: Parse Module Metadata
         id: metadata
         run: |
-          VERSION=$(sed -n "s/^version=//p" module.prop)
+          VERSION=$(sed -n 's/^version=\([^ ]*\).*/\1/p' module.prop)
           VERSION_CODE=$(sed -n "s/^versionCode=//p" module.prop)
           ID=$(sed -n "s/^id=//p" module.prop)
 
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-          echo "version_code=${VERSION_CODE}" >> $GITHUB_OUTPUT
-          echo "basename=${ID}-with-webui_${VERSION}_${VERSION_CODE}" >> $GITHUB_OUTPUT
+          {
+            echo "version=${VERSION}"
+            echo "version_code=${VERSION_CODE}"
+            echo "basename=${ID}-with-webui_${VERSION}_${VERSION_CODE}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Verify Version Match
+        id: verify_version
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            TARGET_TAG="${{ github.ref_name }}"
+          else
+            TARGET_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          fi
+
+          MODULE_VERSION="${{ steps.metadata.outputs.version }}"
+
+          echo "Target Tag:     $TARGET_TAG"
+          echo "Module Version: $MODULE_VERSION"
+
+          if [ "$TARGET_TAG" != "$MODULE_VERSION" ]; then
+            echo "::error title=Version Mismatch::Tag version ($TARGET_TAG) does not match module version ($MODULE_VERSION)!"
+            exit 1
+          fi
+          echo "✅ Versions match successfully!"
 
       - name: Commit & Push Updated Files
         id: create_commit
@@ -110,7 +108,7 @@ jobs:
         with:
           tag_name: ${{ steps.metadata.outputs.version }}
           name: Release ${{ steps.metadata.outputs.version }} (${{ steps.metadata.outputs.version_code }})
-          body_path: latest-release-notes.md
+          body_path: install/latest-release-notes.md
           draft: false
           prerelease: false
           files: |

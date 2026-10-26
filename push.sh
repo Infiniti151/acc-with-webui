@@ -1,7 +1,8 @@
 #!/usr/bin/env sh
 # Push and Install Zip
-# Copyright 2022-2024, VR25
-# License: GPLv3+
+# SPDX-FileCopyrightText: 2022-2024 VR25
+# SPDX-FileCopyrightText: 2026 Infiniti151
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
 # usage: $0 [k] [adb device]
 # k is for KaiOS

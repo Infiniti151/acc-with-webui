@@ -3,9 +3,9 @@
 # $id Online Installer (Infiniti151 Fork)
 # https://raw.githubusercontent.com/Infiniti151/acc-with-webui/$commit/install-online.sh
 #
-# Copyright 2019-2024, VR25
-# Copyright 2026, Infiniti151
-# License: GPLv3+
+# SPDX-FileCopyrightText: 2019-2024 VR25
+# SPDX-FileCopyrightText: 2026 Infiniti151
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
 # Usage: sh install-online.sh [-c|--changelog] [-f|--force] [-n|--non-interactive] [%parent install dir%] [commit]
 

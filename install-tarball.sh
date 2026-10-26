@@ -1,9 +1,9 @@
 #!/system/bin/sh
 #
 # ${1:-$id} Tarball Installer (Infiniti151 Fork)
-# Copyright 2019-2022, VR25
-# Copyright 2026, Infiniti151
-# License: GPLv3+
+# SPDX-FileCopyrightText: 2019-2022 VR25
+# SPDX-FileCopyrightText: 2026 Infiniti151
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
 # this file must be in the same directory as the tarball
 # $1: module id

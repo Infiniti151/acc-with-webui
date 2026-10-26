@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
+#
 # Installation Archives Builder
-# Copyright 2018-2024, VR25
-# Copyright 2026, Infiniti151
-# License: GPLv3+
+# SPDX-FileCopyrightText: 2018-2024 VR25
+# SPDX-FileCopyrightText: 2026 Infiniti151
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
 # usage: $0 [any_random_arg]
 #   e.g.,
@@ -77,17 +78,28 @@ EOF
 build_webui() {
   add_header "Building WebUI..."
 
-  # update package.json version and build WebUI
-  sed -i -E "s/(\"version\": *\")[^\"]*(\")/\1${version#v}\2/" webui/package.json
-  (npm install --prefix=webui && npm run build --prefix=webui) || exit $?
+  # update version and acc_version in package.json
+  sed -i -E \
+  -e "s/(\"version\": *\")[^\"]*(\")/\1${version#v}\2/" \
+  -e "s/(\"acc_version\": *\")[^\"]*(\")/\1${acc_version}\2/" \
+  webui/package.json
+
+  # Run deploy or standard build
+  if [ "$DEPLOY_WEBUI_ONLY" = true ]; then
+    (npm install --prefix=webui && npm run deploy --prefix=webui) || exit $?
+  else
+    (npm install --prefix=webui && npm run build --prefix=webui) || exit $?
+  fi
 }
 
 BUILD_WEBUI_ONLY=false
+DEPLOY_WEBUI_ONLY=false
 SKIP_ARCHIVES=false
 
 for arg in "$@"; do
   case $arg in
-    -W|--webui) BUILD_WEBUI_ONLY=true ;;
+    -w|--webui) BUILD_WEBUI_ONLY=true ;; # Runs standard clean build for CI/CD
+    -d|--deploy) DEPLOY_WEBUI_ONLY=true ;; # Runs the Vite build + ADB push plugin
     *) SKIP_ARCHIVES=true ;;
   esac
 done
@@ -95,11 +107,12 @@ done
 id=$(get_prop id)
 domain=$(get_prop domain)
 version=$(sed -n '1s/### \(v[0-9.]*\).*/\1/p' changelog-webui.md)
+acc_version=$(sed -n '/^### v/{n;s/^`ACC: //;s/`$//;p;q}' changelog-webui.md)
 versionCode=$(getVersionCode "$version")
 basename="${id}-with-webui_${version}_${versionCode}"
 tmpDir=".tmp/META-INF/com/google/android"
 
-if [[ "$BUILD_WEBUI_ONLY" == true ]]; then
+if [[ "$BUILD_WEBUI_ONLY" == true || "$DEPLOY_WEBUI_ONLY" == true ]]; then
   build_webui
   add_header "Done" "$GREEN"
   exit 0
@@ -109,7 +122,7 @@ add_header "Updating module.json..."
 
 # update module info
 if [[ "$(get_prop version)" != "$version" ]]; then
-  set_prop version "$version"
+  set_prop version "$version (ACC: $acc_version)"
   set_prop versionCode "$versionCode"
   cat << EOF > module.json
 {
@@ -134,7 +147,7 @@ awk '
   NR==1 && /^###/ { print; next }
   /^###/ { exit }
   { print }
-' changelog-webui.md > latest-release-notes.md
+' changelog-webui.md > install/latest-release-notes.md
 
 build_webui
 
@@ -227,13 +240,13 @@ if [[ "$SKIP_ARCHIVES" == false ]]; then
 
   echo "=> _builds/${basename}/${basename_}.zip"
   zip -r9 "_builds/${basename}/${basename_}.zip" \
-    customize.sh META-INF/ action.sh banner.jpg bin/ \
-    install/ latest-release-notes.md module.prop README.html \
+    customize.sh META-INF/ bin/ \
+    install/ module.prop README.html \
     | sed 's|.*adding: ||' | grep -iv 'zip warning:'
   echo
 
   # prepare files to be included in $id installable tarball
-  cp -R install install.sh action.sh License.md README.* module.prop bin/ \
+  cp -R install install.sh License.md README.* module.prop bin/ \
     "_builds/${basename}/${basename}/" 2>&1 \
     | grep -iv "can't preserve"
 
