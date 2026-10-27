@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       create_release:
-        description: "Create a GitHub Release and Tag?"
+        description: "Create a GitHub Release?"
         type: boolean
         required: true
         default: true
@@ -92,9 +92,9 @@ jobs:
           empty_commit: false
 
       - name: Fail if no changes were committed
-        if: steps.create_commit.conclusion == 'success' && steps.create_commit.outputs.pushed == 'false'
+        if: steps.create_commit.outputs.pushed == 'false'
         run: |
-          echo "❌ Error: Working directory is clean. No changes found to commit!"
+          echo "::error title=No changes committed::Working directory is clean. No changes found to commit."
           exit 1
 
       - name: Generate cryptographic attestations
