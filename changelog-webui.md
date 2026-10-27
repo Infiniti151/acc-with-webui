@@ -1,3 +1,9 @@
+### v1.5.1 (10500) - 2026-10-26
+`ACC: dev-2025-06-06`
+
+WebUI 🎛️ ->
+- Fixed JetBrains Mono font not loading in `Config` and `Logs`.
+
 ### v1.5.0 (10500) - 2026-10-26
 `ACC: dev-2025-06-06`
 
