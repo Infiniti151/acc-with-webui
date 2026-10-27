@@ -134,7 +134,7 @@ if [[ "$(get_prop version)" != "$version" ]]; then
     "version": "${version}",
     "versionCode": ${versionCode},
     "zipUrl": "https://github.com/Infiniti151/acc-with-webui/releases/download/${version}/${basename}.zip",
-    "changelog": "https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/latest-release-notes.md"
+    "changelog": "https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/install/latest-release-notes.md"
 }
 EOF
 fi
