@@ -98,14 +98,14 @@ jobs:
           exit 1
 
       - name: Generate cryptographic attestations
-        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-path: |
             _builds/${{ steps.metadata.outputs.basename }}/*
 
       - name: Create GitHub Release
         if: ${{ github.event_name == 'push' || inputs.create_release }}
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           tag_name: ${{ steps.metadata.outputs.version }}
           name: Release ${{ steps.metadata.outputs.version }} (${{ steps.metadata.outputs.version_code }})
