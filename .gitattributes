@@ -3,5 +3,13 @@
 
 # Denote all files that are truly binary and should not be modified.
 bin/** binary
+
+# Images
 *.png binary
 *.jpg binary
+
+# Fonts
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
