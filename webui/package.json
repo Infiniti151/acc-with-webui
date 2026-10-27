@@ -3,7 +3,7 @@
     "author": "Infiniti151",
     "license": "GPL-3.0-or-later",
     "private": true,
-    "version": "1.5.0",
+    "version": "1.5.1",
     "acc_version": "dev-2025-06-06",
     "type": "module",
     "scripts": {

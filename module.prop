@@ -1,8 +1,8 @@
 id=acc
 domain=vr25
 name=Advanced Charging Controller (ACC) with WebUI
-version=v1.5.0 (ACC: dev-2025-06-06)
-versionCode=10500
+version=v1.5.1 (ACC: dev-2025-06-06)
+versionCode=10501
 author=VR25, Infiniti151
 description=Extend your battery's service life by controlling charging current, temperature, and voltage.
 updateJson=https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/module.json

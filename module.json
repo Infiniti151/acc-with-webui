@@ -1,11 +1,11 @@
 {
     "busybox": "https://github.com/Magisk-Modules-Repo/busybox-ndk",
     "curl": "https://github.com/Zackptg5/Cross-Compiled-Binaries-Android/tree/master/curl",
-    "onlineInstaller": "https://github.com/Infiniti151/acc-with-webui/releases/download/v1.5.0/install-online.sh",
-    "tgz": "https://github.com/Infiniti151/acc-with-webui/releases/download/v1.5.0/acc-with-webui_v1.5.0_10500.tgz",
-    "tgzInstaller": "https://github.com/Infiniti151/acc-with-webui/releases/download/v1.5.0/install-tarball.sh",
-    "version": "v1.5.0",
-    "versionCode": 10500,
-    "zipUrl": "https://github.com/Infiniti151/acc-with-webui/releases/download/v1.5.0/acc-with-webui_v1.5.0_10500.zip",
+    "onlineInstaller": "https://github.com/Infiniti151/acc-with-webui/releases/download/v1.5.1/install-online.sh",
+    "tgz": "https://github.com/Infiniti151/acc-with-webui/releases/download/v1.5.1/acc-with-webui_v1.5.1_10501.tgz",
+    "tgzInstaller": "https://github.com/Infiniti151/acc-with-webui/releases/download/v1.5.1/install-tarball.sh",
+    "version": "v1.5.1",
+    "versionCode": 10501,
+    "zipUrl": "https://github.com/Infiniti151/acc-with-webui/releases/download/v1.5.1/acc-with-webui_v1.5.1_10501.zip",
     "changelog": "https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/latest-release-notes.md"
 }
