@@ -23,7 +23,7 @@
     - [Notes](#notes-1)
   - [Install from Local Source or GitHub](#install-from-local-source-or-github)
     - [Notes](#notes-2)
-  - [Build WebUI](#build-webui-indexhtml)
+  - [Build/Deploy WebUI](#builddeploy-webui-indexhtml)
 - [DEFAULT CONFIGURATION](#default-configuration)
 - [SETUP/USAGE](#setupusage)
   - [Terminal Commands](#terminal-commands)
@@ -240,7 +240,7 @@ In interactive mode, it also asks the user whether they want to download and ins
 
 - You may also want to read [Terminal Commands](#terminal-commands) > `Exit Codes` below.
 
-### Build & Deploy WebUI (`index.html`)
+### Build/Deploy WebUI (`index.html`)
 
 For building or live-deploying the WebUI without packaging the full module zip:
 
@@ -255,7 +255,7 @@ For building or live-deploying the WebUI without packaging the full module zip:
   * *Note for Wireless ADB*: Ensure the phone is on the same local network as your PC.
   * Files are pushed via staging (`/data/local/tmp/`) and moved into place using `su`.
 
-#### Building & Deploying
+#### Building/Deploying
 
 1. Run the build script with the WebUI flag from the repository root:
 
@@ -278,15 +278,19 @@ For building or live-deploying the WebUI without packaging the full module zip:
       ```cmd
       # Build WebUI bundle
       build.bat -w
+      # or
+      build.bat --webui
 
       # Build AND push to device
       build.bat -d
+      # or
+      build.bat --deploy
       ```
-      (*Or via Git Bash/WSL directly*: `bash build.sh -w/-d`)
+      (*Or via Git Bash/WSL directly*: `bash build.sh -w/-d` or `bash build.sh --webui/--deploy`)
 
 2. **Output Locations**:
    - Local build artifact: `install/webroot/index.html`
-   - Active device location (when using `-d`): `/data/adb/modules/acc/webroot/index.html`
+   - Active device location (when using `-d/--deploy`): `/data/adb/modules/acc/webroot/index.html`
 
 ---
 ## DEFAULT CONFIGURATION
