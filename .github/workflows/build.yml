@@ -11,6 +11,11 @@ on:
         type: boolean
         required: true
         default: true
+      verify_version:
+        description: "Verify version match between tag and module.prop?"
+        type: boolean
+        required: true
+        default: true
 
 permissions:
   contents: write
@@ -58,6 +63,7 @@ jobs:
 
       - name: Verify Version Match
         id: verify_version
+        if: ${{ github.event_name == 'push' || inputs.verify_version == true }}
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
             TARGET_TAG="${{ github.ref_name }}"
