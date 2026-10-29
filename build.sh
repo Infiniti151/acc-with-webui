@@ -85,11 +85,8 @@ build_webui() {
   webui/package.json
 
   # Run deploy or standard build
-  if [ "$DEPLOY_WEBUI_ONLY" = true ]; then
-    (npm install --prefix=webui && npm run deploy --prefix=webui) || exit $?
-  else
-    (npm install --prefix=webui && npm run build --prefix=webui) || exit $?
-  fi
+  npm_cmd=$([[ "$DEPLOY_WEBUI_ONLY" == true ]] && echo "deploy" || echo "build")
+  (cd webui && npm install && npm run "$npm_cmd") || exit $?
 }
 
 BUILD_WEBUI_ONLY=false
