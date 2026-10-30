@@ -1,12 +1,8 @@
 <p align="center">
   <b>English</b> | 
-  <a href="install/translations/de-DE/README.md">Deutsch</a> | 
   <a href="install/translations/fr/README.md">Français</a> | 
-  <a href="install/translations/pt-PT/README.md">Português (PT)</a> | 
   <a href="install/translations/ru/README.md">Русский</a> | 
   <a href="install/translations/tr/README.md">Türkçe</a> | 
-  <a href="install/translations/zh-rCN/README.md">简体中文</a> | 
-  <a href="install/translations/zh-rTW/README.md">繁體中文</a>
 </p>
 <hr>
 # Advanced Charging Controller (ACC) with WebUI
