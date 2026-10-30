@@ -1,0 +1,18 @@
+schemaVersion: 1
+id: acc
+name: Advanced Charging Controller (ACC) with WebUI
+summary: Extend your battery's service life by controlling charging current, temperature, and voltage.
+description: README.md
+license: GPL-3.0-or-later
+homepage: https://github.com/Infiniti151/acc-with-webui
+support: https://github.com/Infiniti151/acc-with-webui/issues
+tags: [charging-controller, battery-longevity, battery-health]
+icon: install/icon/webui.png
+metamodule: false
+authors:
+  - name: Infiniti151
+    url: https://github.com/Infiniti151
+  - name: VR25
+    url: https://github.com/VR25
+release:
+  assetPattern: "acc-with-webui_v*.zip"
