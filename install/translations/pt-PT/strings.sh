@@ -1,5 +1,26 @@
 # Português, Portugal (pt-PT)
 
+TXT_INSTALLING_IN="A instalar em"
+TXT_DONE="Concluído"
+TXT_INSTALLED_RUNNING="instalado e a funcionar!
+
+Reverta com acc -b se não estiver satisfeito."
+TXT_REBOOT_UNNECESSARY="O reinício não é necessário."
+TXT_REBOOT_NOTE="Nota: Se não reiniciar agora, coloque o prefixo /dev/ em todos os executáveis do acc (como em /dev/acc -i, /dev/accd).
+Razão: O Magisk, KernelSU e semelhantes não fazem [re]mount/atualização de módulos sem um reinício."
+TXT_NON_MAGISK_NOTICE="Os utilizadores sem Magisk podem ativar o início automático de $id executando /data/adb/$domain/$id/service.sh (uma cópia ou um link para o mesmo) - com init.d ou uma aplicação que o emule."
+TXT_OVERLAY_SUPPORT="- Adicionar suporte para overlayfs"
+TXT_RUNNING="[*] O daemon está atualmente A FUNCIONAR."
+TXT_STOPPING="[*] A parar o accd..."
+TXT_STOPPED="[*] Daemon PARADO."
+TXT_STOPPED_STATE="[*] O daemon está atualmente PARADO."
+TXT_STARTING="[*] A iniciar o accd..."
+TXT_STARTED="[*] Daemon INICIADO."
+TXT_TEST_RUNNING="[!] O Test All está a funcionar e requer que o daemon esteja parado."
+TXT_WAIT_TEST="[!] Aguarde que termine (ou cancele-o) e tente novamente."
+TXT_PROP_ERROR="[!] Erro: module.prop não encontrado em"
+MODULE_NAME="Prolongue a vida útil da sua bateria controlando a corrente de carga, a temperatura e a tensão."
+
 print_already_running() {
   echo "accd já está em execução"
 }
