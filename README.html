@@ -1,3 +1,16 @@
+<p align="center">
+  <b>English</b> | 
+  <a href="install/translations/de-DE/README.md">Deutsch</a> | 
+  <a href="install/translations/fr/README.md">Français</a> | 
+  <a href="install/translations/pt-PT/README.md">Português (PT)</a> | 
+  <a href="install/translations/ru/README.md">Русский</a> | 
+  <a href="install/translations/tr/README.md">Türkçe</a> | 
+  <a href="install/translations/zh-rCN/README.md">简体中文</a> | 
+  <a href="install/translations/zh-rTW/README.md">繁體中文</a>
+</p>
+
+<hr>
+
 <h1>Advanced Charging Controller (ACC) with WebUI</h1>
 
 <p><a href="https://github.com/Infiniti151/acc-with-webui/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/Infiniti151/acc-with-webui/build.yml?branch=dev&amp;style=for-the-badge&amp;logo=github-actions&amp;logoColor=white&amp;label=Build" alt="Build" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/releases"><img src="https://img.shields.io/github/v/release/Infiniti151/acc-with-webui?style=for-the-badge&amp;logo=github&amp;logoColor=white&amp;label=Release" alt="Latest Release" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/blob/dev/webui/package.json"><img src="https://img.shields.io/badge/Svelte-5.57.2-orange?style=for-the-badge&amp;logo=svelte&amp;logoColor=white" alt="Svelte" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/blob/dev/License.md"><img src="https://img.shields.io/github/license/Infiniti151/acc-with-webui?style=for-the-badge&amp;logo=spdx&amp;logoColor=white&amp;color=yellow&amp;label=License" alt="License" title="" /></a> <a href="https://github.com/Infiniti151/acc-with-webui/releases"><img src="https://img.shields.io/github/downloads/Infiniti151/acc-with-webui/total?style=for-the-badge&amp;color=purple&amp;label=Downloads&amp;logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xOSA5aC00VjNIN3Y2SDNMMTIgMTlsOS05ek01IDE4djJoMTR2LTJINXoiLz48L3N2Zz4=" alt="Downloads" title="" /></a></p>
@@ -29,7 +42,7 @@
 <li><a href="#notes-1">Notes</a></li>
 <li><a href="#install-from-local-source-or-github">Install from Local Source or GitHub</a></li>
 <li><a href="#notes-2">Notes</a></li>
-<li><a href="#build-webui-indexhtml">Build WebUI</a></li>
+<li><a href="#builddeploy-webui-indexhtml">Build/Deploy WebUI</a></li>
 </ul></li>
 <li><a href="#default-configuration">DEFAULT CONFIGURATION</a></li>
 <li><a href="#setupusage">SETUP/USAGE</a>
@@ -250,7 +263,7 @@ In interactive mode, it also asks the user whether they want to download and ins
 <li><p>You may also want to read <a href="#terminal-commands">Terminal Commands</a> > <code>Exit Codes</code> below.</p></li>
 </ul>
 
-<h3>Build &amp; Deploy WebUI (<code>index.html</code>)</h3>
+<h3>Build/Deploy WebUI (<code>index.html</code>)</h3>
 
 <p>For building or live-deploying the WebUI without packaging the full module zip:</p>
 
@@ -270,7 +283,7 @@ In interactive mode, it also asks the user whether they want to download and ins
 </ul></li>
 </ul>
 
-<h4>Building &amp; Deploying</h4>
+<h4>Building/Deploying</h4>
 
 <ol>
 <li><p>Run the build script with the WebUI flag from the repository root:</p>
@@ -303,17 +316,25 @@ chmod +x build.sh</p>
 
 <p>build.bat -w</p>
 
+<h1>or</h1>
+
+<p>build.bat --webui</p>
+
 <h1>Build AND push to device</h1>
 
-<p>build.bat -d
+<p>build.bat -d</p>
+
+<h1>or</h1>
+
+<p>build.bat --deploy
 <code>``
-(*Or via Git Bash/WSL directly*:</code>bash build.sh -w/-d`)</p></li>
+(*Or via Git Bash/WSL directly*:</code>bash build.sh -w/-d<code>or</code>bash build.sh --webui/--deploy`)</p></li>
 </ul></li>
 <li><p><strong>Output Locations</strong>:</p>
 
 <ul>
 <li>Local build artifact: <code>install/webroot/index.html</code></li>
-<li>Active device location (when using <code>-d</code>): <code>/data/adb/modules/acc/webroot/index.html</code></li>
+<li>Active device location (when using <code>-d/--deploy</code>): <code>/data/adb/modules/acc/webroot/index.html</code></li>
 </ul></li>
 </ol>
 

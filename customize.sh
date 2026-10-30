@@ -166,6 +166,12 @@ mkdir -p $data_dir/backup
 cp -aH /data/adb/$domain/$id/* $config $data_dir/backup/ 2>/dev/null || :
 
 
+# backup
+rm -rf $data_dir/backup 2>/dev/null || :
+mkdir -p $data_dir/backup
+cp -aH /data/adb/$domain/$id/* $config $data_dir/backup/ 2>/dev/null || :
+
+
 export KSU=${KSU:-false}
 $KSU || { [ ! -f /data/adb/*/bin/busybox ] || KSU=true; }
 /system/bin/sh $srcDir/install/uninstall.sh install
