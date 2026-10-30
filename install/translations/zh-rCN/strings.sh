@@ -1,5 +1,26 @@
 # 简体中文 (zh-rCN)
 
+TXT_INSTALLING_IN="正在安装到"
+TXT_DONE="完成"
+TXT_INSTALLED_RUNNING="安装成功并正在运行！
+
+如果不满意，请使用 acc -b 回滚。"
+TXT_REBOOT_UNNECESSARY="无需重启。"
+TXT_REBOOT_NOTE="注意：如果不立即重启，请在所有 acc 可执行文件前加上 /dev/ 前缀（例如 /dev/acc -i, /dev/accd）。
+原因：Magisk、KernelSU 及类似工具在不重启的情况下不会[重新]挂载/更新模块。"
+TXT_NON_MAGISK_NOTICE="非 Magisk 用户可以通过运行 /data/adb/$domain/$id/service.sh（其副本或符号链接）来启用 $id 自动启动 - 可使用 init.d 或模拟该功能的应用程序。"
+TXT_OVERLAY_SUPPORT="- 添加 overlayfs 支持"
+TXT_RUNNING="[*] 守护进程当前正在运行。"
+TXT_STOPPING="[*] 正在停止 accd..."
+TXT_STOPPED="[*] 守护进程已停止。"
+TXT_STOPPED_STATE="[*] 守护进程当前已停止。"
+TXT_STARTING="[*] 正在启动 accd..."
+TXT_STARTED="[*] 守护进程已启动。"
+TXT_TEST_RUNNING="[!] 全面测试（Test All）正在运行，需要先停止守护进程。"
+TXT_WAIT_TEST="[!] 请等待其完成（或取消），然后重试。"
+TXT_PROP_ERROR="[!] 错误：未在以下位置找到 module.prop："
+MODULE_NAME="通过控制充电电流、温度和电压来延长电池的使用寿命。"
+
 print_already_running() {
   echo "accd 已在运行"
 }
