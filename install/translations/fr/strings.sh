@@ -1,5 +1,26 @@
 # Français (fr)
 
+TXT_INSTALLING_IN="Installation dans"
+TXT_DONE="Terminé"
+TXT_INSTALLED_RUNNING="installé et en cours d'exécution !
+
+Restaurez avec acc -b si vous n'êtes pas satisfait."
+TXT_REBOOT_UNNECESSARY="Le redémarrage n'est pas nécessaire."
+TXT_REBOOT_NOTE="Remarque : Si vous ne redémarrez pas maintenant, préfixez toutes les exécutables acc par /dev/ (comme dans /dev/acc -i, /dev/accd).
+Raison : Magisk, KernelSU et similaires ne remontent/mettent pas à jour les modules sans redémarrage."
+TXT_NON_MAGISK_NOTICE="Les utilisateurs non-Magisk peuvent activer le démarrage automatique de $id en exécutant /data/adb/$domain/$id/service.sh (une copie ou un lien vers celui-ci) - avec init.d ou une application l'émulant."
+TXT_OVERLAY_SUPPORT="- Ajouter le support d'overlayfs"
+TXT_RUNNING="[*] Le démon est actuellement EN COURS D'EXÉCUTION."
+TXT_STOPPING="[*] Arrêt de accd..."
+TXT_STOPPED="[*] Démon ARRÊTÉ."
+TXT_STOPPED_STATE="[*] Le démon est actuellement ARRÊTÉ."
+TXT_STARTING="[*] Démarrage de accd..."
+TXT_STARTED="[*] Démon DÉMARRÉ."
+TXT_TEST_RUNNING="[!] Test All est en cours d'exécution et nécessite l'arrêt du démon."
+TXT_WAIT_TEST="[!] Attendez qu'il se termine (ou annulez-le), puis réessayez."
+TXT_PROP_ERROR="[!] Erreur : module.prop introuvable à"
+MODULE_NAME="Prolongez la durée de vie de votre batterie en contrôlant le courant de charge, la température et la tension."
+
 print_already_running() {
   echo "accd est déjà en fonctionnement"
 }
