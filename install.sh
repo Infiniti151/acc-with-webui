@@ -308,11 +308,11 @@ _echo() {
   echo "$@" | tee -a $tmpd/.install-notes
 }
 
-# --- Подключение локализации ---
+# --- Localization setup ---
 lang=$(cmd activity get-config 2>/dev/null | grep -m1 '^config:' | sed 's/^config:[[:space:]]*//' | cut -d',' -f1 | cut -d'-' -f1 | tr '[:upper:]' '[:lower:]' | cut -c1-2)
 [ -z "$lang" ] && lang=$(getprop persist.sys.locale | cut -c1-2)
 [ -z "$lang" ] && lang=$(getprop ro.product.locale | cut -c1-2)
-# Указываем правильный путь через install/
+# --- We specify the correct path via install/ ---
 if [ -n "$lang" ] && [ -f "$srcDir/install/translations/$lang/strings.sh" ]; then
     . "$srcDir/install/translations/$lang/strings.sh"
 else
