@@ -19,7 +19,7 @@ TXT_STARTED="[*] Daemon STARTED."
 TXT_TEST_RUNNING="[!] Test All is running and needs the daemon stopped."
 TXT_WAIT_TEST="[!] Wait for it to finish (or cancel it), then try again."
 TXT_PROP_ERROR="[!] Error: module.prop not found at"
-MODULE_NAME="Extend your battery's service life by controlling charging current, temperature, and voltage."
+MODULE_DESC="Extend your battery's service life by controlling charging current, temperature, and voltage."
 
 print_already_running() {
   echo "accd is already running"
