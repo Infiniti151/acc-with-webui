@@ -31,7 +31,7 @@ export dataDir domain execDir id TMPDIR
 (
     sleep 3
 
-# Подключаем локализацию (так как service.sh запускается из папки модуля)
+# We enable localization (since service.sh is launched from the module folder)
     MODDIR="/data/adb/modules/acc"
     lang=$(cmd activity get-config 2>/dev/null | grep -m1 '^config:' | sed 's/^config:[[:space:]]*//' | cut -d',' -f1 | cut -d'-' -f1 | tr '[:upper:]' '[:lower:]' | cut -c1-2)
     [ -z "$lang" ] && lang=$(getprop persist.sys.locale | cut -c1-2)
@@ -54,7 +54,7 @@ export dataDir domain execDir id TMPDIR
 # Get capacities for description update
 eval "$(/dev/acc -sp capacity 2>/dev/null | grep -E '^(resume|pause|shutdown)_capacity=')"
 
-# Формируем новое описание
+# We are creating a new description
 NEW_DESC="[accd ${STATUS}] | 🟢 ${resume_capacity}% | 🟡 ${pause_capacity}% | 🔴 ${shutdown_capacity}% | ${MODULE_NAME}"
 
 # Update description only if it has actually changed (prevents infinite loops)
