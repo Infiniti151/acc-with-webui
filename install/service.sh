@@ -1,78 +1,55 @@
 #!/system/bin/sh
-#
-# SPDX-FileCopyrightText: 2026 Infiniti151
-# SPDX-License-Identifier: GPL-3.0-or-later
+# $id initializer
+# Copyright 2017-2021, VR25
+# Copyright 2026, Infiniti151
+# License: GPLv3+
 
-MODDIR="${0%/*}"
-PROP_FILE="$MODDIR/module.prop"
-TEST_FILES="/data/local/tmp/acc_test_all.log /data/local/tmp/acc_test_all.hb"
+id=acc
+domain=vr25
+TMPDIR=/dev/.$domain/$id
+execDir=/data/adb/$domain/$id
+dataDir=/data/adb/$domain/${id}-data
 
-# Detect system language
-# Detect system language strictly from cmd activity get-config
-lang=$(cmd activity get-config 2>/dev/null | grep -m1 '^config:' | sed 's/^config:[[:space:]]*//' | cut -d',' -f1 | cut -d'-' -f1 | tr '[:upper:]' '[:lower:]' | cut -c1-2)
+[ -f $execDir/disable -o -f $dataDir/disable ] && exit 14
 
-[ -z "$lang" ] && lang=$(getprop persist.sys.locale | cut -c1-2)
-[ -z "$lang" ] && lang=$(getprop ro.product.locale | cut -c1-2)
+# wait til the lock screen is ready and give some bootloop grace period
+slept=false
+until [ .$(getprop init.svc.bootanim 2>/dev/null) = .stopped ]; do
+  [ -f $execDir/disable -o -f $dataDir/disable ] && exit 14
+  sleep 10 && slept=true
+done
+$slept && sleep 60
+unset slept
 
-# Fallback to default if translation doesn't exist
-if [ -n "$lang" ] && [ -f "$MODDIR/translations/$lang/strings.sh" ]; then
-    . "$MODDIR/translations/$lang/strings.sh"
-else
-    . "$MODDIR/strings.sh"
-fi
+mkdir -p $TMPDIR $dataDir
+export dataDir domain execDir id TMPDIR
+. $execDir/setup-busybox.sh
+. $execDir/release-lock.sh
+[ ".$1" = .-x ] && touch $dataDir/disable
 
-echo "========================================"
-echo "       ACC Daemon Action Controller      "
-echo "========================================"
+# --- ACC WebUI: Dynamic Description Boot Sync ---
+(
+    sleep 3
 
-# Is a charging-switch test (acc -t) running? It needs the daemon stopped.
-test_running() {
-    pgrep -f '[a]cc/acc .* (-t|--test)( |$)' >/dev/null 2>&1
-}
+# Подключаем локализацию (так как service.sh запускается из папки модуля)
+    MODDIR="/data/adb/modules/acc"
+    lang=$(cmd activity get-config 2>/dev/null | grep -m1 '^config:' | sed 's/^config:[[:space:]]*//' | cut -d',' -f1 | cut -d'-' -f1 | tr '[:upper:]' '[:lower:]' | cut -c1-2)
+    [ -z "$lang" ] && lang=$(getprop persist.sys.locale | cut -c1-2)
+    [ -z "$lang" ] && lang=$(getprop ro.product.locale | cut -c1-2)
 
-# Move accd to root cgroup
-move_accd() {
-    pgrep -f '[a]ccd' | while read -r PID; do
-        [ -n "$PID" ] || continue
-        echo "$PID" > /sys/fs/cgroup/cgroup.procs 2>/dev/null || echo "$PID" > /dev/freezer/tasks 2>/dev/null || echo "$PID" > /sys/fs/cgroup/freezer/tasks 2>/dev/null || true
-        echo "$PID" > /dev/cpuset/tasks 2>/dev/null || echo "$PID" > /dev/sys/fs/cgroup/cpuset/tasks 2>/dev/null || true
-        echo "$PID" > /dev/stune/tasks 2>/dev/null || echo "$PID" > /sys/fs/cgroup/schedtune/tasks 2>/dev/null || true
-        echo -1000 > /proc/"$PID"/oom_score_adj 2>/dev/null || true
-    done
-}
-
-# Initialize ACC environment if needed
-test -f /dev/acca || /data/adb/vr25/acc/service.sh
-
-# Toggle daemon
-if pgrep -f '[a]ccd' >/dev/null 2>&1; then
-    echo "$TXT_RUNNING"
-    echo "$TXT_STOPPING"
-    /dev/acca -D stop
-    STATUS="❌"
-    echo "$TXT_STOPPED"
-else
-    echo "$TXT_STOPPED_STATE"
-
-    if test_running; then
-        echo "$TXT_TEST_RUNNING"
-        echo "$TXT_WAIT_TEST"
-        echo "========================================"
-        exit 0
+    if [ -n "$lang" ] && [ -f "$MODDIR/translations/$lang/strings.sh" ]; then
+        . "$MODDIR/translations/$lang/strings.sh"
+    else
+        [ -f "$MODDIR/strings.sh" ] && . "$MODDIR/strings.sh"
     fi
-    rm -f $TEST_FILES   # stale leftovers from an interrupted test
 
-    echo "$TXT_STARTING"
-    setsid nohup /dev/acca -D start >/dev/null 2>&1 < /dev/null &
-    i=0
-    while [ $i -lt 6 ]; do
-        sleep 1
-        move_accd
-        i=$((i + 1))
-    done
-    STATUS="✅"
-    echo "$TXT_STARTED"
-fi
+    PROP_FILE="/data/adb/modules/acc/module.prop"
+
+    if pgrep -f accd >/dev/null 2>&1; then
+        STATUS="✅"
+    else
+        STATUS="❌"
+    fi
 
 # Get capacities for description update
 eval "$(/dev/acc -sp capacity 2>/dev/null | grep -E '^(resume|pause|shutdown)_capacity=')"
@@ -89,5 +66,7 @@ if [ -f "$PROP_FILE" ]; then
 else
     echo "$TXT_PROP_ERROR $PROP_FILE"
 fi
+) &
+# ------------------------------------------------
 
-echo "========================================"
+exec start-stop-daemon -bx $execDir/${id}d.sh -S -- "$@" || exit 12
