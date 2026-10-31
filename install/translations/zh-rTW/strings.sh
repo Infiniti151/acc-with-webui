@@ -19,7 +19,7 @@ TXT_STARTED="[*] 幕後程式已啟動。"
 TXT_TEST_RUNNING="[!] 全面測試（Test All）正在執行，需要先停止幕後程式。"
 TXT_WAIT_TEST="[!] 請等待其完成（或取消），然後重試。"
 TXT_PROP_ERROR="[!] 錯誤：未在以下位置找到 module.prop："
-MODULE_NAME="透過控制充電電流、溫度和電壓來延長電池的使用壽命。"
+MODULE_DESC="透過控制充電電流、溫度和電壓來延長電池的使用壽命。"
 
 print_already_running() {
   echo "accd 目前是執行狀態"
