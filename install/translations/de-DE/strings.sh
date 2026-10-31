@@ -19,7 +19,7 @@ TXT_STARTED="[*] Daemon gestartet."
 TXT_TEST_RUNNING="[!] Test All läuft und erfordert einen gestoppten Daemon."
 TXT_WAIT_TEST="[!] Warten Sie, bis er abgeschlossen ist (oder brechen Sie ihn ab), und versuchen Sie es erneut."
 TXT_PROP_ERROR="[!] Fehler: module.prop nicht gefunden unter"
-MODULE_NAME="Verlängern Sie die Lebensdauer Ihres Akkus durch die Steuerung von Ladestrom, Temperatur und Spannung."
+MODULE_DESC="Verlängern Sie die Lebensdauer Ihres Akkus durch die Steuerung von Ladestrom, Temperatur und Spannung."
 
 print_already_running() {
   echo "accd läuft bereits"
