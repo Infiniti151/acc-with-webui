@@ -55,7 +55,7 @@ export dataDir domain execDir id TMPDIR
 eval "$(/dev/acc -sp capacity 2>/dev/null | grep -E '^(resume|pause|shutdown)_capacity=')"
 
 # We are creating a new description
-NEW_DESC="[accd ${STATUS}] | 🟢 ${resume_capacity}% | 🟡 ${pause_capacity}% | 🔴 ${shutdown_capacity}% | ${MODULE_NAME}"
+NEW_DESC="[accd ${STATUS}] | 🟢 ${resume_capacity}% | 🟡 ${pause_capacity}% | 🔴 ${shutdown_capacity}% | ${MODULE_DESC}"
 
 # Update description only if it has actually changed (prevents infinite loops)
 if [ -f "$PROP_FILE" ]; then
