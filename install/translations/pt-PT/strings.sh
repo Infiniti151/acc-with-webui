@@ -19,7 +19,7 @@ TXT_STARTED="[*] Daemon INICIADO."
 TXT_TEST_RUNNING="[!] O Test All está a funcionar e requer que o daemon esteja parado."
 TXT_WAIT_TEST="[!] Aguarde que termine (ou cancele-o) e tente novamente."
 TXT_PROP_ERROR="[!] Erro: module.prop não encontrado em"
-MODULE_NAME="Prolongue a vida útil da sua bateria controlando a corrente de carga, a temperatura e a tensão."
+MODULE_DESC="Prolongue a vida útil da sua bateria controlando a corrente de carga, a temperatura e a tensão."
 
 print_already_running() {
   echo "accd já está em execução"
