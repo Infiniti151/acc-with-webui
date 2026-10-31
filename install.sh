@@ -156,6 +156,7 @@ Copyright 2017-2024, $(echo "$author" | cut -d',' -f1 | tr -d ' ')
 Copyright 2026, $(echo "$author" | cut -d',' -f2 | tr -d ' ')
 GPLv3+
 
+
 Installing in $installDir/$id/..."
 
 
@@ -290,7 +291,7 @@ esac
 
 
 set +eu
-printf "Done\n\n\n"
+printf "$TXT_DONE\n\n\n"
 
 printf "─────────────[ ACC ⚡ WebUI ]─────────────\n\n"
 
@@ -301,20 +302,41 @@ _echo() {
   echo "$@" | tee -a $tmpd/.install-notes
 }
 
+# --- Localization setup ---
+lang=$(cmd activity get-config 2>/dev/null | grep -m1 '^config:' | sed 's/^config:[[:space:]]*//' | cut -d',' -f1 | cut -d'-' -f1 | tr '[:upper:]' '[:lower:]' | cut -c1-2)
+[ -z "$lang" ] && lang=$(getprop persist.sys.locale | cut -c1-2)
+[ -z "$lang" ] && lang=$(getprop ro.product.locale | cut -c1-2)
+# --- We specify the correct path via install/ ---
+if [ -n "$lang" ] && [ -f "$srcDir/install/translations/$lang/strings.sh" ]; then
+    . "$srcDir/install/translations/$lang/strings.sh"
+else
+    [ -f "$srcDir/install/strings.sh" ] && . "$srcDir/install/strings.sh"
+fi
+# --------------------------------
+
+print_msg() {
+    if command -v ui_print >/dev/null 2>&1; then
+        ui_print "$1"
+    else
+        echo "$1"
+    fi
+}
+
+print_msg "- Detected language: '${lang:-default (en)}'"
 
 printf "\n\n"
-printf "$version ($versionCode) installed and running!\n\nRollback with acc -b if not satisfied.\n\n" | tee $tmpd/.install-notes
+printf "$version ($versionCode) $TXT_INSTALLED_RUNNING\n\n" | tee $tmpd/.install-notes
 if [ -x /sbin/${id}d ] || grep -q '#exec_wrapper' /system/bin/${id}d 2>/dev/null; then
-  _echo "Rebooting is unnecessary."
+  _echo "$TXT_REBOOT_UNNECESSARY"
 else
-  _echo "Note: If you're not rebooting now, prefix all acc executables with /dev/ (as in /dev/acc -i, /dev/accd). Reasoning: Magisk, KernelSU and similar, don't [re]mount/update modules without a reboot."
+  _echo "$TXT_REBOOT_NOTE"
 fi
 
 
 case $installDir in
   /data/adb/modules*) ;;
   *) $KSU || echo "
-Non-Magisk users can enable $id auto-start by running /data/adb/$domain/$id/service.sh, a copy of, or a link to it - with init.d or an app that emulates it.";;
+$TXT_NON_MAGISK_NOTICE";;
 esac
 
 
@@ -332,7 +354,7 @@ OVERLAY_IMAGE_SHRINK=true # shrink overlay.img or not?
 if [ -f "/data/adb/modules/magisk_overlayfs/util_functions.sh" ] && \
     /data/adb/modules/magisk_overlayfs/overlayfs_system --test; then
   ui_print ""
-  ui_print "- Add support for overlayfs"
+  ui_print "$TXT_OVERLAY_SUPPORT"
   . /data/adb/modules/magisk_overlayfs/util_functions.sh
   support_overlayfs && rm -rf "$MODPATH"/system
 fi

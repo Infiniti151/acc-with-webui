@@ -1,5 +1,26 @@
 # Indonesia (id)
 
+TXT_INSTALLING_IN="Menginstal di"
+TXT_DONE="Selesai"
+TXT_INSTALLED_RUNNING="terpasang dan berjalan!
+
+Kembalikan dengan acc -b jika tidak puas."
+TXT_REBOOT_UNNECESSARY="Mulai ulang (reboot) tidak diperlukan."
+TXT_REBOOT_NOTE="Catatan: Jika Anda tidak memulai ulang sekarang, tambahkan awalan /dev/ ke semua perintah acc (seperti /dev/acc -i, /dev/accd).
+Alasan: Magisk, KernelSU, dan sejenisnya tidak melakukan [re]mount/pembaruan modul tanpa dimulai ulang."
+TXT_NON_MAGISK_NOTICE="Pengguna non-Magisk dapat mengaktifkan autostart $id dengan menjalankan /data/adb/$domain/$id/service.sh (salinan atau tautan ke file tersebut) - menggunakan init.d atau aplikasi yang mengemulasikannya."
+TXT_OVERLAY_SUPPORT="- Tambahkan dukungan overlayfs"
+TXT_RUNNING="[*] Daemon sedang BERJALAN."
+TXT_STOPPING="[*] Menghentikan accd..."
+TXT_STOPPED="[*] Daemon BERHENTI."
+TXT_STOPPED_STATE="[*] Daemon saat ini BERHENTI."
+TXT_STARTING="[*] Memulai accd..."
+TXT_STARTED="[*] Daemon DIMULAI."
+TXT_TEST_RUNNING="[!] Test All sedang berjalan dan memerlukan daemon untuk dihentikan."
+TXT_WAIT_TEST="[!] Tunggu hingga selesai (atau batalkan), lalu coba lagi."
+TXT_PROP_ERROR="[!] Kesalahan: module.prop tidak ditemukan di"
+MODULE_DESC="Perpanjang masa pakai baterai Anda dengan mengontrol arus pengisian daya, suhu, dan tegangan."
+
 print_already_running() {
   echo "accd sedang berjalan"
 }

@@ -30,6 +30,19 @@ export dataDir domain execDir id TMPDIR
 # --- ACC WebUI: Dynamic Description Boot Sync ---
 (
     sleep 3
+
+# We enable localization (since service.sh is launched from the module folder)
+    MODDIR="/data/adb/modules/acc"
+    lang=$(cmd activity get-config 2>/dev/null | grep -m1 '^config:' | sed 's/^config:[[:space:]]*//' | cut -d',' -f1 | cut -d'-' -f1 | tr '[:upper:]' '[:lower:]' | cut -c1-2)
+    [ -z "$lang" ] && lang=$(getprop persist.sys.locale | cut -c1-2)
+    [ -z "$lang" ] && lang=$(getprop ro.product.locale | cut -c1-2)
+
+    if [ -n "$lang" ] && [ -f "$MODDIR/translations/$lang/strings.sh" ]; then
+        . "$MODDIR/translations/$lang/strings.sh"
+    else
+        [ -f "$MODDIR/strings.sh" ] && . "$MODDIR/strings.sh"
+    fi
+
     PROP_FILE="/data/adb/modules/acc/module.prop"
 
     if pgrep -f accd >/dev/null 2>&1; then
@@ -38,17 +51,21 @@ export dataDir domain execDir id TMPDIR
         STATUS="❌"
     fi
 
-    # Get capacities for description update
-    eval "$(/dev/acc -sp capacity 2>/dev/null | grep -E '^(resume|pause|shutdown)_capacity=')"
+# Get capacities for description update
+eval "$(/dev/acc -sp capacity 2>/dev/null | grep -E '^(resume|pause|shutdown)_capacity=')"
 
-    # --- Update description (cross-compatible) ---
-    if [ -f "$PROP_FILE" ]; then
-        sed -i "/^description=/ {
-            s@^description=.*Extend@description=[accd ${STATUS}] | 🟢 ${resume_capacity}% | 🟡 ${pause_capacity}% | 🔴 ${shutdown_capacity}% | Extend@
-        }" "$PROP_FILE"
-    else
-        echo "[!] Error: module.prop not found at $PROP_FILE"
+# We are creating a new description
+NEW_DESC="[accd ${STATUS}] | 🟢 ${resume_capacity}% | 🟡 ${pause_capacity}% | 🔴 ${shutdown_capacity}% | ${MODULE_DESC}"
+
+# Update description only if it has actually changed (prevents infinite loops)
+if [ -f "$PROP_FILE" ]; then
+    CURRENT_DESC="$(grep '^description=' "$PROP_FILE" | cut -d= -f2-)"
+    if [ "$CURRENT_DESC" != "$NEW_DESC" ]; then
+        sed -i "s@^description=.*@description=${NEW_DESC}@" "$PROP_FILE"
     fi
+else
+    echo "$TXT_PROP_ERROR $PROP_FILE"
+fi
 ) &
 # ------------------------------------------------
 

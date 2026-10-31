@@ -9,6 +9,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
   import { cubicOut } from "svelte/easing";
   import { listPackages, getPackagesInfo } from "kernelsu";
   import { version, acc_version } from "../package.json";
+  import { t } from "./i18n.js";
   import { infoDescriptions } from "./utils/descriptions.js";
   import { exec } from "./utils/exec.js";
   import { toast } from "./stores/toast.svelte.js";
@@ -115,27 +116,27 @@ SPDX-License-Identifier: GPL-3.0-or-later
     detecting: () => ({
       icon: "spinner",
       pulse: true,
-      text: "Detecting a charging switch... ACC is testing switches in the background, so charging may pause briefly.",
+      text: t("bannerDetectingSwitch"),
     }),
     stopped: () => ({
       icon: "warning",
-      text: "No charging switch selected and the daemon is stopped. Start it so ACC can detect one, or run Test All.",
-      actionLabel: "Test All",
+      text: t("bannerDaemonStoppedNoSwitch"),
+      actionLabel: t("testAll"),
       onAction: startTestAllFromBanner,
     }),
     select: () => ({
       icon: "warning",
-      text: "No charging switch selected. Pick a working switch, or plug in a charger and let ACC detect one.",
-      actionLabel: "Select",
+      text: t("bannerSelectSwitch"),
+      actionLabel: t("select"),
       onAction: () => (showSwitchModal = true),
     }),
     waiting: () => ({
       icon: "warning",
-      text: "Charger connected. ACC will look for a charging switch as soon as the battery is charging.",
+      text: t("bannerChargerConnected"),
     }),
     none: () => ({
       icon: "warning",
-      text: "No charging switch found. Plug in a charger so ACC can automatically detect a working switch.",
+      text: t("bannerNoSwitchFound"),
     }),
   };
 
@@ -281,7 +282,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     }
 
     if (!isTransitioning) {
-      daemonStatus = isRunning ? "Running" : "Stopped";
+      daemonStatus = isRunning ? t("running") : t("stopped");
     }
 
     if (initialLoad && rawConfigText) {
@@ -590,7 +591,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
   // Battery Banner
   // =========================
   let initialLoad = $state(true);
-  let currentEnv = $state("DETECTING");
+  let currentEnv = $state(t("detectingEnvironment"));
 
   let fillPercentage = $derived(Math.min(Math.max(pauseThresh || 0, 0), 100));
   let fluidHeight = $derived((160 * fillPercentage) / 100);
@@ -719,7 +720,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
   }
 
   async function detectEnvironment() {
-    currentEnv = "CHECKING...";
+    currentEnv = t("checking");
     const cmd = `
             if [ -d /data/adb/magisk ] || [ -d /sbin/.magisk ]; then
                 echo "MAGISK";
@@ -735,7 +736,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     if (res.errno === 0 && res.stdout) {
       currentEnv = res.stdout;
     } else {
-      currentEnv = "ERROR";
+      currentEnv = t("error");
     }
   }
 
@@ -754,7 +755,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
   let isRunning = $state(false);
   let isTransitioning = $state(false);
   let statusReady = $state(false);
-  let daemonStatus = $state("Checking...");
+  let daemonStatus = $state(t("checking"));
 
   let currentState = $derived(
     isTransitioning || !statusReady
@@ -767,7 +768,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
   function controlDaemon(action) {
     if (isSectionDisabled) return;
     isTransitioning = true;
-    daemonStatus = `${action.toUpperCase()}${action === "stop" ? "PING..." : "ING..."}`;
+    daemonStatus =
+      action === "stop"
+        ? t("stopping")
+        : action === "restart"
+          ? t("restarting")
+          : t("starting");
 
     banner.clearRestart();
 
@@ -911,7 +917,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
   let manualSwitchInput = $state("");
   let fo = $state(false);
   let testAllState = $state(load("testAllState", "idle")); // 'idle' | 'running' | 'done'
-  let testAllLogs = $state(load("testAllLogs", "Initializing test..."));
+  let testAllLogs = $state(load("testAllLogs", t("initializingTest")));
   let testAllPid = $state(load("testAllPid", ""));
   let testWasRunning = $state(load("testWasRunning", false));
   let testAllInterval = null;
@@ -969,7 +975,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
   async function handleSelectSwitch(value) {
     if (value === currentSwitch) {
-      toast.info("Switch is already selected.");
+      toast.info(t("switchAlreadySelected"));
       return;
     }
     currentSwitch = value;
@@ -1006,7 +1012,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           return {
             type: match[1],
             value: match[2].trim(),
-            label: `${match[2].trim()} [${match[1].toUpperCase()}] — ${match[1] === "i" ? "Idle Mode Supported" : "Disable Only"}`,
+            label: `${match[2].trim()} [${match[1].toUpperCase()}] — ${match[1] === "i" ? t("idleModeSupported") : t("disableOnly")}`,
           };
         }
 
@@ -1016,7 +1022,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           return {
             type: match[1],
             value: match[2].trim(),
-            label: `${match[2].trim()} [${match[1].toUpperCase()}] — ${match[1] === "i" ? "Idle Mode Supported" : "Disable Only"}`,
+            label: `${match[2].trim()} [${match[1].toUpperCase()}] — ${match[1] === "i" ? t("idleModeSupported") : t("disableOnly")}`,
           };
         }
 
@@ -1038,15 +1044,15 @@ SPDX-License-Identifier: GPL-3.0-or-later
         await banner.requireRestart();
         await updateStatus();
         await syncConfigEditor();
-        toast.success("Charging switch updated!");
+        toast.success(t("chargingSwitchUpdated"));
         await yieldToUI();
       } else {
         console.error("Failed to update charging switch:", res.stderr);
-        toast.error("Failed to update charging switch.");
+        toast.error(t("failedUpdateChargingSwitch"));
       }
     } catch (e) {
       console.error("Error saving charging switch:", e);
-      toast.error("Error updating charging switch.");
+      toast.error(t("errorUpdatingChargingSwitch"));
     } finally {
       isSavingSwitch = false;
     }
@@ -1064,7 +1070,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
       const res = await exec(`/dev/acca -s s="${value}"`);
       if (res.errno === 0) {
         currentSwitch = value;
-        toast.success("Manual switch applied!");
+        toast.success(t("manualSwitchApplied"));
         await updateStatus();
         await syncConfigEditor();
         await banner.requireRestart();
@@ -1074,11 +1080,11 @@ SPDX-License-Identifier: GPL-3.0-or-later
           "Error applying manual charging switch: ",
           res.stderr || "Unknown error",
         );
-        toast.error("Failed to apply manual switch.");
+        toast.error(t("failedApplyManualSwitch"));
       }
     } catch (e) {
       console.error("Error applying manual charging switch:", e);
-      toast.error("Failed to apply manual switch.");
+      toast.error(t("failedApplyManualSwitch"));
     } finally {
       isSavingSwitch = false;
     }
@@ -1173,7 +1179,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         if (last.stdout) testAllLogs = last.stdout;
         testAllState = "done";
         await loadChargingSwitches();
-        toast.success("Test All finished!");
+        toast.success(t("testAllFinished"));
         await restoreDaemonAfterTest();
         return;
       }
@@ -1188,7 +1194,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           stopTestAllPolling();
           await killTestAll(testAllPid);
           testAllState = "idle";
-          toast.error("Charger disconnected. 'Test All' was stopped.");
+          toast.error(t("chargerDisconnectedTestStopped"));
           await restoreDaemonAfterTest();
         }
       }
@@ -1204,7 +1210,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         const plug = await exec(`${PLUG_SH} plugged online && echo yes`);
         if (!plug.stdout.includes("yes")) {
           toast.error(
-            "No charger connected. Plug in a charger to run Test All.",
+            t("noChargerForTestAll"),
           );
           return;
         }
@@ -1213,8 +1219,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
       unplugStreak = 0;
       testWasRunning = isRunning;
       testAllState = "running";
-      testAllLogs =
-        "Running /dev/acca -t...\nThis process takes 5-10 minutes. Do not close the WebUI.\n\n";
+      testAllLogs = `${t("testRunningCommand")}\n${t("testDurationNotice")}\n\n`;
 
       const res = await exec(`
       : > ${TEST_LOG}
@@ -1269,7 +1274,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
       stopTestAllPolling();
       await killTestAll(testAllPid);
       testAllState = "idle";
-      toast.warning("Test All cancelled.");
+      toast.warning(t("testAllCancelled"));
       await restoreDaemonAfterTest();
     } else if (testAllState === "done") {
       testAllState = "idle";
@@ -1348,7 +1353,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     if (isUnchanged) {
       showAppModal = false;
-      toast.info("No changes to apply.");
+      toast.info(t("noChangesToApply"));
       return;
     }
 
@@ -1362,7 +1367,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
       await banner.requireRestart();
     } else {
       console.error("Failed to update idle apps: ", res.stderr);
-      toast.error("Failed to update idle apps.");
+      toast.error(t("failedUpdateIdleApps"));
     }
   }
 
@@ -1503,9 +1508,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
   let configMatchIndex = $state(load("configMatchIndex", 0));
   let isEditorOpen = $state(false);
   let isSaving = $state(false);
-  let saveButtonText = $state("Save");
+  let saveButtonText = $state(t("save"));
   let isResetting = $state(false);
-  let resetButtonText = $state("Reset");
+  let resetButtonText = $state(t("reset"));
   let editorContainer = $state();
   let editorScroller = $state();
   let prevConfigQuery;
@@ -1519,7 +1524,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
   let configCountLabel = $derived.by(() => {
     if (!configSearchQuery) return "";
     const n = configMatches().length;
-    return n > 0 ? `${configMatchIndex + 1}/${n}` : "No matches";
+    return n > 0 ? `${configMatchIndex + 1}/${n}` : t("noMatches");
   });
   let configMatches = $derived(() => {
     if (!configSearchQuery || !configText) return [];
@@ -1616,12 +1621,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
     if (isSaving) return;
 
     if (!isConfigDirty) {
-      toast.info("No changes to save.");
+      toast.info(t("noChangesToSave"));
       return;
     }
 
     isSaving = true;
-    saveButtonText = "Saving...";
+    saveButtonText = t("saving");
     await tick();
     await yieldToUI();
 
@@ -1634,19 +1639,19 @@ SPDX-License-Identifier: GPL-3.0-or-later
         await updateStatus();
 
         originalConfigText = configText;
-        saveButtonText = "Saved! ✓";
+        saveButtonText = t("saved");
       } else {
         console.error("Failed to save config:", res.stderr);
-        toast.error("Failed to save config.");
-        saveButtonText = "Error Saving";
+        toast.error(t("failedSaveConfig"));
+        saveButtonText = t("errorSaving");
       }
     } catch (e) {
       console.error("Failed to save config: ", e);
-      toast.error("Error saving config.");
-      saveButtonText = "Error Saving";
+      toast.error(t("errorSavingConfig"));
+      saveButtonText = t("errorSaving");
     } finally {
       setTimeout(() => {
-        saveButtonText = "Save";
+        saveButtonText = t("save");
         isSaving = false;
       }, 2000);
     }
@@ -1673,14 +1678,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
   async function resetConfig() {
     if (await isConfigDefault()) {
-      toast.info("Config is already default.");
+      toast.info(t("configAlreadyDefault"));
       return;
     }
 
-    await toast.confirm("The entire config will be reset. Proceed?", {
+    await toast.confirm(t("confirmResetConfig"), {
       action: async () => {
         isResetting = true;
-        resetButtonText = "Resetting...";
+        resetButtonText = t("resetting");
 
         await tick();
         await yieldToUI();
@@ -1700,18 +1705,18 @@ SPDX-License-Identifier: GPL-3.0-or-later
             originalConfigText = configText;
             await updateStatus();
 
-            resetButtonText = "Reset! ✓";
+            resetButtonText = t("resetDone");
           } else {
-            toast.error("Failed to reset configuration.");
-            resetButtonText = "Error Resetting";
+            toast.error(t("failedResetConfig"));
+            resetButtonText = t("errorResetting");
           }
         } catch (e) {
           console.error("Error resetting config:", e);
-          toast.error("Error resetting configuration.");
-          resetButtonText = "Error Resetting";
+          toast.error(t("errorResetConfig"));
+          resetButtonText = t("errorResetting");
         } finally {
           setTimeout(() => {
-            resetButtonText = "Reset";
+            resetButtonText = t("reset");
             isResetting = false;
           }, 2000);
         }
@@ -1793,7 +1798,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
   // =========================
   let isLogsOpen = $state(load("isLogsOpen", false));
   let activeLogType = $state(load("activeLogType", ""));
-  let logsContent = $state(load("logsContent", "Loading logs..."));
+  let logsContent = $state(load("logsContent", t("loadingLogs")));
   let isLogsPolling = $state(load("isLogsPolling", false));
   let isLogsSearchOpen = $state(load("isLogsSearchOpen", false));
   let logsSearchQuery = $state(load("logsSearchQuery", ""));
@@ -1820,9 +1825,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
     return results;
   });
   let logsCountLabel = $derived.by(() => {
-    if (!logsSearchQuery || logsContent === "Loading logs...") return "";
+    if (!logsSearchQuery || logsContent === t("loadingLogs")) return "";
     const n = logsMatches().length;
-    return n > 0 ? `${logsMatchIndex + 1}/${n}` : "No matches";
+    return n > 0 ? `${logsMatchIndex + 1}/${n}` : t("noMatches");
   });
 
   async function switchLogs(type) {
@@ -1839,7 +1844,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     if (type !== activeLogType) logsMatchIndex = 0;
     activeLogType = type;
     isLogsOpen = true;
-    logsContent = "Loading logs...";
+    logsContent = t("loadingLogs");
 
     const path =
       type === "volatile"
@@ -1847,7 +1852,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         : "/data/adb/vr25/acc-data/logs/*.log";
 
     const res = await exec(`tail -n 50 ${path} 2>/dev/null`);
-    logsContent = res.stdout || "Empty.";
+    logsContent = res.stdout || t("empty");
 
     if (!wasLogsOpen) {
       startPollingLogs();
@@ -1878,7 +1883,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           : "/data/adb/vr25/acc-data/logs/*.log";
 
       const res = await exec(`tail -n 50 ${path} 2>/dev/null`);
-      const newContent = res.stdout || "Empty.";
+      const newContent = res.stdout || t("empty");
 
       if (newContent !== logsContent) {
         const isNearBottom = logContainer
@@ -1927,7 +1932,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
       console.error("Failed to clear logs:", res.stderr);
     }
 
-    logsContent = "Logs cleared.";
+    logsContent = t("logsCleared");
   }
 
   async function exportLogs() {
@@ -1967,12 +1972,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
       const archive_path = checkFile.stdout || "";
 
       if (archive_path) {
-        toast.success(`Exported to ${archive_path}`);
+        toast.success(t("exportedTo", { path: archive_path }));
       } else {
-        toast.error("Export failed (no archive created)");
+        toast.error(t("exportFailed"));
       }
     } catch (e) {
-      toast.error("Error exporting logs");
+      toast.error(t("errorExportingLogs"));
     } finally {
       isExportingLogs = false;
     }
@@ -2195,7 +2200,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           font-family="system-ui, sans-serif"
           font-size="62"
           font-weight="800"
-          letter-spacing="-1.5">ACC WebUI</text
+          letter-spacing="-1.5">{t("webUiName")}</text
         >
         <text
           x="0"
@@ -2204,7 +2209,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           font-family="system-ui, sans-serif"
           font-size="26"
           font-weight="600"
-          opacity="0.95">Advanced Charging Controller</text
+          opacity="0.95">{t("advancedChargingController")}</text
         >
       </g>
 
@@ -2304,7 +2309,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
   <div class="grid grid-2">
     <div class="m3-card" style="margin-bottom:0;">
       <div class="card-header">
-        <span class="card-title">Health</span><IMaterialSymbolsFavorite
+        <span class="card-title">{t("health")}</span><IMaterialSymbolsFavorite
           class="mi-icon"
         />
       </div>
@@ -2312,7 +2317,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     </div>
     <div class="m3-card" style="margin-bottom:0;">
       <div class="card-header">
-        <span class="card-title">Temperature</span><IMaterialSymbolsThermostat
+        <span class="card-title">{t("temperature")}</span><IMaterialSymbolsThermostat
           class="mi-icon"
         />
       </div>
@@ -2320,7 +2325,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     </div>
     <div class="m3-card" style="margin-bottom:0;">
       <div class="card-header">
-        <span class="card-title">Current</span><IMaterialSymbolsSwapCalls
+        <span class="card-title">{t("current")}</span><IMaterialSymbolsSwapCalls
           class="mi-icon"
         />
       </div>
@@ -2328,7 +2333,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     </div>
     <div class="m3-card" style="margin-bottom:0;">
       <div class="card-header">
-        <span class="card-title">Voltage</span><IMaterialSymbolsBolt
+        <span class="card-title">{t("voltage")}</span><IMaterialSymbolsBolt
           class="mi-icon"
         />
       </div>
@@ -2341,7 +2346,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <div class="header-row section-divider">
       <div class="title-group">
         <IMaterialSymbolsBuild class="mi-icon" />
-        <div class="section-title">Daemon (accd)</div>
+        <div class="section-title">{t("daemon")}</div>
       </div>
       <span id="bat-status" class={currentState}>
         {daemonStatus}
@@ -2356,7 +2361,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         disabled={!statusReady ||
           isTransitioning ||
           isSectionDisabled ||
-          isRunning}>Start</button
+          isRunning}>{t("start")}</button
       >
       <button
         id="btn-stop"
@@ -2365,7 +2370,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         disabled={!statusReady ||
           isTransitioning ||
           isSectionDisabled ||
-          !isRunning}>Stop</button
+          !isRunning}>{t("stop")}</button
       >
       <button
         id="btn-banner-restart"
@@ -2374,7 +2379,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         disabled={!statusReady ||
           isTransitioning ||
           isSectionDisabled ||
-          !isRunning}>Restart</button
+          !isRunning}>{t("restart")}</button
       >
     </div>
   </section>
@@ -2384,7 +2389,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <div class="header-row section-divider">
       <div class="title-group">
         <IMaterialSymbolsSwitch class="mi-icon" />
-        <div class="section-title">Charging Switch</div>
+        <div class="section-title">{t("chargingSwitchSection")}</div>
       </div>
     </div>
 
@@ -2392,7 +2397,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <div class="setting-wrapper">
       <div class="setting-row input-row">
         <div class="label-group">
-          <div class="label-text">Current Switch</div>
+          <div class="label-text">{t("currentSwitch")}</div>
           <button
             type="button"
             class="info-btn"
@@ -2400,7 +2405,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
               e.stopPropagation();
               toggleDescription("cs_current");
             }}
-            aria-label="Toggle info for Current Switch"
+            aria-label={t("infoCurrentSwitchLabel")}
           >
             <IMaterialSymbolsInfo class="mi-icon" />
           </button>
@@ -2423,7 +2428,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <div class="setting-wrapper" class:disabled-section={isSectionDisabled}>
       <div class="setting-row input-row">
         <div class="label-group">
-          <div class="label-text">Working Switches</div>
+          <div class="label-text">{t("workingSwitches")}</div>
           <button
             type="button"
             class="info-btn"
@@ -2431,7 +2436,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
               e.stopPropagation();
               toggleDescription("chargingSwitch");
             }}
-            aria-label="Toggle info for Charging Switch"
+            aria-label={t("infoChargingSwitchLabel")}
           >
             <IMaterialSymbolsInfo class="mi-icon" />
           </button>
@@ -2450,8 +2455,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
             {matchingSwitches
               ? currentSwitch
               : availableSwitches.length === 0
-                ? "Click 'Test All' to populate"
-                : "Select a working switch"}
+                ? t("switchSelectPrompt")
+                : t("selectWorkingSwitchPrompt")}
           </span>
           <IMaterialSymbolsArrowDropDown class="mi-icon" />
         </button>
@@ -2471,7 +2476,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <div class="setting-wrapper" class:disabled-section={isSectionDisabled}>
       <div class="setting-row input-row">
         <div class="label-group">
-          <div class="label-text">Manual Override</div>
+          <div class="label-text">{t("manualOverride")}</div>
           <button
             type="button"
             class="info-btn"
@@ -2479,7 +2484,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
               e.stopPropagation();
               toggleDescription("cs_manual");
             }}
-            aria-label="Toggle info for Manual Override"
+            aria-label={t("infoManualOverrideLabel")}
           >
             <IMaterialSymbolsInfo class="mi-icon" />
           </button>
@@ -2487,7 +2492,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <input
           type="text"
           class="m3-input"
-          placeholder="e.g., battery/charging_enabled 1 0"
+          placeholder={t("manualSwitchPlaceholder")}
           bind:value={manualSwitchInput}
           disabled={isSectionDisabled}
         />
@@ -2506,7 +2511,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <div class="setting-wrapper" class:disabled-section={isSectionDisabled}>
       <div class="setting-row">
         <div class="label-group">
-          <div class="label-text">Force Off</div>
+          <div class="label-text">{t("forceOff")}</div>
           <button
             type="button"
             class="info-btn"
@@ -2514,7 +2519,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
               e.stopPropagation();
               toggleDescription("fo");
             }}
-            aria-label="Toggle info for Force Off"
+            aria-label={t("infoForceOffLabel")}
           >
             <IMaterialSymbolsInfo class="mi-icon" />
           </button>
@@ -2546,7 +2551,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         class="m3-btn btn-secondary m3-btn-centered"
         disabled={!manualSwitchInput || manualSwitchInput === currentSwitch}
       >
-        <span>Apply Manual</span>
+        <span>{t("applyManual")}</span>
       </button>
 
       <button
@@ -2556,11 +2561,11 @@ SPDX-License-Identifier: GPL-3.0-or-later
       >
         {#if testAllState === "running"}
           <span class="btn-leading-icon"><span class="m3-spinner"></span></span>
-          <span>Cancel</span>
+          <span>{t("cancel")}</span>
         {:else if testAllState === "done"}
-          <span>Close</span>
+          <span>{t("close")}</span>
         {:else}
-          <span>Test All</span>
+          <span>{t("testAll")}</span>
         {/if}
       </button>
     </div>
@@ -2589,7 +2594,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         class="section-hint"
         transition:slideNoFade={{ duration: 250, easing: cubicOut }}
       >
-        Takes effect once a charging switch is selected.
+        {t("takesEffectWithSwitch")}
       </div>
     {/if}
   {/snippet}
@@ -2599,14 +2604,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <div class="header-row section-divider header-wrap">
       <div class="title-group">
         <IMaterialSymbolsBatteryChargingFull class="mi-icon" />
-        <div class="section-title">Charging Thresholds</div>
+        <div class="section-title">{t("chargingThresholds")}</div>
       </div>
       {@render noSwitchHint()}
     </div>
 
     <div class="slider-wrapper">
       <div class="flex justify-between">
-        <div class="label-text">Resume At</div>
+        <div class="label-text">{t("resumeAt")}</div>
         <div class="thresh-label">{resumeThresh}%</div>
       </div>
       <div class="slider-container resume" style="--percent: {resumeThresh}%;">
@@ -2627,7 +2632,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <div class="slider-wrapper stop-spacing">
       <div class="flex justify-between">
-        <div class="label-text">Pause At</div>
+        <div class="label-text">{t("pauseAt")}</div>
         <div class="thresh-label">{pauseThresh}%</div>
       </div>
       <div class="slider-container pause" style="--percent: {pauseThresh}%;">
@@ -2648,7 +2653,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
     <div class="slider-wrapper stop-spacing">
       <div class="flex justify-between">
-        <div class="label-text">Shutdown At</div>
+        <div class="label-text">{t("shutdownAt")}</div>
         <div class="thresh-label">{shutdownThresh}%</div>
       </div>
       <div
@@ -2676,7 +2681,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <div class="header-row section-divider header-wrap">
       <div class="title-group">
         <IMaterialSymbolsEnergySavingsLeaf class="mi-icon" />
-        <div class="section-title">Idle Mode</div>
+        <div class="section-title">{t("idleMode")}</div>
       </div>
       {@render noSwitchHint()}
     </div>
@@ -2685,12 +2690,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <div class="setting-wrapper">
       <div class="setting-row">
         <div class="label-group">
-          <div class="label-text">Allow Idle Above Pause</div>
+          <div class="label-text">{t("allowIdleAbovePause")}</div>
           <button
             type="button"
             class="info-btn"
             onclick={() => toggleDescription("aiapc")}
-            aria-label="Toggle info for Allow Idle Above Pause"
+            aria-label={t("infoAllowIdleAbovePauseLabel")}
           >
             <IMaterialSymbolsInfo class="mi-icon" />
           </button>
@@ -2719,12 +2724,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <div class="setting-wrapper">
       <div class="setting-row">
         <div class="label-group">
-          <div class="label-text">Prioritize Idle Mode</div>
+          <div class="label-text">{t("prioritizeIdleMode")}</div>
           <button
             type="button"
             class="info-btn"
             onclick={() => toggleDescription("pbim")}
-            aria-label="Toggle info for Prioritize Idle Mode"
+            aria-label={t("infoPrioritizeIdleModeLabel")}
           >
             <IMaterialSymbolsInfo class="mi-icon" />
           </button>
@@ -2753,12 +2758,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <div class="setting-wrapper">
       <div class="setting-row">
         <div class="label-group">
-          <div class="label-text">Off Mid</div>
+          <div class="label-text">{t("offMid")}</div>
           <button
             type="button"
             class="info-btn"
             onclick={() => toggleDescription("om")}
-            aria-label="Toggle info for Off Mid"
+            aria-label={t("infoOffMidLabel")}
           >
             <IMaterialSymbolsInfo class="mi-icon" />
           </button>
@@ -2797,7 +2802,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
         aria-disabled={isSectionDisabled}
       >
         <div class="label-group">
-          <div class="label-text">Idle Apps</div>
+          <div class="label-text">{t("idleApps")}</div>
           <button
             type="button"
             class="info-btn"
@@ -2805,13 +2810,13 @@ SPDX-License-Identifier: GPL-3.0-or-later
               e.stopPropagation();
               toggleDescription("ia");
             }}
-            aria-label="Toggle info for Idle Apps"
+            aria-label={t("infoIdleAppsLabel")}
           >
             <IMaterialSymbolsInfo class="mi-icon" />
           </button>
         </div>
         <div class="idle-apps-value">
-          <span class="idle-apps-count">{idleApps.length} apps</span>
+          <span class="idle-apps-count">{t("idleAppsCount", { count: idleApps.length })}</span>
           <IMaterialSymbolsChevronRight class="mi-icon" />
         </div>
       </div>
@@ -2840,12 +2845,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <div class="modal-header">
           <div class="modal-title-group">
             <IMaterialSymbolsApps class="mi-icon" />
-            <h3 class="modal-title">Select Idle Apps</h3>
+            <h3 class="modal-title">{t("selectIdleApps")}</h3>
           </div>
           <button
             class="modal-close-btn"
             onclick={() => (showAppModal = false)}
-            aria-label="Close"
+            aria-label={t("close")}
           >
             <IMaterialSymbolsClose class="mi-icon" />
           </button>
@@ -2861,7 +2866,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
             disabled={selectedApps.length === 0 || iconsLoading}
           >
             <IMaterialSymbolsClearAll class="mi-icon" />
-            <span class="btn-text">Clear All</span>
+            <span class="btn-text">{t("clearAll")}</span>
           </button>
 
           <!-- Search -->
@@ -2875,7 +2880,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
             <input
               type="text"
               class="search-input"
-              placeholder="Search apps..."
+              placeholder={t("searchAppsPlaceholder")}
               bind:value={searchQuery}
               onclick={() => !iconsLoading && (searchExpanded = true)}
               disabled={iconsLoading}
@@ -2889,7 +2894,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
                   searchQuery = "";
                   searchExpanded = false;
                 }}
-                aria-label="Close search"
+                aria-label={t("closeSearchLabel")}
               >
                 <IMaterialSymbolsClose class="mi-icon" />
               </button>
@@ -2900,7 +2905,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           <label class="sys-toggle-pill" class:disabled-section={iconsLoading}>
             <IMaterialSymbolsAndroid class="mi-icon" />
 
-            <span class="btn-text">System Apps</span>
+            <span class="btn-text">{t("systemApps")}</span>
 
             <span class="m3-switch">
               <input
@@ -2957,14 +2962,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
             {#if displayedApps.length === 0}
               <div class="empty-state">
                 <IMaterialSymbolsInbox class="mi-icon" />
-                <p>No apps found</p>
+                <p>{t("noAppsFound")}</p>
               </div>
             {/if}
           </div>
 
           {#if iconsLoading}
             <div class="app-list-loading">
-              <span class="m3-spinner" aria-label="Loading apps"></span>
+              <span class="m3-spinner" aria-label={t("loadingApps")}></span>
             </div>
           {/if}
         </div>
@@ -2975,13 +2980,13 @@ SPDX-License-Identifier: GPL-3.0-or-later
             class="m3-btn btn-secondary modal-action-btn"
             onclick={() => (showAppModal = false)}
           >
-            Cancel
+            {t("cancel")}
           </button>
           <button
             class="m3-btn btn-primary modal-action-btn"
             onclick={saveIdleApps}
           >
-            Confirm
+            {t("confirm")}
             {#if selectedApps.length > 0 && !iconsLoading}
               <span class="selection-count">{selectedApps.length}</span>
             {/if}
@@ -2996,7 +3001,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <div class="header-row section-divider">
       <div class="title-group">
         <IMaterialSymbolsSync class="mi-icon" />
-        <div class="section-title">Reset Battery Stats</div>
+        <div class="section-title">{t("resetBatteryStats")}</div>
       </div>
     </div>
 
@@ -3004,12 +3009,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <div class="setting-wrapper">
       <div class="setting-row">
         <div class="label-group">
-          <div class="label-text">On Pause</div>
+          <div class="label-text">{t("onPause")}</div>
           <button
             type="button"
             class="info-btn"
             onclick={() => toggleDescription("rbsp")}
-            aria-label="Toggle info for On Pause"
+            aria-label={t("infoOnPauseLabel")}
           >
             <IMaterialSymbolsInfo class="mi-icon" />
           </button>
@@ -3038,12 +3043,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <div class="setting-wrapper">
       <div class="setting-row">
         <div class="label-group">
-          <div class="label-text">On Unplug</div>
+          <div class="label-text">{t("onUnplug")}</div>
           <button
             type="button"
             class="info-btn"
             onclick={() => toggleDescription("rbsu")}
-            aria-label="Toggle info for On Unplug"
+            aria-label={t("infoOnUnplugLabel")}
           >
             <IMaterialSymbolsInfo class="mi-icon" />
           </button>
@@ -3072,12 +3077,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <div class="setting-wrapper">
       <div class="setting-row">
         <div class="label-group">
-          <div class="label-text">On Plug</div>
+          <div class="label-text">{t("onPlug")}</div>
           <button
             type="button"
             class="info-btn"
             onclick={() => toggleDescription("rbspl")}
-            aria-label="Toggle info for On Plug"
+            aria-label={t("infoOnPlugLabel")}
           >
             <IMaterialSymbolsInfo class="mi-icon" />
           </button>
@@ -3108,7 +3113,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <div class="header-row">
       <div class="title-group">
         <IMaterialSymbolsEditNote class="mi-icon" />
-        <div class="section-title">Config</div>
+        <div class="section-title">{t("config")}</div>
       </div>
       <div class="config-controls">
         {#if isEditorOpen}
@@ -3119,7 +3124,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
               isConfigSearchOpen = !isConfigSearchOpen;
               if (!isConfigSearchOpen) configSearchQuery = "";
             }}
-            title="Search config"
+            title={t("searchConfig")}
             in:fade={{ duration: 180, easing: cubicOut }}
             out:fade={{ duration: 140, easing: cubicOut }}
           >
@@ -3130,7 +3135,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
             class="log-poll-btn"
             onclick={undoConfig}
             disabled={!canUndo}
-            title="Undo"
+            title={t("undo")}
             in:fade={{ duration: 180, easing: cubicOut }}
             out:fade={{ duration: 140, easing: cubicOut }}
           >
@@ -3141,7 +3146,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
             class="log-poll-btn"
             onclick={redoConfig}
             disabled={!canRedo}
-            title="Redo"
+            title={t("redo")}
             in:fade={{ duration: 180, easing: cubicOut }}
             out:fade={{ duration: 140, easing: cubicOut }}
           >
@@ -3151,7 +3156,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           <button
             class="log-poll-btn"
             onclick={() => jumpEditor(false)}
-            title="Jump to top"
+            title={t("jumpToTop")}
             in:fade={{ duration: 180, easing: cubicOut }}
             out:fade={{ duration: 140, easing: cubicOut }}
           >
@@ -3161,7 +3166,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           <button
             class="log-poll-btn"
             onclick={() => jumpEditor(true)}
-            title="Jump to bottom"
+            title={t("jumpToBottom")}
             in:fade={{ duration: 180, easing: cubicOut }}
             out:fade={{ duration: 140, easing: cubicOut }}
           >
@@ -3174,8 +3179,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
           class="arrow-toggle-btn"
           onclick={toggleEditor}
           aria-label={isEditorOpen
-            ? "Collapse config file"
-            : "Expand config file"}
+            ? t("collapseConfigFile")
+            : t("expandConfigFile")}
           aria-expanded={isEditorOpen}
         >
           <div
@@ -3205,7 +3210,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
                 type="text"
                 class="inline-search-input-field"
                 placeholder=""
-                aria-label="Search config"
+                aria-label={t("searchConfig")}
                 bind:value={configSearchQuery}
               />
               {#if !configSearchQuery}
@@ -3214,7 +3219,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
                   in:fly={{ y: 6, duration: 180, easing: cubicOut }}
                   out:fly={{ y: -6, duration: 120, easing: cubicOut }}
                 >
-                  Search config...
+                  {t("searchConfigPlaceholder")}
                 </span>
               {/if}
             </div>
@@ -3253,7 +3258,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
                       e.stopPropagation();
                       configSearchQuery = "";
                     }}
-                    aria-label="Clear search"
+                    aria-label={t("clearSearch")}
                     transition:scale={{ duration: 150, easing: cubicOut }}
                   >
                     <IMaterialSymbolsClose class="mi-icon" />
@@ -3264,7 +3269,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
               <button
                 class="search-nav-btn"
                 onclick={() => navigateConfigSearch(-1)}
-                title="Previous"
+                title={t("previous")}
                 disabled={configMatches().length === 0}
               >
                 <IMaterialSymbolsKeyboardArrowUp class="mi-icon" />
@@ -3272,7 +3277,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
               <button
                 class="search-nav-btn"
                 onclick={() => navigateConfigSearch(1)}
-                title="Next"
+                title={t("next")}
                 disabled={configMatches().length === 0}
               >
                 <IMaterialSymbolsKeyboardArrowDown class="mi-icon" />
@@ -3347,7 +3352,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     <div class="header-row">
       <div class="title-group">
         <IMaterialSymbolsTerminal class="mi-icon" />
-        <div class="section-title">Logs</div>
+        <div class="section-title">{t("logs")}</div>
       </div>
 
       <div class="logs-controls">
@@ -3359,7 +3364,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
               isLogsSearchOpen = !isLogsSearchOpen;
               if (!isLogsSearchOpen) logsSearchQuery = "";
             }}
-            title="Search logs"
+            title={t("searchLogs")}
             in:fade={{ duration: 180, easing: cubicOut }}
             out:fade={{ duration: 140, easing: cubicOut }}
           >
@@ -3376,9 +3381,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
               }
             }}
             aria-label={isLogsPolling
-              ? "Pause log polling"
-              : "Start log polling"}
-            title={isLogsPolling ? "Pause" : "Play"}
+              ? t("pauseLogPolling")
+              : t("startLogPolling")}
+            title={isLogsPolling ? t("pause") : t("play")}
             in:fade={{ duration: 180, easing: cubicOut }}
             out:fade={{ duration: 140, easing: cubicOut }}
           >
@@ -3398,7 +3403,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
               : ''}"
             onclick={() => switchLogs("volatile")}
           >
-            Volatile
+            {t("volatile")}
           </button>
           <button
             class="log-tab-btn {isLogsOpen && activeLogType === 'persistent'
@@ -3406,7 +3411,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
               : ''}"
             onclick={() => switchLogs("persistent")}
           >
-            Persistent
+            {t("persistent")}
           </button>
         </div>
       </div>
@@ -3429,7 +3434,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
                 type="text"
                 class="inline-search-input-field"
                 placeholder=""
-                aria-label="Search logs"
+                aria-label={t("searchLogs")}
                 bind:value={logsSearchQuery}
               />
               {#if !logsSearchQuery}
@@ -3438,7 +3443,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
                   in:fly={{ y: 6, duration: 180, easing: cubicOut }}
                   out:fly={{ y: -6, duration: 120, easing: cubicOut }}
                 >
-                  Search logs...
+                  {t("searchLogsPlaceholder")}
                 </span>
               {/if}
             </div>
@@ -3473,7 +3478,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
                       e.stopPropagation();
                       logsSearchQuery = "";
                     }}
-                    aria-label="Clear search"
+                    aria-label={t("clearSearch")}
                     transition:scale={{ duration: 150, easing: cubicOut }}
                   >
                     <IMaterialSymbolsClose class="mi-icon" />
@@ -3484,7 +3489,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
               <button
                 class="search-nav-btn"
                 onclick={() => navigateLogsSearch(-1)}
-                title="Previous"
+                title={t("previous")}
                 disabled={logsMatches().length === 0}
               >
                 <IMaterialSymbolsKeyboardArrowUp class="mi-icon" />
@@ -3492,7 +3497,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
               <button
                 class="search-nav-btn"
                 onclick={() => navigateLogsSearch(1)}
-                title="Next"
+                title={t("next")}
                 disabled={logsMatches().length === 0}
               >
                 <IMaterialSymbolsKeyboardArrowDown class="mi-icon" />
@@ -3520,7 +3525,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
             disabled={activeLogType === "persistent"}
             class="m3-btn btn-danger m3-btn-centered"
           >
-            <span>Clear</span>
+            <span>{t("clear")}</span>
           </button>
           <button
             onclick={exportLogs}
@@ -3531,9 +3536,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
               <span class="btn-leading-icon">
                 <span class="m3-spinner"></span>
               </span>
-              <span>Exporting...</span>
+              <span>{t("exporting")}</span>
             {:else}
-              <span>Export</span>
+              <span>{t("export")}</span>
             {/if}
           </button>
         </div>
@@ -3564,7 +3569,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           </div>
           <div class="repo-details">
             <div class="repo-name">Infiniti151/acc-with-webui</div>
-            <div class="repo-action-label">View on GitHub</div>
+            <div class="repo-action-label">{t("viewOnGitHub")}</div>
           </div>
         </div>
         <div class="footer-right-group">
@@ -3583,7 +3588,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 <DropdownModal
   isOpen={showSwitchModal}
-  title="Select Working Switch"
+  title={t("selectWorkingSwitch")}
   options={availableSwitches}
   bind:selectedValue={currentSwitch}
   onSelect={handleSelectSwitch}

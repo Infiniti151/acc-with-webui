@@ -1,5 +1,26 @@
 # English (en)
 
+TXT_INSTALLING_IN="Installing in"
+TXT_DONE="Done"
+TXT_INSTALLED_RUNNING="installed and running!
+
+Rollback with acc -b if not satisfied."
+TXT_REBOOT_UNNECESSARY="Rebooting is unnecessary."
+TXT_REBOOT_NOTE="Note: If you're not rebooting now, prefix all acc executables with /dev/ (as in /dev/acc -i, /dev/accd).
+Reasoning: Magisk, KernelSU and similar, don't [re]mount/update modules without a reboot."
+TXT_NON_MAGISK_NOTICE="Non-Magisk users can enable $id auto-start by running /data/adb/$domain/$id/service.sh, a copy of, or a link to it - with init.d or an app that emulates it."
+TXT_OVERLAY_SUPPORT="- Add support for overlayfs"
+TXT_RUNNING="[*] Daemon is currently RUNNING."
+TXT_STOPPING="[*] Stopping accd..."
+TXT_STOPPED="[*] Daemon STOPPED."
+TXT_STOPPED_STATE="[*] Daemon is currently STOPPED."
+TXT_STARTING="[*] Starting accd..."
+TXT_STARTED="[*] Daemon STARTED."
+TXT_TEST_RUNNING="[!] Test All is running and needs the daemon stopped."
+TXT_WAIT_TEST="[!] Wait for it to finish (or cancel it), then try again."
+TXT_PROP_ERROR="[!] Error: module.prop not found at"
+MODULE_DESC="Extend your battery's service life by controlling charging current, temperature, and voltage."
+
 print_already_running() {
   echo "accd is already running"
 }
