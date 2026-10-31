@@ -19,7 +19,7 @@ TXT_STARTED="[*] Démon DÉMARRÉ."
 TXT_TEST_RUNNING="[!] Test All est en cours d'exécution et nécessite l'arrêt du démon."
 TXT_WAIT_TEST="[!] Attendez qu'il se termine (ou annulez-le), puis réessayez."
 TXT_PROP_ERROR="[!] Erreur : module.prop introuvable à"
-MODULE_NAME="Prolongez la durée de vie de votre batterie en contrôlant le courant de charge, la température et la tension."
+MODULE_DESC="Prolongez la durée de vie de votre batterie en contrôlant le courant de charge, la température et la tension."
 
 print_already_running() {
   echo "accd est déjà en fonctionnement"
