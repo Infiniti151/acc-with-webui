@@ -8,7 +8,6 @@ PROP_FILE="$MODDIR/module.prop"
 TEST_FILES="/data/local/tmp/acc_test_all.log /data/local/tmp/acc_test_all.hb"
 
 # Detect system language
-# Detect system language strictly from cmd activity get-config
 lang=$(cmd activity get-config 2>/dev/null | grep -m1 '^config:' | sed 's/^config:[[:space:]]*//' | cut -d',' -f1 | cut -d'-' -f1 | tr '[:upper:]' '[:lower:]' | cut -c1-2)
 
 [ -z "$lang" ] && lang=$(getprop persist.sys.locale | cut -c1-2)
@@ -77,7 +76,7 @@ fi
 # Get capacities for description update
 eval "$(/dev/acc -sp capacity 2>/dev/null | grep -E '^(resume|pause|shutdown)_capacity=')"
 
-# Формируем новое описание
+# We are creating a new description
 NEW_DESC="[accd ${STATUS}] | 🟢 ${resume_capacity}% | 🟡 ${pause_capacity}% | 🔴 ${shutdown_capacity}% | ${MODULE_NAME}"
 
 # Update description only if it has actually changed (prevents infinite loops)
