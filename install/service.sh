@@ -77,9 +77,15 @@ fi
 # Get capacities for description update
 eval "$(/dev/acc -sp capacity 2>/dev/null | grep -E '^(resume|pause|shutdown)_capacity=')"
 
-# Update description (cross-compatible)
+# Формируем новое описание
+NEW_DESC="[accd ${STATUS}] | 🟢 ${resume_capacity}% | 🟡 ${pause_capacity}% | 🔴 ${shutdown_capacity}% | ${MODULE_NAME}"
+
+# Update description only if it has actually changed (prevents infinite loops)
 if [ -f "$PROP_FILE" ]; then
-    sed -i "s@^description=.*@description=[accd ${STATUS}] | 🟢 ${resume_capacity}% | 🟡 ${pause_capacity}% | 🔴 ${shutdown_capacity}% | ${MODULE_NAME}@" "$PROP_FILE"
+    CURRENT_DESC="$(grep '^description=' "$PROP_FILE" | cut -d= -f2-)"
+    if [ "$CURRENT_DESC" != "$NEW_DESC" ]; then
+        sed -i "s@^description=.*@description=${NEW_DESC}@" "$PROP_FILE"
+    fi
 else
     echo "$TXT_PROP_ERROR $PROP_FILE"
 fi
