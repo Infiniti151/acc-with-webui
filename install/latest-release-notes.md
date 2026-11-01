@@ -1,4 +1,4 @@
-### v1.6.0 (10600) - 2026-10-31
+### v1.6.0 (10600) - 2026-11-01
 `ACC: dev-2025-06-06`
 - Added dynamic accd description system with real-time status and charging thresholds (@LegacyFreeman)
 - Added multi-language UI localization support (de-DE, fr, pt-PT, ru, tr, zh-rCN, zh-rTW) (@LegacyFreeman)
