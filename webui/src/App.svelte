@@ -10,7 +10,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
   import { listPackages, getPackagesInfo } from "kernelsu";
   import { version, acc_version } from "../package.json";
   import { t } from "./i18n.js";
-  import { infoDescriptions } from "./utils/descriptions.js";
   import { exec } from "./utils/exec.js";
   import { toast } from "./stores/toast.svelte.js";
   import { banner } from "./stores/banner.svelte.js";
