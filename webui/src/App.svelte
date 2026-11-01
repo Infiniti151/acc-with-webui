@@ -2405,7 +2405,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
               e.stopPropagation();
               toggleDescription("cs_current");
             }}
-            aria-label={t("descriptionCurrentSwitch")}
+            aria-label={t("infoCurrentSwitchLabel")}
           >
             <IMaterialSymbolsInfo class="mi-icon" />
           </button>
