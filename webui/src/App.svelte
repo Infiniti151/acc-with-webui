@@ -2418,7 +2418,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           class="toggle-description"
           transition:slide={{ duration: 250, easing: cubicOut }}
         >
-          {@html infoDescriptions.cs_current}
+         {@html t("descriptionCurrentSwitch")}
         </div>
       {/if}
     </div>
