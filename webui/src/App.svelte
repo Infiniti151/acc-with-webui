@@ -2433,7 +2433,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
             class="info-btn"
             onclick={(e) => {
               e.stopPropagation();
-              toggleDescription("descriptionWorkingSwitches");
+              toggleDescription("chargingSwitch");
             }}
             aria-label={t("infoChargingSwitchLabel")}
           >
@@ -2466,7 +2466,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           class="toggle-description"
           transition:slide={{ duration: 250, easing: cubicOut }}
         >
-          {@html infoDescriptions.chargingSwitch}
+          {@html t("descriptionWorkingSwitches")}
         </div>
       {/if}
     </div>
@@ -2501,7 +2501,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           class="toggle-description"
           transition:slide={{ duration: 250, easing: cubicOut }}
         >
-          {@html infoDescriptions.cs_manual}
+          {@html t("descriptionManualOverride")}
         </div>
       {/if}
     </div>
@@ -2538,7 +2538,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           class="toggle-description"
           transition:slide={{ duration: 250, easing: cubicOut }}
         >
-          {@html infoDescriptions.fo}
+          {@html t("descriptionForceOff")}
         </div>
       {/if}
     </div>
@@ -2714,7 +2714,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           class="toggle-description"
           transition:slide={{ duration: 250, easing: cubicOut }}
         >
-          {infoDescriptions.aiapc}
+          {t("descriptionAllowIdleAbovePause")}
         </div>
       {/if}
     </div>
@@ -2748,7 +2748,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           class="toggle-description"
           transition:slide={{ duration: 250, easing: cubicOut }}
         >
-          {infoDescriptions.pbim}
+          {t("descriptionPrioritizeIdleMode")}
         </div>
       {/if}
     </div>
@@ -2782,7 +2782,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           class="toggle-description"
           transition:slide={{ duration: 250, easing: cubicOut }}
         >
-          {infoDescriptions.om}
+          {t("descriptionOffMid")}
         </div>
       {/if}
     </div>
@@ -2824,7 +2824,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           class="toggle-description"
           transition:slide={{ duration: 250, easing: cubicOut }}
         >
-          {infoDescriptions.ia}
+          {t("descriptionIdleApps")}
         </div>
       {/if}
     </div>
@@ -3033,7 +3033,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           class="toggle-description"
           transition:slide={{ duration: 250, easing: cubicOut }}
         >
-          {infoDescriptions.rbsp}
+          {t("descriptionOnPause")}
         </div>
       {/if}
     </div>
@@ -3067,7 +3067,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           class="toggle-description"
           transition:slide={{ duration: 250, easing: cubicOut }}
         >
-          {infoDescriptions.rbsu}
+          {t("descriptionOnUnplug")}
         </div>
       {/if}
     </div>
@@ -3101,7 +3101,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           class="toggle-description"
           transition:slide={{ duration: 250, easing: cubicOut }}
         >
-          {infoDescriptions.rbspl}
+          {t("descriptionOnPlug")}
         </div>
       {/if}
     </div>
