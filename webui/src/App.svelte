@@ -2433,7 +2433,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
             class="info-btn"
             onclick={(e) => {
               e.stopPropagation();
-              toggleDescription("chargingSwitch");
+              toggleDescription("descriptionWorkingSwitches");
             }}
             aria-label={t("infoChargingSwitchLabel")}
           >
