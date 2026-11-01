@@ -1,5 +1,26 @@
 # Türkçe (tr)
 
+TXT_INSTALLING_IN="Şuraya yükleniyor"
+TXT_DONE="Tamamlandı"
+TXT_INSTALLED_RUNNING="kuruldu ve çalışıyor!
+
+Memnun kalmazsanız acc -b ile geri alın."
+TXT_REBOOT_UNNECESSARY="Yeniden başlatma gerekmez."
+TXT_REBOOT_NOTE="Not: Şimdi yeniden başlatmıyorsanız, tüm acc yürütülebilir dosyalarının başına /dev/ ekleyin (örn. /dev/acc -i, /dev/accd).
+Sebep: Magisk, KernelSU ve benzerleri yeniden başlatma olmadan modülleri [yeniden] bağlamaz/güncellemez."
+TXT_NON_MAGISK_NOTICE="Magisk kullanmayanlar, /data/adb/$domain/$id/service.sh dosyasını (kopyasını veya kısayolunu) init.d veya bunu taklit eden bir uygulama ile çalıştırarak $id otomatik başlatmasını etkinleştirebilir."
+TXT_OVERLAY_SUPPORT="- Overlayfs desteği ekle"
+TXT_RUNNING="[*] Servis (Daemon) şu anda ÇALIŞIYOR."
+TXT_STOPPING="[*] accd durduruluyor..."
+TXT_STOPPED="[*] Servis DURDURULDU."
+TXT_STOPPED_STATE="[*] Servis şu anda DURDURULMUŞ durumda."
+TXT_STARTING="[*] accd başlatılıyor..."
+TXT_STARTED="[*] Servis BAŞLATILDI."
+TXT_TEST_RUNNING="[!] Test All çalışıyor ve servisin durdurulması gerekiyor."
+TXT_WAIT_TEST="[!] Tamamlanmasını bekleyin (veya iptal edin) ve tekrar deneyin."
+TXT_PROP_ERROR="[!] Hata: module.prop şurada bulunamadı:"
+MODULE_DESC="Şarj akımını, sıcaklığı ve voltajı kontrol ederek pilinizin ömrünü uzatın."
+
 print_already_running() {
   echo "accd zaten çalışıyor"
 }

@@ -6,10 +6,11 @@ SPDX-License-Identifier: GPL-3.0-or-later
 <script>
   import { fly, fade } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
+  import { t } from "../i18n.js";
 
   let {
     isOpen = $bindable(false),
-    title = "Select Option",
+    title = t("selectOption"),
     options = [],
     selectedValue = $bindable(""),
     onSelect = () => {},
@@ -48,7 +49,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           <IMaterialSymbolsSwitch class="mi-icon" />
           <h3 class="modal-title">{title}</h3>
         </div>
-        <button class="modal-close-btn" onclick={onClose} aria-label="Close">
+        <button class="modal-close-btn" onclick={onClose} aria-label={t("close")}>
           <IMaterialSymbolsClose class="mi-icon" />
         </button>
       </div>
@@ -78,7 +79,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           {#if options.length === 0}
             <div class="empty-state">
               <IMaterialSymbolsInbox class="mi-icon" />
-              <p>No switches available. Run 'Test All'.</p>
+              <p>{t("noSwitchesAvailable")}</p>
             </div>
           {/if}
         </div>

@@ -1,5 +1,26 @@
 # German (de_DE)
 
+TXT_INSTALLING_IN="Wird installiert in"
+TXT_DONE="Fertig"
+TXT_INSTALLED_RUNNING="installiert und läuft!
+
+Mit acc -b zurücksetzen, falls nicht zufrieden."
+TXT_REBOOT_UNNECESSARY="Ein Neustart ist nicht erforderlich."
+TXT_REBOOT_NOTE="Hinweis: Wenn Sie jetzt keinen Neustart durchführen, stellen Sie allen acc-Befehlen /dev/ voran (wie in /dev/acc -i, /dev/accd).
+Grund: Magisk, KernelSU und Ähnliche mounten/aktualisieren Module ohne Neustart nicht neu."
+TXT_NON_MAGISK_NOTICE="Nicht-Magisk-Benutzer können den $id-Autostart aktivieren, indem sie /data/adb/$domain/$id/service.sh ausführen (eine Kopie oder ein Link davon) – mit init.d oder einer App, die dies emuliert."
+TXT_OVERLAY_SUPPORT="- Unterstützung für OverlayFS hinzufügen"
+TXT_RUNNING="[*] Daemon läuft derzeit."
+TXT_STOPPING="[*] Stoppe accd..."
+TXT_STOPPED="[*] Daemon gestoppt."
+TXT_STOPPED_STATE="[*] Daemon ist derzeit gestoppt."
+TXT_STARTING="[*] Starte accd..."
+TXT_STARTED="[*] Daemon gestartet."
+TXT_TEST_RUNNING="[!] Test All läuft und erfordert einen gestoppten Daemon."
+TXT_WAIT_TEST="[!] Warten Sie, bis er abgeschlossen ist (oder brechen Sie ihn ab), und versuchen Sie es erneut."
+TXT_PROP_ERROR="[!] Fehler: module.prop nicht gefunden unter"
+MODULE_DESC="Verlängern Sie die Lebensdauer Ihres Akkus durch die Steuerung von Ladestrom, Temperatur und Spannung."
+
 print_already_running() {
   echo "accd läuft bereits"
 }

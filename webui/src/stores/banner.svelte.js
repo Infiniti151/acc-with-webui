@@ -4,6 +4,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 **/
 
 import { exec } from "../utils/exec.js";
+import { t } from "../i18n.js";
 
 const RESTART_FLAG = "/data/local/tmp/acc_restart_required";
 
@@ -44,8 +45,8 @@ export const banner = {
         this.show("restart", {
             order: 1,
             icon: "restart",
-            text: "Daemon restart required to apply changes.",
-            actionLabel: "Restart",
+            text: t("bannerRestartRequired"),
+            actionLabel: t("restart"),
             onAction: () => restartHandler?.(),
             actionDisabled: () => (restartBlocked ? restartBlocked() : false),
         });

@@ -6,6 +6,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 <script>
   import { fly } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
+  import { t } from "../i18n.js";
   import { toast, toastState } from "../stores/toast.svelte.js";
 </script>
 
@@ -41,7 +42,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
             onclick={toast.onCancel}
             disabled={toast.loading}
           >
-            No
+            {t("no")}
           </button>
           <button
             class="toast-btn confirm"
@@ -54,7 +55,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
                 style="width: 16px; height: 16px; border-width: 2px;"
               ></div>
             {:else}
-              Yes
+              {t("yes")}
             {/if}
           </button>
         </div>
