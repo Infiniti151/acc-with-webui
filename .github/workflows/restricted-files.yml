@@ -1,0 +1,136 @@
+name: Restricted Files Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  check-restricted-files:
+    name: Restricted Files
+    runs-on: ubuntu-latest
+
+    # Dependabot PRs are exempt.
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
+
+    steps:
+      - name: Check modified files
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const pull_number = context.issue.number;
+
+            // Define restricted files and directories.
+            const restrictedPatterns = [
+              // Directories
+              { pattern: /^META-INF\//, type: 'directory' },
+              { pattern: /^bin\//, type: 'directory' },
+              { pattern: /^\.github\//, type: 'directory' },
+
+              // Individual files
+              { pattern: /^module\.prop$/, type: 'file' },
+              { pattern: /^module\.json$/, type: 'file' },
+              { pattern: /^module\.yaml$/, type: 'file' },
+              { pattern: /^install\/latest-release-notes\.md$/, type: 'file' },
+              { pattern: /^customize\.sh$/, type: 'file' },
+            ];
+
+            // Retrieve all changed files, including paginated results.
+            const files = await github.paginate(
+              github.rest.pulls.listFiles,
+              {
+                owner,
+                repo,
+                pull_number,
+                per_page: 100
+              }
+            );
+
+            function findFirstAddedLine(patch) {
+              if (!patch) return null;
+
+              let newLine = 0;
+
+              for (const line of patch.split('\n')) {
+                const hunk = line.match(
+                  /^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@/
+                );
+
+                if (hunk) {
+                  newLine = Number(hunk[1]);
+                  continue;
+                }
+
+                if (newLine === 0) continue;
+
+                // Added line (ignore +++ headers)
+                if (line.startsWith('+')) {
+                  return newLine;
+                }
+
+                // Context line exists in the new file too.
+                if (line.startsWith(' ')) {
+                  newLine++;
+                }
+
+                // Deleted lines do not increment the new-file line number.
+              }
+
+              return null;
+            }
+
+            // Check both current and previous paths (renames).
+            const violations = files.map(file => {
+              const paths = [
+                file.filename,
+                file.previous_filename
+              ].filter(Boolean);
+
+              for (const path of paths) {
+                const rule = restrictedPatterns.find(rule =>
+                  rule.pattern.test(path)
+                );
+
+                if (rule) {
+                  return {
+                    ...file,
+                    type: rule.type,
+                    restrictedPath: rule.type === 'directory'
+                      ? path.match(rule.pattern)[0]
+                      : path
+                  };
+                }
+              }
+
+              return null;
+            }).filter(Boolean);
+
+            if (violations.length > 0) {
+              for (const file of violations) {
+                const message = file.type === 'directory'
+                  ? 'Files in this directory cannot be modified by pull requests.'
+                  : 'This file cannot be modified by pull requests.';
+
+                const line = findFirstAddedLine(file.patch) ?? 1;
+
+                core.error(message, {
+                  file: file.filename,
+                  startLine: line,
+                  title: `Restricted ${file.type}: ${file.restrictedPath}`
+                });
+              }
+
+              core.setFailed(
+                `Found ${violations.length} restricted file(s) in this PR.`
+              );
+
+              return;
+            }
+
+            core.info(
+              `Checked ${files.length} file(s). No restricted files modified.`
+            );
