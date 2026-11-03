@@ -1,12 +1,16 @@
 # Advanced Charging Controller (ACC)
 
+> [!important]
+> [WebUI](#webui) et le [bouton d'action](#action-button) sont les seuls ajouts de cette version dérivée. Aucun code backend n'a été modifié. Pourquoi ne pas simplement utiliser l'application AccA ? Parce que je ne souhaite pas installer une application séparée pour contrôler un module. De plus, son développement est abandonné depuis 2022. Elle a été créée avant l'apparition des WebUI des gestionnaires root, qui sont désormais la norme pour les interfaces graphiques des modules. Veuillez ouvrir ici uniquement les problèmes concernant la WebUI. Tous les problèmes concernant ACC doivent être signalés sur le dépôt en amont. Ce projet est basé sur la branche dev d'ACC afin de bénéficier des dernières mises à jour d'ACC.
+
+> [!warning]
+> **Compatibilité :** Cette WebUI a été développée et testée sur [crDroid](https://crdroid.net/) v12.13 avec [KernelSU Next](https://github.com/KernelSU-Next/KernelSU-Next) v3.4.0. [WebUI X: Portable](https://github.com/MMRLApp/WebUI-X-Portable) v608 a été testé avec la plateforme KernelSU Next. Bien qu'elle soit censée fonctionner avec KernelSU officiel, APatch et la plupart des dérivés basés sur KernelSU, la compatibilité avec ces plateformes n'a pas été officiellement vérifiée. La compatibilité avec Magisk via *WebUI X: Portable* n'a pas non plus été testée.
 
 ---
 - [DESCRIPTION](#description)
 - [LICENSE](#license)
 - [CLAUSE DE NON-RESPONSABILITÉ](#clause-de-non-responsabilité)
 - [AVERTISSEMENTS](#avertissements)
-- [DONATIONS](#donations)
 - [PRÉREQUIS](#prérequis)
 - [GUIDE DE DÉMARAGE RAPIDE](#guide-de-démarage-rapide)
   - [Notes](#notes)
@@ -16,6 +20,9 @@
     - [Notes](#notes-1)
   - [Installer depuis la Source Locale ou Github](#installer-depuis-la-source-locale-ou-github)
     - [Notes](#notes-2)
+  - [Build/Deploy WebUI (`index.html`)](#builddeploy-webui-indexhtml)
+    - [Prérequis](#prérequis)
+    - [Compilation / Déploiement](#compilation--déploiement)
 - [CONFIGURATION PAR DÉFAUT](#configuration-par-défaut)
 - [SETUP/USAGE](#setupusage)
   - [Commandes du Terminal](#commandes-du-terminal)
@@ -29,6 +36,8 @@
   - [The Output of --info](#the-output-of---info)
   - [Profiles](#profiles)
   - [More](#more)
+  - [WebUI](#webui)
+  - [Bouton d’action](#bouton-daction)
 - [TROUBLESHOOTING](#troubleshooting)
   - [`acc -t` Results Seem Inconsistent](#acc--t-results-seem-inconsistent)
   - [Battery Capacity (% Level) Doesn't Seem Right](#battery-capacity--level-doesnt-seem-right)
@@ -53,8 +62,6 @@
   - [Google Pixel Devices](#google-pixel-devices)
   - [Idle Mode and Alternatives](#idle-mode-and-alternatives)
 - [FREQUENTLY ASKED QUESTIONS (FAQ)](#frequently-asked-questions-faq)
-- [LINKS](#links)
-
 
 ---
 ## DESCRIPTION
@@ -110,14 +117,6 @@ Utiliser la fonction d'auto-extinction est fortement recomandée.
 Se référer à [ce post XDA ](https://forum.xda-developers.com/t/rom-official-arrowos-11-0-android-11-0-vayu-bhima.4267263/post-85119331) pour plus de détails.
 
 [lybxlpsv](https://github.com/lybxlpsv) suggère de démarrer dans le bootloader et de retourner ensuite dans le système pour réinitialiser le PMIC.
-
-
----
-## DONATIONS
-
-S'il vous plaît, supportez le projet avec des dons ([liens](#links) en bas).
-Avec le projet qui grandit et qui devient plus populaire, le besoin de café augmente aussi
-
 
 ---
 ## PRÉREQUIS
@@ -230,6 +229,60 @@ En mode interactif, il demande également à l'utilisateur s'il souhaite téléc
 
 - Vous pouvez aussi lire les [Commandes du Terminal](#commandes-du-terminal) > `Codes de sortie` plus bas.
 
+### Build/Deploy WebUI (`index.html`)
+
+Pour compiler ou déployer la WebUI en direct sans empaqueter l'archive ZIP complète du module :
+
+#### Prérequis
+* **Node.js** : `22.12.0+` (Node.js `26 LTS` fortement recommandé).
+* **ADB et accès root** *(uniquement requis si vous utilisez le flag `-d` / `--deploy`)* :
+  * Activez le **Débogage USB** dans les Options pour les développeurs Android.
+  * **Connexion filaire (USB)** : Connectez votre appareil à l'aide d'un câble USB et acceptez l'invite de débogage sur votre téléphone. Exécutez `adb root` ou assurez-vous que l'accès `su` est accordé à Android Shell (com.android.shell) dans votre application de gestion root.
+  * **Connexion sans fil (Wi-Fi)** :
+    1. Activez le **Débogage sans fil** dans les Options pour les développeurs.
+    2. Associez et connectez votre appareil (`adb pair <ip>:<port>` et `adb connect <ip>:<port>`).
+  * *Remarque concernant ADB sans fil* : Assurez-vous que votre téléphone et votre PC sont connectés au même réseau local.
+  * Les fichiers sont transférés via un répertoire temporaire (`/data/local/tmp/`), puis déplacés à leur emplacement définitif à l'aide de `su`.
+* **Git hook** *(nécessaire uniquement si vous contribuez à ce dépôt, afin d'éviter de valider accidentellement des fichiers destinés à être transférés par la CI)* :
+  * `chmod +x .githooks/pre-commit`
+  * `git config core.hooksPath .githooks`
+
+#### Compilation / Déploiement
+
+1. Exécutez le script de compilation avec le flag WebUI depuis la racine du dépôt :
+
+   - **Linux / macOS** :
+     ```bash
+     chmod +x build.sh
+
+     # Compiler le bundle WebUI (sortie dans install/webroot/index.html)
+     ./build.sh -w
+     # ou
+     ./build.sh --webui
+
+     # Compiler ET transférer automatiquement vers l'appareil connecté (ADB filaire ou sans fil)
+     ./build.sh -d
+     # ou
+     ./build.sh --deploy
+     ```
+
+   - **Windows (Invite de commandes / PowerShell)** :
+     ```cmd
+     # Compiler le bundle WebUI
+     build.bat -w
+     # ou
+     build.bat --webui
+
+     # Compiler ET transférer vers l'appareil
+     build.bat -d
+     # ou
+     build.bat --deploy
+     ```
+     (*Ou directement via Git Bash/WSL* : `bash build.sh -w/-d` ou `bash build.sh --webui/--deploy`)
+
+2. **Emplacements de sortie** :
+   - Artefact de compilation local : `install/webroot/index.html`
+   - Emplacement actif sur l'appareil (avec `-d/--deploy`) : `/data/adb/modules/acc/webroot/index.html`
 
 ---
 ## CONFIGURATION PAR DÉFAUT
@@ -1043,6 +1096,109 @@ There are a few exceptions:
 
 This information is in the [default configuration](#default-configuration) section as well.
 
+### WebUI
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="33%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/1.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/1.png" height="300">
+        </a>
+      </td>
+      <td align="center" width="33%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/2.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/2.png" height="300">
+        </a>
+      </td>
+      <td align="center" width="33%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/8.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/8.png" height="300">
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <em>Battery Stats &amp; Daemon Control</em>
+      </td>
+      <td align="center">
+        <em>Charging Thresholds &amp; Reset Battery Stats</em>
+      </td>
+      <td align="center">
+        <em>Idle Mode</em>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" width="33%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/9.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/9.png" height="300">
+        </a>
+      </td>
+      <td align="center" width="33%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png" height="300">
+        </a>
+      </td>
+      <td align="center" width="33%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png" height="300">
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <em>Charging Switch</em>
+      </td>
+      <td align="center">
+        <em>Config File Editor</em>
+      </td>
+      <td align="center">
+        <em>Logs Viewer</em>
+      </td>
+    </tr>
+  </table>
+</div>
+
+### Bouton d’action
+
+`accd` peut être rapidement démarré ou arrêté à l’aide du bouton d’action.
+
+<p align="center">
+  <table>
+    <tr>
+      <td align="center" colspan="2">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/5.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/5.png" height="300">
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" colspan="2">
+        <em>Bouton d’action</em>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/6.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/6.png" height="300">
+        </a>
+      </td>
+      <td align="center">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/7.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/7.png" height="300">
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <em>accd démarré</em>
+      </td>
+      <td align="center">
+        <em>accd arrêté</em>
+      </td>
+    </tr>
+  </table>
+</p>
 
 ---
 ## TROUBLESHOOTING
@@ -1430,30 +1586,3 @@ Currently, it does work in recovery mode, though.
 The best solution is enforcing a charging switch that doesn't trigger a wakelock.
 Refer back to `TROUBLESHOOTING > Charging Switch`.
 A common workaround is having `resume_capacity = pause_capacity - 1`. e.g., resume_capacity=74, pause_capacity=75.
-
-
----
-## LINKS
-
-- [Daily Job Scheduler](https://github.com/VR-25/djs)
-
-- [Donate - Airtm, username: ivandro863auzqg](https://app.airtm.com/send-or-request/send)
-- [Donate - Credit/Debit Card](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=iprj25@gmail.com&lc=US&item_name=VR25+is+creating+free+and+open+source+software.+Donate+to+suppport+their+work.&no_note=0&cn=&currency_code=USD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted)
-- [Donate - Liberapay](https://liberapay.com/vr25)
-- [Donate - Patreon](https://patreon.com/vr25)
-- [Donate - PayPal Me](https://paypal.me/vr25xda)
-
-- [Facebook Page](https://fb.me/vr25xda)
-
-- [Frontend - ACC App](https://github.com/MatteCarra/AccA/releases)
-- [Frontend - ACC Settings](https://github.com/CrazyBoyFeng/AccSettings)
-
-- [Must Read - How to Prolong Lithium Ion Batteries Lifespan](https://batteryuniversity.com/article/bu-808-how-to-prolong-lithium-based-batteries)
-
-- [Telegram Channel](https://t.me/vr25_xda)
-- [Telegram Group](https://t.me/acc_group)
-- [Telegram Profile](https://t.me/vr25xda)
-
-- [Upstream Repository](https://github.com/VR-25/acc)
-
-- [XDA Thread](https://forum.xda-developers.com/apps/magisk/module-magic-charging-switch-cs-v2017-9-t3668427)

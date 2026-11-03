@@ -1,12 +1,16 @@
 # Advanced Charging Controller (ACC)
 
+> [!important]
+> [WebUI](#webui) ve [Action button](#action-button) bu fork'a eklenen yegâne özelliklerdir. Backend kodunda hiçbir değişiklik yapılmamıştır. Neden doğrudan AccA uygulamasını kullanmıyorsunuz? Çünkü bir modülü kontrol etmek için ayrı bir uygulama yüklemek istemiyorum. Ayrıca uygulamanın geliştirilmesi 2022'den beri durdurulmuş durumda. Root yöneticilerinin WebUI arayüzleri ortaya çıkmadan önce geliştirilmişti; günümüzde ise WebUI'ler, modül grafik arayüzleri için standart hâline geldi. Lütfen burada yalnızca WebUI ile ilgili sorunları bildirin. ACC ile ilgili tüm sorunlar upstream depoda açılmalıdır. Bu proje, ACC'nin en güncel güncellemelerini alabilmek için ACC'nin dev dalı temel alınarak geliştirilmiştir.
+
+> [!warning]
+> **Uyumluluk:** Bu WebUI, [crDroid](https://crdroid.net/) v12.13 üzerinde [KernelSU Next](https://github.com/KernelSU-Next/KernelSU-Next) v3.4.0 ile geliştirilmiş ve test edilmiştir. [WebUI X: Portable](https://github.com/MMRLApp/WebUI-X-Portable) v608, KernelSU Next platformu kullanılarak test edilmiştir. Resmî KernelSU, APatch ve KernelSU tabanlı türevlerin çoğuyla çalışması beklense de bu platformlarla uyumluluğu resmî olarak doğrulanmamıştır. *WebUI X: Portable* aracılığıyla Magisk ile uyumluluğu da test edilmemiştir.
 
 ---
 - [Açıklama](#açıklama)
 - [Lisans](#lisans)
 - [Kullanmadan önce okuyun](#kullanmadan-önce-okuyun)
 - [Uyarılar](#uyarılar)
-- [Bağışlar](#bağışlar)
 - [Gereksinimler](#gereksinimler)
 - [Hızlı başlangıç kılavuzu](#hızlı-başlangıç-kılavuzu)
   - [Notlar](#notlar)
@@ -16,6 +20,9 @@
     - [Notlar](#notlar-1)
   - [Lokal kaynaktan veya GitHub'dan indir](#lokal-kaynaktan-veya-githubdan-indir)
     - [Notlar](#notlar-2)
+  - [WebUI Derleme / Dağıtma (`index.html`)](#webui-derleme--dağıtma-indexhtml)
+    - [Ön Koşullar](#ön-koşullar)
+    - [Derleme / Dağıtım](#derleme--dağıtım)
 - [Varsayılan ayarlar](#varsayılan-ayarlar)
 - [Kurulum/Kullanım](#kurulumkullanım)
   - [Terminal Komutları](#terminal-komutları)
@@ -29,6 +36,8 @@
   - [--info komutu](#--info-komutu)
   - [Profiller](#profiller)
   - [Daha fazla](#daha-fazla)
+  - [WebUI](#webui)
+  - [Eylem düğmesi](#eylem-düğmesi)
 - [Sorun Giderme](#sorun-giderme)
   - [`acc -t` komutunun çıktıları tutarsız](#acc--t-komutunun-çıktıları-tutarsız)
   - [Batarya seviyesi doğru görünmüyor](#batarya-seviyesi-doğru-görünmüyor)
@@ -53,8 +62,6 @@
   - [Google Pixel Cihazları](#google-pixel-cihazları)
   - [idle Mod ve Alternatifler](#idle-mod-ve-alternatifler)
 - [Sıkça sorulan sorular (SSS)](#sıkça-sorulan-sorular-sss)
-- [Linkler](#linkler)
-
 
 ---
 ## Açıklama
@@ -105,14 +112,6 @@ acc'nin otomatik kapatma özelliğini kullanmanız şiddetle tavsiye edilir.
 Ekstra detaylar için [ilgili XDA forum postu](https://forum.xda-developers.com/t/rom-official-arrowos-11-0-android-11-0-vayu-bhima.4267263/post-85119331)
 
 [lybxlpsv](https://github.com/lybxlpsv) bootlader'dan sonra sisteme geçerek PMIC sıfırlamanızı tavsiye ediyor. (fazla teknik)
-
-
----
-## Bağışlar
-
-Lütfen bu projeyi aşağıdaki ([linkler](#linkler)'den destekleyin.
-Proje büyüyüp popülerleştikçe, kahveye olan ihtiyaç artıyor :)
-
 
 ---
 ## Gereksinimler
@@ -227,6 +226,60 @@ Interaktif modda, kullanıcıya güncellemeyi indirip kurmak isteyip istemediği
 
 - Aynı zamanda aşağıdaki [Terminal Komutları](#terminal-komutları) > `Çıkış Kodları` kısmını okumak yararlı olabilir.
 
+### WebUI Derleme / Dağıtma (`index.html`)
+
+Modülün tam ZIP arşivini paketlemeden WebUI'yi derlemek veya doğrudan bağlı cihaza dağıtmak için:
+
+#### Ön Koşullar
+* **Node.js**: `22.12.0+` (Node.js `26 LTS` şiddetle tavsiye edilir).
+* **ADB ve Root Erişimi** *(yalnızca `-d` / `--deploy` bayrağı kullanıldığında gereklidir)*:
+  * Android Geliştirici Seçenekleri'nden **USB Hata Ayıklama** özelliğini etkinleştirin.
+  * **Kablolu Bağlantı (USB)**: Cihazınızı USB kablosuyla bağlayın ve telefonunuzda görüntülenen hata ayıklama isteğine izin verin. `adb root` komutunu çalıştırın veya root yöneticisi uygulamanızda Android Shell'e (com.android.shell) `su` erişimi verildiğinden emin olun.
+  * **Kablosuz Bağlantı (Wi-Fi)**:
+    1. Geliştirici Seçenekleri'nden **Kablosuz Hata Ayıklama** özelliğini etkinleştirin.
+    2. Cihazınızı eşleştirin ve bağlayın (`adb pair <ip>:<port>` ve `adb connect <ip>:<port>`).
+  * *Kablosuz ADB hakkında not*: Telefonunuzun ve bilgisayarınızın aynı yerel ağa bağlı olduğundan emin olun.
+  * Dosyalar önce geçici bir dizine (`/data/local/tmp/`) aktarılır, ardından `su` kullanılarak hedef konumlarına taşınır.
+* **Git hook** *(yalnızca bu depoya katkıda bulunurken gereklidir; CI tarafından gönderilmesi gereken dosyaların yanlışlıkla commit edilmesini önler)*:
+  * `chmod +x .githooks/pre-commit`
+  * `git config core.hooksPath .githooks`
+
+#### Derleme / Dağıtım
+
+1. Depo kök dizininden WebUI bayrağını kullanarak derleme betiğini çalıştırın:
+
+   - **Linux / macOS**:
+     ```bash
+     chmod +x build.sh
+
+     # WebUI paketini derle (çıktı: install/webroot/index.html)
+     ./build.sh -w
+     # veya
+     ./build.sh --webui
+
+     # Derle VE bağlı cihaza otomatik olarak aktar (kablolu veya kablosuz ADB)
+     ./build.sh -d
+     # veya
+     ./build.sh --deploy
+     ```
+
+   - **Windows (Komut İstemi / PowerShell)**:
+     ```cmd
+     # WebUI paketini derle
+     build.bat -w
+     # veya
+     build.bat --webui
+
+     # Derle VE cihaza aktar
+     build.bat -d
+     # veya
+     build.bat --deploy
+     ```
+     (*Veya Git Bash/WSL üzerinden doğrudan*: `bash build.sh -w/-d` veya `bash build.sh --webui/--deploy`)
+
+2. **Çıktı Konumları**:
+   - Yerel derleme çıktısı: `install/webroot/index.html`
+   - Cihazdaki etkin konum (`-d/--deploy` kullanıldığında): `/data/adb/modules/acc/webroot/index.html`
 
 ---
 ## Varsayılan ayarlar
@@ -1039,6 +1092,109 @@ Bazı istisnalar şunlardır:
 
 Bu bilgi aynı zamanda [varsayılan ayarlar](#varsayılan-ayarlar) kısmında da mevcuttur.
 
+### WebUI
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="33%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/1.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/1.png" height="300">
+        </a>
+      </td>
+      <td align="center" width="33%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/2.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/2.png" height="300">
+        </a>
+      </td>
+      <td align="center" width="33%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/8.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/8.png" height="300">
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <em>Battery Stats &amp; Daemon Control</em>
+      </td>
+      <td align="center">
+        <em>Charging Thresholds &amp; Reset Battery Stats</em>
+      </td>
+      <td align="center">
+        <em>Idle Mode</em>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" width="33%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/9.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/9.png" height="300">
+        </a>
+      </td>
+      <td align="center" width="33%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png" height="300">
+        </a>
+      </td>
+      <td align="center" width="33%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png" height="300">
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <em>Charging Switch</em>
+      </td>
+      <td align="center">
+        <em>Config File Editor</em>
+      </td>
+      <td align="center">
+        <em>Logs Viewer</em>
+      </td>
+    </tr>
+  </table>
+</div>
+
+### Eylem düğmesi
+
+`accd`, eylem düğmesi kullanılarak hızlıca başlatılıp durdurulabilir.
+
+<p align="center">
+  <table>
+    <tr>
+      <td align="center" colspan="2">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/5.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/5.png" height="300">
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" colspan="2">
+        <em>Eylem düğmesi</em>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/6.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/6.png" height="300">
+        </a>
+      </td>
+      <td align="center">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/7.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/7.png" height="300">
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <em>accd başlatıldı</em>
+      </td>
+      <td align="center">
+        <em>accd durduruldu</em>
+      </td>
+    </tr>
+  </table>
+</p>
 
 ---
 ## Sorun Giderme
@@ -1426,30 +1582,3 @@ Ama şu anda, recovery mod sırasında çalışıyor.
 En iyi çözüm bu duruma sebep olmayan bir şarj portu kullanmak.
 `Sorun Giderme > Şarj Portları` kısmına bakınız.
 Bir öteki yaygın yöntem ise `resume_capacity = pause_capacity - 1`. örn., resume_capacity=74, pause_capacity=75.
-
-
----
-## Linkler
-
-- [Daily Job Scheduler](https://github.com/VR-25/djs)
-
-- [Donate - Airtm, username: ivandro863auzqg](https://app.airtm.com/send-or-request/send)
-- [Donate - Credit/Debit Card](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=iprj25@gmail.com&lc=US&item_name=VR25+is+creating+free+and+open+source+software.+Donate+to+suppport+their+work.&no_note=0&cn=&currency_code=USD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted)
-- [Donate - Liberapay](https://liberapay.com/vr25)
-- [Donate - Patreon](https://patreon.com/vr25)
-- [Donate - PayPal Me](https://paypal.me/vr25xda)
-
-- [Facebook Page](https://fb.me/vr25xda)
-
-- [Frontend - ACC App](https://github.com/MatteCarra/AccA/releases)
-- [Frontend - ACC Settings](https://github.com/CrazyBoyFeng/AccSettings)
-
-- [Must Read - How to Prolong Lithium Ion Batteries Lifespan](https://batteryuniversity.com/article/bu-808-how-to-prolong-lithium-based-batteries)
-
-- [Telegram Channel](https://t.me/vr25_xda)
-- [Telegram Group](https://t.me/acc_group)
-- [Telegram Profile](https://t.me/vr25xda)
-
-- [Upstream Repository](https://github.com/VR-25/acc)
-
-- [XDA Thread](https://forum.xda-developers.com/apps/magisk/module-magic-charging-switch-cs-v2017-9-t3668427)

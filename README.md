@@ -1,14 +1,15 @@
 <p align="center">
-  <b>English</b> | 
-  <a href="install/translations/fr/README.md">Français</a> | 
-  <a href="install/translations/ru/README.md">Русский</a> | 
-  <a href="install/translations/tr/README.md">Türkçe</a> 
+  <b>English</b> |
+  <a href="install/translations/fr/README.md">Français</a> |
+  <a href="install/translations/ru/README.md">Русский</a> |
+  <a href="install/translations/tr/README.md">Türkçe</a>
 </p>
 <hr>
 
 # Advanced Charging Controller (ACC) with WebUI
 
-[![Build](https://img.shields.io/github/actions/workflow/status/Infiniti151/acc-with-webui/build.yml?branch=dev&style=for-the-badge&logo=github-actions&logoColor=white&label=Build)](https://github.com/Infiniti151/acc-with-webui/actions/workflows/build.yml) [![Latest Release](https://img.shields.io/github/v/release/Infiniti151/acc-with-webui?style=for-the-badge&logo=github&logoColor=white&label=Release)](https://github.com/Infiniti151/acc-with-webui/releases) [![Svelte](https://img.shields.io/badge/Svelte-5.57.3-orange?style=for-the-badge&logo=svelte&logoColor=white)](https://github.com/Infiniti151/acc-with-webui/blob/dev/webui/package.json) [![License](https://img.shields.io/github/license/Infiniti151/acc-with-webui?style=for-the-badge&logo=spdx&logoColor=white&color=yellow&label=License)](https://github.com/Infiniti151/acc-with-webui/blob/dev/License.md) [![Downloads](https://img.shields.io/github/downloads/Infiniti151/acc-with-webui/total?style=for-the-badge&color=purple&label=Downloads&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xOSA5aC00VjNIN3Y2SDNMMTIgMTlsOS05ek01IDE4djJoMTR2LTJINXoiLz48L3N2Zz4=)](https://github.com/Infiniti151/acc-with-webui/releases)
+[![Build](https://img.shields.io/github/actions/workflow/status/Infiniti151/acc-with-webui/build.yml?branch=dev&style=for-the-badge&logo=github-actions&logoColor=white&label=Build&labelColor=black)](https://github.com/Infiniti151/acc-with-webui/actions/workflows/build.yml) [![Latest Release](https://img.shields.io/github/v/release/Infiniti151/acc-with-webui?style=for-the-badge&logo=github&logoColor=white&label=Release&labelColor=black)](https://github.com/Infiniti151/acc-with-webui/releases) [![Svelte](https://img.shields.io/badge/Svelte-5.57.3-orange?style=for-the-badge&logo=svelte&logoColor=white&labelColor=black)](https://github.com/Infiniti151/acc-with-webui/blob/dev/webui/package.json) [![License](https://img.shields.io/github/license/Infiniti151/acc-with-webui?style=for-the-badge&logo=spdx&logoColor=white&color=yellow&label=License&labelColor=black)](https://github.com/Infiniti151/acc-with-webui/blob/dev/License.md) [![Downloads](https://img.shields.io/github/downloads/Infiniti151/acc-with-webui/total?style=for-the-badge&color=purple&label=Downloads&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xOSA5aC00VjNIN3Y2SDNMMTIgMTlsOS05ek01IDE4djJoMTR2LTJINXoiLz48L3N2Zz4=&labelColor=black)](https://github.com/Infiniti151/acc-with-webui/releases) [![Crowdin](https://img.shields.io/badge/Crowdin-Translate-cyan?style=for-the-badge&logo=crowdin&labelColor=black)](https://crowdin.com/project/acc-with-webui)
+
 
 > [!important]
 > [WebUI](#webui) and [Action button](#action-button) are the only additions in this fork. No backend code has been changed. Why not just use the AccA app? Coz I don't want to install a separate app to control a module. Also, it has been abandoned since 2022. It was built before the advent of root manager WebUIs and WebUIs are the standard now for module GUIs. Only open issues regarding WebUI here. All issues regarding ACC must be opened upstream. This is based on ACC dev branch in order to get the latest ACC updates.
@@ -33,6 +34,8 @@
   - [Install from Local Source or GitHub](#install-from-local-source-or-github)
     - [Notes](#notes-2)
   - [Build/Deploy WebUI](#builddeploy-webui-indexhtml)
+    - [Prerequisites](#prerequisites-1)
+    - [Building/Deploying](#buildingdeploying)
 - [DEFAULT CONFIGURATION](#default-configuration)
 - [SETUP/USAGE](#setupusage)
   - [Terminal Commands](#terminal-commands)
@@ -254,7 +257,7 @@ In interactive mode, it also asks the user whether they want to download and ins
 For building or live-deploying the WebUI without packaging the full module zip:
 
 #### Prerequisites
-* **Node.js**: `18.0.0+` (Node.js `20+` LTS strongly recommended).
+* **Node.js**: `22.12.0+` (Node.js `26 LTS` strongly recommended).
 * **ADB & Root Access** *(only required if using the `-d` / `--deploy` flag)*:
   * Enable **USB Debugging** in Android Developer Options.
   * **Wired Connection (USB)**: Connect via USB cable and allow the debugging prompt on your phone. Run `adb root` or ensure `su` access is granted in your root manager app to Android Shell (com.android.shell).
@@ -263,6 +266,9 @@ For building or live-deploying the WebUI without packaging the full module zip:
     2. Pair and connect your device (`adb pair <ip>:<port>` and `adb connect <ip>:<port>`).
   * *Note for Wireless ADB*: Ensure the phone is on the same local network as your PC.
   * Files are pushed via staging (`/data/local/tmp/`) and moved into place using `su`.
+* **Git hook** *(Only needed when contributing to this repo, to prevent accidentally committing files that are supposed to be pushed by CI)*
+  * `chmod +x .githooks/pre-commit`
+  * `git config core.hooksPath .githooks`
 
 #### Building/Deploying
 
@@ -1318,6 +1324,28 @@ Refer back to [terminal commands](#terminal-commands) for details.
     </tr>
   </table>
 </p>
+
+### 🌐 Translations (WebUI, Action button, Module description, Installation)
+
+> [!important]
+> These translations are not for backend ACC CLI.
+>
+
+[![Crowdin](https://badges.crowdin.net/acc-with-webui/localized.svg)](https://crowdin.com/project/acc-with-webui)
+
+**Language progress**
+
+[![German](https://img.shields.io/badge/dynamic/json?color=blue&label=German&style=flat&logo=crowdin&query=%24.progress.0.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-17964331-943657.json)](https://crowdin.com/project/acc-with-webui)
+[![French](https://img.shields.io/badge/dynamic/json?color=blue&label=French&style=flat&logo=crowdin&query=%24.progress.1.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-17964331-943657.json)](https://crowdin.com/project/acc-with-webui)
+[![Indonesian](https://img.shields.io/badge/dynamic/json?color=blue&label=Indonesian&style=flat&logo=crowdin&query=%24.progress.2.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-17964331-943657.json)](https://crowdin.com/project/acc-with-webui)
+[![Portuguese (Portugal)](https://img.shields.io/badge/dynamic/json?color=blue&label=Portuguese%20(Portugal)&style=flat&logo=crowdin&query=%24.progress.3.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-17964331-943657.json)](https://crowdin.com/project/acc-with-webui)
+
+[![Russian](https://img.shields.io/badge/dynamic/json?color=blue&label=Russian&style=flat&logo=crowdin&query=%24.progress.4.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-17964331-943657.json)](https://crowdin.com/project/acc-with-webui)
+[![Turkish](https://img.shields.io/badge/dynamic/json?color=blue&label=Turkish&style=flat&logo=crowdin&query=%24.progress.5.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-17964331-943657.json)](https://crowdin.com/project/acc-with-webui)
+[![Chinese (Simplified)](https://img.shields.io/badge/dynamic/json?color=blue&label=Chinese%20(Simplified)&style=flat&logo=crowdin&query=%24.progress.6.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-17964331-943657.json)](https://crowdin.com/project/acc-with-webui)
+[![Chinese (Traditional)](https://img.shields.io/badge/dynamic/json?color=blue&label=Chinese%20(Traditional)&style=flat&logo=crowdin&query=%24.progress.7.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-17964331-943657.json)](https://crowdin.com/project/acc-with-webui)
+
+[Help translate ACC on Crowdin](https://crowdin.com/project/acc-with-webui)
 
 ---
 ## TROUBLESHOOTING

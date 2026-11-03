@@ -1,63 +1,68 @@
 # Advanced Charging Controller (ACC)
 
+> [!important]
+> [WebUI](#webui) и [кнопка действия](#action-button) — единственные дополнения в этом форке. Код бэкенда не изменялся. Почему бы просто не использовать приложение AccA? Потому что я не хочу устанавливать отдельное приложение для управления модулем. Кроме того, его разработка прекращена с 2022 года. Оно было создано ещё до появления WebUI в менеджерах root-доступа, а сейчас WebUI стали стандартом для графических интерфейсов модулей. Здесь следует открывать только issues, связанные с WebUI. Все issues, касающиеся ACC, необходимо открывать в исходном репозитории. Этот проект основан на ветке dev проекта ACC, чтобы получать последние обновления ACC.
+
+> [!warning]
+> **Совместимость:** Эта WebUI была разработана и протестирована на [crDroid](https://crdroid.net/) v12.13 с [KernelSU Next](https://github.com/KernelSU-Next/KernelSU-Next) v3.4.0. [WebUI X: Portable](https://github.com/MMRLApp/WebUI-X-Portable) v608 была протестирована с использованием платформы KernelSU Next. Хотя ожидается, что она будет работать с официальным KernelSU, APatch и большинством производных проектов на базе KernelSU, совместимость с этими платформами официально не проверялась. Совместимость с Magisk через *WebUI X: Portable* также не тестировалась.
 
 ---
-- [ОПИСАНИЕ](#description)
-- [ЛИЦЕНЗИЯ](#license)
-- [ОТКАЗ ОТ ОТВЕТСТВЕННОСТИ](#clause-de-non-responsabilité)
-- [ПРЕДУПРЕЖДЕНИЯ](#avertissements)
-- [ПОЖЕРТВОВАНИЯ](#donations)
-- [ТРЕБОВАНИЯ](#prérequis)
-- [КРАТКОЕ РУКОВОДСТВО](#guide-de-démarage-rapide)
-  - [Примечания](#notes)
-- [СБОРКА И/ИЛИ УСТАНОВКА ИЗ ИСХОДНОГО КОДА](#construire-etou-installer-depuis-la-source)
-  - [Зависимости для сборки](#dépendances-construction)
-  - [Сборка tar-архивов и прошиваемых ZIP-файлов](#construire-des-tarballs-et-des-zips-flashables)
-    - [Примечания](#notes-1)
-  - [Установка из локального исходного кода или GitHub](#installer-depuis-la-source-locale-ou-github)
-    - [Примечания](#notes-2)
-- [КОНФИГУРАЦИЯ ПО УМОЛЧАНИЮ](#configuration-par-défaut)
-- [НАСТРОЙКА И ИСПОЛЬЗОВАНИЕ](#setupusage)
-  - [Команды терминала](#commandes-du-terminal)
-- [ПЛАГИНЫ](#plugins)
-- [ПРИМЕЧАНИЯ ДЛЯ РАЗРАБОТЧИКОВ ФРОНТЕНДОВ](#notestips-for-front-end-developers)
-  - [Основы](#basics)
-  - [Установка и обновление ACC](#installingupgrading-acc)
-  - [Удаление ACC](#uninstalling-acc)
-  - [Инициализация ACC](#initializing-acc)
-  - [Управление ACC](#managing-acc)
-  - [Вывод команды --info](#the-output-of---info)
-  - [Профили](#profiles)
-  - [Дополнительно](#more)
-- [УСТРАНЕНИЕ НЕПОЛАДОК](#troubleshooting)
-  - [Результаты `acc -t` кажутся непоследовательными](#acc--t-results-seem-inconsistent)
-  - [Уровень заряда батареи отображается неверно](#battery-capacity--level-doesnt-seem-right)
-  - [Переключатель зарядки](#charging-switch)
-  - [Пользовательские ограничения максимального напряжения и тока зарядки](#custom-max-charging-voltage-and-current-limits)
-  - [Диагностика и журналы](#diagnosticslogs)
-  - [Быстрый поиск дополнительных потенциальных переключателей зарядки](#finding-additionalpotential-charging-switches-quickly)
-  - [Установка, обновление и остановка/перезапуск занимают слишком много времени](#install-upgrade-stop-and-restart-processes-seem-to-take-too-long)
-  - [Восстановление конфигурации по умолчанию](#restore-default-config)
-  - [Samsung: зарядка _всегда_ останавливается на уровне 70%](#samsung-charging-always-stops-at-70-capacity)
-  - [Медленная зарядка](#slow-charging)
-  - [Не удаётся зарядить устройство](#unable-to-charge)
-  - [Неожиданные перезагрузки](#unexpected-reboots)
-  - [WARP, VOOC и другие технологии быстрой зарядки](#warp-vooc-and-other-fast-charging-tech)
-  - [Почему accd остановился?](#why-did-accd-stop)
-- [ЖУРНАЛЫ ИСТОЧНИКОВ ПИТАНИЯ (НУЖНА ПОМОЩЬ)](#power-supply-logs-help-needed)
-- [ЛОКАЛИЗАЦИЯ](#localization)
-- [СОВЕТЫ](#tips)
-  - [_Всегда_ ограничивайте ток зарядки, если батарея старая и/или быстро разряжается](#always-limit-the-charging-current-if-your-battery-is-old-andor-tends-to-discharge-too-fast)
-  - [Управление зарядкой по току и напряжению](#current-and-voltage-based-charging-control)
-  - [Общие рекомендации](#generic)
-  - [Устройства Google Pixel](#google-pixel-devices)
-  - [Режим простоя и альтернативы](#idle-mode-and-alternatives)
-- [ЧАСТО ЗАДАВАЕМЫЕ ВОПРОСЫ (FAQ)](#frequently-asked-questions-faq)
-- [ССЫЛКИ](#links)
-
+- [ОПИСАНИЕ](#описание)
+- [ЛИЦЕНЗИЯ](#лицензия)
+- [ОТКАЗ ОТ ОТВЕТСТВЕННОСТИ](#отказ-от-ответственности)
+- [ПРЕДУПРЕЖДЕНИЯ](#предупреждения)
+- [ТРЕБОВАНИЯ](#требования)
+- [КРАТКОЕ РУКОВОДСТВО](#краткое-руководство)
+  - [Примечания](#примечания)
+- [СБОРКА И/ИЛИ УСТАНОВКА ИЗ ИСХОДНОГО КОДА](#сборка-иили-установка-из-исходного-кода)
+  - [Зависимости для сборки](#зависимости-для-сборки)
+  - [Сборка tar-архивов и прошиваемых ZIP-файлов](#сборка-tar-архивов-и-прошиваемых-zip-файлов)
+    - [Примечания](#примечания-1)
+  - [Установка из локального исходного кода или GitHub](#установка-из-локального-исходного-кода-или-github)
+    - [Примечания](#примечания-2)
+  - [Сборка/развёртывание WebUI (`index.html`)](#сборкаразвёртывание-webui-indexhtml)
+    - [Требования](#Требования)
+    - [Сборка/развёртывание](#Сборкаразвёртывание)
+- [КОНФИГУРАЦИЯ ПО УМОЛЧАНИЮ](#конфигурация-по-умолчанию)
+- [НАСТРОЙКА И ИСПОЛЬЗОВАНИЕ](#настройка-и-использование)
+  - [Команды терминала](#команды-терминала)
+- [ПЛАГИНЫ](#плагины)
+- [ПРИМЕЧАНИЯ ДЛЯ РАЗРАБОТЧИКОВ ФРОНТЕНДОВ](#примечания-для-разработчиков-фронтендов)
+  - [Основы](#основы)
+  - [Установка и обновление ACC](#установка-и-обновление-acc)
+  - [Удаление ACC](#удаление-acc)
+  - [Инициализация ACC](#инициализация-acc)
+  - [Управление ACC](#управление-acc)
+  - [Вывод команды --info](#вывод-команды---info)
+  - [Профили](#профили)
+  - [Дополнительно](#дополнительно)
+  - [WebUI](#webui)
+  - [Кнопка действия](#кнопка-действия)
+- [УСТРАНЕНИЕ НЕПОЛАДОК](#устранение-неполадок)
+  - [Результаты `acc -t` кажутся непоследовательными](#результаты-acc--t-кажутся-непоследовательными)
+  - [Уровень заряда батареи отображается неверно](#уровень-заряда-батареи-отображается-неверно)
+  - [Переключатель зарядки](#переключатель-зарядки)
+  - [Пользовательские ограничения максимального напряжения и тока зарядки](#пользовательские-ограничения-максимального-напряжения-и-тока-зарядки)
+  - [Диагностика и журналы](#диагностика-и-журналы)
+  - [Установка, обновление и остановка/перезапуск занимают слишком много времени](#установка-обновление-и-остановкаперезапуск-занимают-слишком-много-времени)
+  - [Восстановление конфигурации по умолчанию](#восстановление-конфигурации-по-умолчанию)
+  - [Samsung: зарядка _всегда_ останавливается на уровне 70%](#samsung-зарядка-всегда-останавливается-на-уровне-70)
+  - [Медленная зарядка](#медленная-зарядка)
+  - [Не удаётся зарядить устройство](#не-удаётся-зарядить-устройство)
+  - [Неожиданные перезагрузки](#неожиданные-перезагрузки)
+  - [WARP, VOOC и другие технологии быстрой зарядки](#warp-vooc-и-другие-технологии-быстрой-зарядки)
+  - [Почему accd остановился?](#почему-остановился-accd)
+- [ЖУРНАЛЫ ИСТОЧНИКОВ ПИТАНИЯ (НУЖНА ПОМОЩЬ)](#журналы-источников-питания-нужна-помощь)
+- [ЛОКАЛИЗАЦИЯ](#локализация)
+- [СОВЕТЫ](#советы)
+  - [_Всегда_ ограничивайте ток зарядки, если батарея старая и/или быстро разряжается](#всегда-ограничивайте-ток-зарядки-если-батарея-старая-иили-быстро-разряжается)
+  - [Управление зарядкой по току и напряжению](#управление-зарядкой-по-току-и-напряжению)
+  - [Общие рекомендации](#общие-рекомендации)
+  - [Устройства Google Pixel](#устройства-google-pixel)
+  - [Режим простоя и альтернативы](#режим-простоя-и-альтернативы)
+- [ЧАСТО ЗАДАВАЕМЫЕ ВОПРОСЫ (FAQ)](#часто-задаваемые-вопросы-faq)
 
 ---
-<a id="description"></a>
 ## ОПИСАНИЕ
 
 ACC — приложение для Android, предназначенное прежде всего для [продления срока службы батареи](https://batteryuniversity.com/article/bu-808-how-to-prolong-lithium-based-batteries).
@@ -67,7 +72,6 @@ ACC — приложение для Android, предназначенное пр
 
 
 ---
-<a id="license"></a>
 ## ЛИЦЕНЗИЯ
 
 Copyright 2017-2024, VR25
@@ -87,7 +91,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 ---
-<a id="clause-de-non-responsabilité"></a>
 ## ОТКАЗ ОТ ОТВЕТСТВЕННОСТИ
 
 Перед установкой или обновлением программы обязательно прочитайте этот документ.
@@ -99,7 +102,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 ---
-<a id="avertissements"></a>
 ## ПРЕДУПРЕЖДЕНИЯ
 
 ACC изменяет низкоуровневые параметры Android ([ядра](https://duckduckgo.com/lite/?q=kernel+android)), управляющие цепями зарядки.
@@ -115,17 +117,7 @@ ACC изменяет низкоуровневые параметры Android ([�
 
 [lybxlpsv](https://github.com/lybxlpsv) рекомендует загрузиться в bootloader, а затем снова запустить систему, чтобы сбросить PMIC.
 
-
 ---
-<a id="donations"></a>
-## ПОЖЕРТВОВАНИЯ
-
-Пожалуйста, поддержите проект пожертвованием ([ссылки](#links) внизу).
-Чем больше становится проект, тем больше ему нужно кофе.
-
-
----
-<a id="prérequis"></a>
 ## ТРЕБОВАНИЯ
 
 - [Прочитайте, как продлить срок службы литий-ионных батарей (англ.)](https://batteryuniversity.com/article/bu-808-how-to-prolong-lithium-based-batteries)
@@ -144,7 +136,6 @@ ACC изменяет низкоуровневые параметры Android ([�
 
 
 ---
-<a id="guide-de-démarage-rapide"></a>
 ## КРАТКОЕ РУКОВОДСТВО
 
 
@@ -162,7 +153,6 @@ ACC изменяет низкоуровневые параметры Android ([�
 Прежде чем сообщать об ошибке или задавать вопрос, изучите документацию: ответ часто уже есть в тексте.
 
 
-<a id="notes"></a>
 ### Примечания
 
 Шаги `2` и `3` необязательны, поскольку используются настройки по умолчанию.
@@ -181,18 +171,15 @@ ACC также работает в некоторых средах recovery.
 
 
 ---
-<a id="construire-etou-installer-depuis-la-source"></a>
 ## СБОРКА И/ИЛИ УСТАНОВКА ИЗ ИСХОДНОГО КОДА
 
 
-<a id="dépendances-construction"></a>
 ### Зависимости для сборки
 
 - git, wget или curl
 - zip
 
 
-<a id="construire-des-tarballs-et-des-zips-flashables"></a>
 ### Сборка tar-архивов и прошиваемых ZIP-файлов
 
 1. Скачайте и распакуйте исходный код: `git clone https://github.com/VR-25/acc.git`
@@ -204,7 +191,6 @@ ACC также работает в некоторых средах recovery.
 3. Выполните `sh build.sh` (или дважды щёлкните `build.bat` в Windows 10, если установлен WSL (Windows Subsystem for Linux) с zip)
 
 
-<a id="notes-1"></a>
 #### Примечания
 
 - `build.sh` автоматически задаёт или меняет `id=*` в файлах `*.sh` и `update-binary`.
@@ -213,7 +199,6 @@ ACC также работает в некоторых средах recovery.
 - Чтобы обновить локальный исходный код, выполните `git pull --force` или скачайте его заново (с помощью wget/curl), как описано выше.
 
 
-<a id="installer-depuis-la-source-locale-ou-github"></a>
 ### Установка из локального исходного кода или GitHub
 
 - `[export installDir=<родительский каталог установки>] sh install.sh` устанавливает acc из распакованного исходного кода.
@@ -226,7 +211,6 @@ ACC также работает в некоторых средах recovery.
 Архив должен находиться в том же каталоге и быть скачан с GitHub: https://github.com/VR-25/acc/archive/$commit.tar.gz (примеры commit: master, dev, v2020.5.20-rc).
 
 
-<a id="notes-2"></a>
 #### Примечания
 
 - `install-online.sh` — аналог команды `acc --upgrade`.
@@ -249,7 +233,7 @@ ACC также работает в некоторых средах recovery.
 Для сборки или live-развёртывания WebUI без упаковки полного zip модуля:
 
 #### Требования
-* **Node.js**: `18.0.0+` (рекомендуется Node.js `20+` LTS).
+* **Node.js**: `22.12.0+` (настоятельно рекомендуется Node.js `26 LTS`).
 * **ADB и root-доступ** *(требуются только при использовании флага `-d` / `--deploy`)*:
   * Включите **USB Debugging** в настройках разработчика Android.
   * **Проводное подключение (USB)**: подключите устройство по USB и подтвердите запрос отладки на телефоне. Выполните `adb root` или убедитесь, что root-менеджер предоставил доступ Android Shell (com.android.shell).
@@ -258,6 +242,9 @@ ACC также работает в некоторых средах recovery.
     2. Выполните сопряжение и подключение устройства (`adb pair <ip>:<port>` и `adb connect <ip>:<port>`).
   * *Примечание для беспроводного ADB*: убедитесь, что телефон находится в той же локальной сети, что и ПК.
   * Файлы передаются через staging (`/data/local/tmp/`) и затем перемещаются в нужное место через `su`.
+* **Git hook** *(требуется только при внесении изменений в этот репозиторий, чтобы случайно не закоммитить файлы, которые должны отправляться средствами CI)*:
+  * `chmod +x .githooks/pre-commit`
+  * `git config core.hooksPath .githooks`
 
 #### Сборка/развёртывание
 
@@ -297,7 +284,6 @@ ACC также работает в некоторых средах recovery.
    - Активное расположение на устройстве (при использовании `-d/--deploy`): `/data/adb/modules/acc/webroot/index.html`
 
 ---
-<a id="configuration-par-défaut"></a>
 ## КОНФИГУРАЦИЯ ПО УМОЛЧАНИЮ
 ```
 #DC#
@@ -664,7 +650,6 @@ dischargePolarity=
 ```
 
 ---
-<a id="setupusage"></a>
 ## НАСТРОЙКА И ИСПОЛЬЗОВАНИЕ
 
 
@@ -680,7 +665,6 @@ dischargePolarity=
 Его содержимое соответствует разделу [конфигурация по умолчанию](#configuration-par-défaut) выше.
 
 
-<a id="commandes-du-terminal"></a>
 ### Команды терминала
 ```
 #TC#
@@ -943,7 +927,6 @@ dischargePolarity=
 ```
 
 ---
-<a id="plugins"></a>
 ## ПЛАГИНЫ
 
 Это скрипты, переопределяющие функции и некоторые глобальные переменные.
@@ -959,11 +942,9 @@ dischargePolarity=
 
 
 ---
-<a id="notestips-for-front-end-developers"></a>
 ## ПРИМЕЧАНИЯ ДЛЯ РАЗРАБОТЧИКОВ ФРОНТЕНДОВ
 
 
-<a id="basics"></a>
 ### Основы
 
 Для ACC не требуется Magisk.
@@ -984,7 +965,6 @@ dischargePolarity=
 См. `НАСТРОЙКА И ИСПОЛЬЗОВАНИЕ > [Команды терминала](#commandes-du-terminal) > Коды выхода`.
 
 
-<a id="installingupgrading-acc"></a>
 ### Установка и обновление ACC
 
 Это должно быть просто.
@@ -1010,13 +990,11 @@ dischargePolarity=
 }
 ```
 
-<a id="uninstalling-acc"></a>
 ### Удаление ACC
 
 Выполните `/data/adb/vr25/acc/uninstall.sh` (перезагрузка не требуется; **зарядное устройство должно быть подключено**) либо удалите модуль через приложение Magisk и перезагрузите устройство.
 
 
-<a id="initializing-acc"></a>
 ### Инициализация ACC
 
 В обработчике boot_completed и при запуске основной активности выполните:
@@ -1042,7 +1020,6 @@ dischargePolarity=
 - Установщик ACC всегда выполняет инициализацию.
 
 
-<a id="managing-acc"></a>
 ### Управление ACC
 
 Как уже говорилось, фронтендам следует использовать исполняемый файл `/dev/.vr25/acc/acca`.
@@ -1060,7 +1037,6 @@ dischargePolarity=
 Подробнее см. раздел [команды терминала](#commandes-du-terminal).
 
 
-<a id="the-output-of---info"></a>
 ### Вывод команды --info
 
 Эти данные поступают из ядра, а не от acc.
@@ -1081,7 +1057,6 @@ POWER_NOW=0 # (CURRENT_NOW * VOLTAGE_NOW) (ваты)
 Внешнее питание всегда преобразуется до того, как достигает батареи.
 
 
-<a id="profiles"></a>
 ### Профили
 
 Профили — это просто разные файлы конфигурации.
@@ -1108,7 +1083,6 @@ _Возврат к основной конфигурации:_
 `/dev/.vr25/acc/accd --init`
 
 
-<a id="more"></a>
 ### Дополнительно
 
 После изменения конфигурации перезапускать демон ACC не нужно.
@@ -1121,19 +1095,119 @@ _Возврат к основной конфигурации:_
 
 Эта информация также приведена в разделе [конфигурация по умолчанию](#configuration-par-défaut).
 
+### WebUI
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="33%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/1.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/1.png" height="300">
+        </a>
+      </td>
+      <td align="center" width="33%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/2.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/2.png" height="300">
+        </a>
+      </td>
+      <td align="center" width="33%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/8.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/8.png" height="300">
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <em>Battery Stats &amp; Daemon Control</em>
+      </td>
+      <td align="center">
+        <em>Charging Thresholds &amp; Reset Battery Stats</em>
+      </td>
+      <td align="center">
+        <em>Idle Mode</em>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" width="33%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/9.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/9.png" height="300">
+        </a>
+      </td>
+      <td align="center" width="33%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/3.png" height="300">
+        </a>
+      </td>
+      <td align="center" width="33%">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/4.png" height="300">
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <em>Charging Switch</em>
+      </td>
+      <td align="center">
+        <em>Config File Editor</em>
+      </td>
+      <td align="center">
+        <em>Logs Viewer</em>
+      </td>
+    </tr>
+  </table>
+</div>
+
+### Кнопка действия
+
+С помощью кнопки действия можно быстро запускать и останавливать `accd`.
+
+<p align="center">
+  <table>
+    <tr>
+      <td align="center" colspan="2">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/5.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/5.png" height="300">
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" colspan="2">
+        <em>Кнопка действия</em>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/6.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/6.png" height="300">
+        </a>
+      </td>
+      <td align="center">
+        <a href="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/7.png">
+          <img src="https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/7.png" height="300">
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <em>accd запущен</em>
+      </td>
+      <td align="center">
+        <em>accd остановлен</em>
+      </td>
+    </tr>
+  </table>
+</p>
 
 ---
-<a id="troubleshooting"></a>
 ## УСТРАНЕНИЕ НЕПОЛАДОК
 
 
-<a id="acc--t-results-seem-inconsistent"></a>
 ## Результаты acc -t кажутся непоследовательными
 
 См. «конфигурация по умолчанию > batt_status_workaround».
 
 
-<a id="battery-capacity--level-doesnt-seem-right"></a>
 ### Уровень заряда батареи отображается неверно
 
 Если показания уровня заряда в Android отличаются от показаний ядра, демон ACC автоматически синхронизирует их: останавливает службу батареи и каждые несколько секунд передаёт ей фактическое значение.
@@ -1144,8 +1218,6 @@ _Возврат к основной конфигурации:_
 Подробнее см. раздел [конфигурация по умолчанию](#configuration-par-défaut) выше.
 
 
-<a id="finding-additionalpotential-charging-switches-quickly"></a>
-<a id="charging-switch"></a>
 ### Переключатель зарядки
 
 По умолчанию ACC использует любой работающий [переключатель зарядки](https://github.com/VR-25/acc/blob/dev/acc/charging-switches.txt) (автоматический выбор переключателя).
@@ -1174,7 +1246,6 @@ _Возврат к основной конфигурации:_
 Они находятся в `acc/oem-custom.sh`.
 
 
-<a id="custom-max-charging-voltage-and-current-limits"></a>
 ### Пользовательские ограничения максимального напряжения и тока зарядки
 
 К сожалению, эти возможности поддерживаются не всеми ядрами.
@@ -1205,7 +1276,6 @@ _Возврат к основной конфигурации:_
 Напоминание: для загрузки новых или изменённых плагинов необходимо перезапустить демон.
 
 
-<a id="diagnosticslogs"></a>
 ### Диагностика и журналы
 
 Временные журналы (удаляются после перезагрузки; только файлы `.log`) хранятся в `/dev/.vr25/acc/`.
@@ -1216,7 +1286,6 @@ _Возврат к основной конфигурации:_
 Автоматический экспорт (локально) выполняется при определённых условиях (см. `НАСТРОЙКА И ИСПОЛЬЗОВАНИЕ > Команды терминала > Коды выхода`).
 
 
-<a id="install-upgrade-stop-and-restart-processes-seem-to-take-too-long"></a>
 ### Установка, обновление и остановка/перезапуск занимают слишком много времени
 
 Остановка демона предполагает полный откат изменений, внесённых в систему управления зарядкой.
@@ -1226,13 +1295,11 @@ _Возврат к основной конфигурации:_
 Опытные пользователи могут принудительно остановить accd командой `pkill -9 -f accd`.
 
 
-<a id="kernel-panic-and-spontaneous-reboots"></a>
 ### Паника ядра и самопроизвольные перезагрузки
 
 Файлы управления, вызывающие такие проблемы, автоматически заносятся в чёрный список (в `/data/adb/acc-data/logs/write.log` они отмечаются комментариями).
 
 
-<a id="restore-default-config"></a>
 ### Восстановление конфигурации по умолчанию
 
 Это может сэкономить много времени и избавить от лишних проблем.
@@ -1240,7 +1307,6 @@ _Возврат к основной конфигурации:_
 `acc --set --reset`, `acc -sr` или `rm /data/adb/vr25/acc-data/config.txt` (аварийный вариант)
 
 
-<a id="samsung-charging-always-stops-at-70-capacity"></a>
 ### Samsung: зарядка _всегда_ останавливается на уровне 70%
 
 Это проблема конкретных устройств (так задумано?).
@@ -1249,7 +1315,6 @@ _Возврат к основной конфигурации:_
 Подробнее см. раздел [Переключатель зарядки](#charging-switch) выше.
 
 
-<a id="slow-charging"></a>
 ### Медленная зарядка
 
 Возможные причины:
@@ -1260,13 +1325,11 @@ _Возврат к основной конфигурации:_
 - Слабый адаптер питания и/или кабель.
 
 
-<a id="unable-to-charge"></a>
 ### Не удаётся зарядить устройство
 
 См. раздел [Предупреждения](#avertissements) выше.
 
 
-<a id="unexpected-reboots"></a>
 ### Неожиданные перезагрузки
 
 Неподходящие или проблемные файлы управления зарядкой могут вызывать неожиданные перезагрузки.
@@ -1275,7 +1338,6 @@ ACC автоматически заносит некоторые из них в 
 После прекращения перезагрузок отправьте разработчику файл `write.log`.
 
 
-<a id="warp-vooc-and-other-fast-charging-tech"></a>
 ### WARP, VOOC и другие технологии быстрой зарядки
 
 Переключатели зарядки могут работать нестабильно с оригинальным адаптером питания.
@@ -1284,7 +1346,6 @@ ACC автоматически заносит некоторые из них в 
 Можно также попробовать останавливать зарядку ограничением тока/напряжения.
 
 
-<a id="why-did-accd-stop"></a>
 ### Почему остановился accd?
 
 Чтобы выяснить причину, выполните `acc -l tail`.
@@ -1297,7 +1358,6 @@ ACC автоматически заносит некоторые из них в 
 
 
 ---
-<a id="power-supply-logs-help-needed"></a>
 ## ЖУРНАЛЫ ИСТОЧНИКОВ ПИТАНИЯ (НУЖНА ПОМОЩЬ)
 
 Выполните `acc -le` и загрузите файл `/data/adb/vr25/acc-data/logs/power_supply-*.log` в [мою папку Dropbox](https://www.dropbox.com/request/WYVDyCc0GkKQ8U5mLNlH) (учётная запись не требуется).
@@ -1314,7 +1374,6 @@ ACC автоматически заносит некоторые из них в 
 
 
 ---
-<a id="localization"></a>
 ## ЛОКАЛИЗАЦИЯ
 
 
@@ -1341,11 +1400,9 @@ ACC автоматически заносит некоторые из них в 
 
 
 ---
-<a id="tips"></a>
 ## СОВЕТЫ
 
 
-<a id="always-limit-the-charging-current-if-your-battery-is-old-andor-tends-to-discharge-too-fast"></a>
 ### _Всегда_ ограничивайте ток зарядки, если батарея старая и/или быстро разряжается
 
 Это продлевает срок службы батареи и может даже _снизить_ скорость её разряда.
@@ -1357,7 +1414,6 @@ ACC автоматически заносит некоторые из них в 
 Если устройство не поддерживает пользовательские ограничения тока, используйте отдельный адаптер питания («медленную» зарядку).
 
 
-<a id="current-and-voltage-based-charging-control"></a>
 ### Управление зарядкой по току и напряжению
 
 Включается значением charging_switch=milliamps или charging_switch=3700-4300 (милливольты), например: `acc -s s=0`, `acc -s s=250`, `acc -s s=3700`, `acc -ss` (мастер).
@@ -1370,7 +1426,6 @@ ACC автоматически заносит некоторые из них в 
 Если статус периодически меняется, ток слишком низкий; увеличивайте его, пока проблема не исчезнет.
 
 
-<a id="generic"></a>
 ### Общие рекомендации
 
 Имитируйте _режим простоя батареи_ с помощью ограничения напряжения: `acc -s pc=101 rc=0 mcv=3900`.
@@ -1388,7 +1443,6 @@ ACC автоматически заносит некоторые из них в 
 Принудительное включение быстрой зарядки: `appy_on_boot="/sys/kernel/fast_charge/force_fast_charge::1::0 usb/boost_current::1::0 charger/boost_current::1::0"`
 
 
-<a id="google-pixel-devices"></a>
 ### Устройства Google Pixel
 
 Принудительно включить быструю беспроводную зарядку сторонними зарядными устройствами, которые должны заряжать батарею быстрее: `apply_on_plug=wireless/voltage_max::9000000`.
@@ -1397,7 +1451,6 @@ ACC автоматически заносит некоторые из них в 
 Если не сработает, никаких негативных последствий не будет.
 
 
-<a id="export-import-config"></a>
 ### Экспорт/импорт конфигурации
 
 Экспорт: `acc -s > /sdcard/Download/config.txt`
@@ -1407,14 +1460,12 @@ ACC автоматически заносит некоторые из них в 
 Поддерживается частичный импорт — можно поделиться только частью конфигурации (например, `acc -sp curr,volt > file`); тот, кто импортирует её, получит только эти изменения.
 
 
-<a id="override-battery-mah-capacity"></a>
 ### Переопределение ёмкости батареи в мА·ч
 
 «Расширенная» батарея не будет заряжаться полностью, если ядро по-прежнему использует исходное значение `charge_full_design`.
 На некоторых устройствах это можно изменить. Если это относится к вашему случаю, используйте `apply_on_boot`, чтобы задать нужное значение(-я) в `/sys/class/power_supply/*/charge_full_design`.
 
 
-<a id="override-broken-temperature-sensor"></a>
 ### Переопределение неисправного датчика температуры
 
 Если датчик температуры батареи постоянно показывает отрицательное значение, а зарядка очень медленная или вообще не идёт, попробуйте следующее (вставьте и выполните):
@@ -1422,7 +1473,6 @@ ACC автоматически заносит некоторые из них в 
 `acc -c d temp_cool; acc -c a ':; for i in */temp_cool */temp_cold; do [ -f $i ] || continue; chmod a+w $i && echo "-999" > $i || :; done'`
 
 
-<a id="idle-mode-and-alternatives"></a>
 ### Режим простоя и альтернативы
 
 1 — Переключатель зарядки с поддержкой режима простоя (очевидно, лучший вариант).
@@ -1450,7 +1500,6 @@ ACC автоматически заносит некоторые из них в 
 
 
 ---
-<a id="frequently-asked-questions-faq"></a>
 ## ЧАСТО ЗАДАВАЕМЫЕ ВОПРОСЫ (FAQ)
 
 
@@ -1585,30 +1634,3 @@ AccA поставляется с версией ACC, которая автома
 
 `acc -c a ": day profile; at 6:00 \"acc -s pc=75 mcc= mcv=4100; acc -n 'Switched to day profile'\""; acc -c a ": night profile; at 22:00 \"acc -s pc=50 mcc=500 mcv=3900; acc -n 'Switched to night profile'\""`
 
-
----
-<a id="links"></a>
-## ССЫЛКИ
-
-- [Daily Job Scheduler](https://github.com/VR-25/djs)
-
-- [Пожертвовать через Airtm, имя пользователя: ivandro863auzqg](https://app.airtm.com/send-or-request/send)
-- [Пожертвовать банковской картой](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=iprj25@gmail.com&lc=US&item_name=VR25+is+creating+free+and+open+source+software.+Donate+to+suppport+their+work.&no_note=0&cn=&currency_code=USD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted)
-- [Пожертвовать через Liberapay](https://liberapay.com/vr25)
-- [Пожертвовать через Patreon](https://patreon.com/vr25)
-- [Пожертвовать через PayPal](https://paypal.me/vr25xda)
-
-- [Страница Facebook](https://fb.me/vr25xda)
-
-- [Фронтенд — ACC App](https://github.com/MatteCarra/AccA/releases)
-- [Фронтенд — ACC Settings](https://github.com/CrazyBoyFeng/AccSettings)
-
-- [Обязательно к прочтению — как продлить срок службы литий-ионных батарей](https://batteryuniversity.com/article/bu-808-how-to-prolong-lithium-based-batteries)
-
-- [Канал Telegram](https://t.me/vr25_xda)
-- [Группа Telegram](https://t.me/acc_group)
-- [Профиль Telegram](https://t.me/vr25xda)
-
-- [Основной репозиторий](https://github.com/VR-25/acc)
-
-- [Тема на XDA](https://forum.xda-developers.com/apps/magisk/module-magic-charging-switch-cs-v2017-9-t3668427)
