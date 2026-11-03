@@ -5,6 +5,9 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "00:00"
+      timezone: "Etc/UTC"
     open-pull-requests-limit: 3
     assignees:
       - "Infiniti151"
@@ -21,6 +24,9 @@ updates:
     directory: "/webui"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "00:00"
+      timezone: "Etc/UTC"
     open-pull-requests-limit: 3
     assignees:
       - "Infiniti151"
