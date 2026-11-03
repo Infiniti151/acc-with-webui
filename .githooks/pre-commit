@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+#
+# SPDX-FileCopyrightText: 2026 Infiniti151
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# Define restricted files and directories.
+restrictedPatterns=(
+    '^META-INF/'
+    '^bin/'
+    '^install/webroot/'
+    '^module\.prop$'
+    '^module\.json$'
+    '^module\.yaml$'
+    '^install/latest-release-notes\.md$'
+    '^webui/package-lock\.json$'
+    '^customize\.sh$'
+    '^README\.html$'
+)
+
+# Find staged files matching restricted patterns.
+while IFS= read -r -d '' file; do
+    for pattern in "${restrictedPatterns[@]}"; do
+        if [[ "$file" =~ $pattern ]]; then
+            git restore --staged -- "$file"
+            break
+        fi
+    done
+done < <(git diff --cached --name-only -z)
+
+if git diff --cached --quiet; then
+    printf '\033[31mError: All staged files are restricted. Nothing to commit.\033[0m\n'
+    exit 1
+fi
+
+exit 0
