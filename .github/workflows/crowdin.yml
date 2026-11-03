@@ -1,0 +1,48 @@
+name: Crowdin Translations
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - "crowdin/en.json"
+      - "crowdin.yaml"
+      - ".github/workflows/crowdin.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  synchronize:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Synchronize with Crowdin
+        uses: crowdin/github-action@5b9790df740c85af5412a3a3a91b24988d5d324f # v3.5.1
+        with:
+          config: crowdin.yaml
+
+          upload_sources: true
+          upload_translations: true
+          download_translations: false
+
+          localization_branch_name: l10n/crowdin
+
+          create_pull_request: true
+          pull_request_title: "Update Crowdin translations"
+          pull_request_body: |
+            Automated translation updates from Crowdin.
+
+            Please review the updated translations before merging.
+          pull_request_base_branch_name: dev
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
