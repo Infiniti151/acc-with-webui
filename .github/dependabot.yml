@@ -34,6 +34,11 @@ updates:
       app-dependencies:
         patterns:
           - "*"
+    ignore:
+      # ksu.io was introduced in this version which breaks WXP.
+      - dependency-name: "kernelsu"
+        versions:
+          - "3.3.0"
     commit-message:
       prefix: "chore(deps)"
     target-branch: "dev"
