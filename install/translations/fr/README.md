@@ -20,8 +20,8 @@
     - [Notes](#notes-1)
   - [Installer depuis la Source Locale ou Github](#installer-depuis-la-source-locale-ou-github)
     - [Notes](#notes-2)
-  - [Build/Deploy WebUI (`index.html`)](#builddeploy-webui-indexhtml)
-    - [Prérequis](#prérequis)
+  - [Compilation / Déploiement de la WebUI (`index.html`)](#compilation--déploiement-de-la-webui-indexhtml)
+    - [Prérequis](#prérequis-1)
     - [Compilation / Déploiement](#compilation--déploiement)
 - [CONFIGURATION PAR DÉFAUT](#configuration-par-défaut)
 - [SETUP/USAGE](#setupusage)
@@ -229,7 +229,7 @@ En mode interactif, il demande également à l'utilisateur s'il souhaite téléc
 
 - Vous pouvez aussi lire les [Commandes du Terminal](#commandes-du-terminal) > `Codes de sortie` plus bas.
 
-### Build/Deploy WebUI (`index.html`)
+### Compilation / Déploiement de la WebUI (`index.html`)
 
 Pour compiler ou déployer la WebUI en direct sans empaqueter l'archive ZIP complète du module :
 
