@@ -48,6 +48,7 @@
   - [Managing ACC](#managing-acc)
   - [WebUI](#webui)
   - [Action Button](#action-button)
+  - [WebUI Translations](#-translations-webui-action-button-module-description-installation)
 - [TROUBLESHOOTING](#troubleshooting)
   - [`acc -t` Results Seem Inconsistent](#acc--t-results-seem-inconsistent)
   - [Charging Switch](#charging-switch)
