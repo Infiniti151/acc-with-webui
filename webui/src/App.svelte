@@ -852,10 +852,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
   async function updateModuleDescription(status) {
     try {
       const res = await exec(`
-        sed -i "/^description=/ {
-          s@^description=.*Extend@description=[accd ${status}] | 🟢 ${resumeThresh}% | 🟡 ${pauseThresh}% | 🔴 ${shutdownThresh}% | Extend@
-        }" "${PROP_PATH}"
-      `);
+      sed -i 's@^description=\\[accd [^]]*\\] | 🟢 [0-9]*% | 🟡 [0-9]*% | 🔴 [0-9]*%@description=[accd ${status}] | 🟢 ${resumeThresh}% | 🟡 ${pauseThresh}% | 🔴 ${shutdownThresh}%@' "${PROP_PATH}"
+    `);
+
       if (res.errno !== 0) {
         console.error("Failed to update module description:", res.stderr);
       }
