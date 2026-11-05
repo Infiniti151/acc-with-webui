@@ -1,5 +1,7 @@
-### v1.6.0 (10600) - 2026-11-03
+### v1.6.0 (10600) - 2026-11-05
 `ACC: dev-2025-06-06`
+
+WebUI 🎛️ ->
 - Added language switcher to the WebUI banner.
 - Added animated gradient glow to the WebUI banner border to indicate active charging.
 - Added system information line to the WebUI banner displaying the root solution, Android version, and kernel version.
