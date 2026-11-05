@@ -30,13 +30,16 @@ jobs:
               { pattern: /^META-INF\//, type: 'directory' },
               { pattern: /^bin\//, type: 'directory' },
               { pattern: /^\.github\//, type: 'directory' },
+              { pattern: /^install\/webroot\//, type: 'directory' },
 
               // Individual files
               { pattern: /^module\.prop$/, type: 'file' },
               { pattern: /^module\.json$/, type: 'file' },
               { pattern: /^module\.yaml$/, type: 'file' },
               { pattern: /^install\/latest-release-notes\.md$/, type: 'file' },
+              { pattern: /^webui\/package-lock\.json$/, type: 'file' },
               { pattern: /^customize\.sh$/, type: 'file' },
+              { pattern: /^README\.html$/, type: 'file' },
             ];
 
             // Retrieve all changed files, including paginated results.

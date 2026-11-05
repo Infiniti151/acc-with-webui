@@ -87,6 +87,7 @@
         "export": "Export",
         "viewOnGitHub": "View on GitHub",
         "selectWorkingSwitch": "Select Working Switch",
+        "selectLanguage": "Select Language",
         "selectOption": "Select Option",
         "noSwitchesAvailable": "No switches available. Run 'Test All'.",
         "infoCurrentSwitchLabel": "Toggle info for Current Switch",

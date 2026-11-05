@@ -20,6 +20,7 @@ TXT_TEST_RUNNING="[!] Test All sedang berjalan dan memerlukan daemon untuk dihen
 TXT_WAIT_TEST="[!] Tunggu hingga selesai (atau batalkan), lalu coba lagi."
 TXT_PROP_ERROR="[!] Kesalahan: module.prop tidak ditemukan di"
 MODULE_DESC="Perpanjang masa pakai baterai Anda dengan mengontrol arus pengisian daya, suhu, dan tegangan."
+TXT_CHANGELOG="Catatan Perubahan"
 
 print_already_running() {
   echo "accd sedang berjalan"

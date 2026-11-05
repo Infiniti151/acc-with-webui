@@ -146,6 +146,15 @@ awk '
   { print }
 ' changelog-webui.md > install/latest-release-notes.md
 
+add_header "Generating translations..."
+
+if [[ "${CROWDIN_CHANGED:-false}" == "true" ]]; then
+    echo "Generating translations..."
+    node scripts/generate-translations.js
+else
+    echo "No Crowdin changes detected. Skipping translation generation."
+fi
+
 build_webui
 
 add_header "Updating ID and domain in install scripts..."

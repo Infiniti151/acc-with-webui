@@ -37,26 +37,11 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
       {#if toast.type === "confirm"}
         <div class="toast-actions">
-          <button
-            class="toast-btn cancel"
-            onclick={toast.onCancel}
-            disabled={toast.loading}
-          >
+          <button class="toast-btn cancel" onclick={toast.onCancel}>
             {t("no")}
           </button>
-          <button
-            class="toast-btn confirm"
-            onclick={toast.onConfirm}
-            disabled={toast.loading}
-          >
-            {#if toast.loading}
-              <div
-                class="m3-spinner"
-                style="width: 16px; height: 16px; border-width: 2px;"
-              ></div>
-            {:else}
-              {t("yes")}
-            {/if}
+          <button class="toast-btn confirm" onclick={toast.onConfirm}>
+            {t("yes")}
           </button>
         </div>
       {/if}

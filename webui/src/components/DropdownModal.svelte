@@ -13,6 +13,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
     title = t("selectOption"),
     options = [],
     selectedValue = $bindable(""),
+    icon: Icon = IMaterialSymbolsKeyboardDoubleArrowDown,
     onSelect = () => {},
     onClose = () => {},
   } = $props();
@@ -46,10 +47,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
       <!-- Header -->
       <div class="modal-header">
         <div class="modal-title-group">
-          <IMaterialSymbolsSwitch class="mi-icon" />
+          <Icon class="mi-icon" />
           <h3 class="modal-title">{title}</h3>
         </div>
-        <button class="modal-close-btn" onclick={onClose} aria-label={t("close")}>
+        <button
+          class="modal-close-btn"
+          onclick={onClose}
+          aria-label={t("close")}
+        >
           <IMaterialSymbolsClose class="mi-icon" />
         </button>
       </div>

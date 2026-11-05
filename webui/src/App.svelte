@@ -9,7 +9,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
   import { cubicOut } from "svelte/easing";
   import { listPackages, getPackagesInfo } from "kernelsu";
   import { version, acc_version } from "../package.json";
-  import { t } from "./i18n.js";
+  import { t, getLocale, setLocale, getAvailableLocales } from "./i18n.js";
   import { exec } from "./utils/exec.js";
   import { toast } from "./stores/toast.svelte.js";
   import { banner } from "./stores/banner.svelte.js";
@@ -226,9 +226,11 @@ SPDX-License-Identifier: GPL-3.0-or-later
     if (!isValid) {
       temperature = voltage = current = "—";
     } else {
-      const temp = parseInt(tempRes);
-      const volt = parseInt(voltRes);
-      const curr = parseInt(currRes);
+      const temp = parseInt(tempRes, 10);
+      const volt = parseInt(voltRes, 10);
+      const curr = parseInt(currRes, 10);
+
+      currentRaw = Number.isFinite(curr) ? curr : null;
 
       temperature = isNaN(temp)
         ? "—"
@@ -587,10 +589,23 @@ SPDX-License-Identifier: GPL-3.0-or-later
   });
 
   // =========================
-  // Battery Banner
+  // WebUI Banner
   // =========================
+  let showLangModal = $state(false);
+  let currentLocale = $state(getLocale());
+  let availableLocales = getAvailableLocales();
+  let androidVersion = $state("--");
+  let kernelVersion = $state("--");
+  let currentRaw = $state(null);
+
   let initialLoad = $state(true);
   let currentEnv = $state(t("detectingEnvironment"));
+
+  let systemInfoLine = $derived(
+    `${currentEnv} • Android ${androidVersion} • Kernel ${kernelVersion}`,
+  );
+
+  let isCharging = $derived(isPlugged && currentRaw !== null && currentRaw > 0);
 
   let fillPercentage = $derived(Math.min(Math.max(pauseThresh || 0, 0), 100));
   let fluidHeight = $derived((160 * fillPercentage) / 100);
@@ -720,23 +735,43 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
   async function detectEnvironment() {
     currentEnv = t("checking");
+
+    // Execute root detector, getprop for Android version, and uname for Kernel release in a single call
     const cmd = `
-            if [ -d /data/adb/magisk ] || [ -d /sbin/.magisk ]; then
-                echo "MAGISK";
-            elif [ -d /data/adb/ksu ] || [ -d /data/adb/ksu-v ]; then
-                echo "KERNELSU";
-            elif [ -d /data/adb/ap ]; then
-                echo "APATCH";
-            else
-                echo "UNKNOWN";
-            fi
-        `;
+      if [ -d /data/adb/magisk ] || [ -d /sbin/.magisk ]; then
+        echo "Magisk"
+      elif [ -d /data/adb/ksu ] || [ -d /data/adb/ksu-v ]; then
+        echo "KernelSU"
+      elif [ -d /data/adb/ap ]; then
+        echo "APatch"
+      else
+        echo "Unknown"
+      fi
+      printf '\\x1E'
+      getprop ro.build.version.release 2>/dev/null || echo "Unknown"
+      printf '\\x1E'
+      uname -r 2>/dev/null || echo "Unknown"
+    `;
+
     const res = await exec(cmd);
     if (res.errno === 0 && res.stdout) {
-      currentEnv = res.stdout;
+      const [envRes, androidRes, kernelRes] = res.stdout
+        .split("\x1E")
+        .map((s) => s.trim());
+      currentEnv = envRes || t("error");
+      androidVersion = androidRes || "--";
+      kernelVersion = kernelRes || "--";
     } else {
       currentEnv = t("error");
+      androidVersion = "--";
+      kernelVersion = "--";
     }
+  }
+
+  function handleLanguageSelect(val) {
+    setLocale(val);
+    currentLocale = val;
+    window.location.reload();
   }
 
   // =========================
@@ -1208,9 +1243,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
       if (TEST_CHECK_CHARGER) {
         const plug = await exec(`${PLUG_SH} plugged online && echo yes`);
         if (!plug.stdout.includes("yes")) {
-          toast.error(
-            t("noChargerForTestAll"),
-          );
+          toast.error(t("noChargerForTestAll"));
           return;
         }
       }
@@ -1263,8 +1296,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
       await tick();
       setTimeout(() => {
-        if (switchCardRef) {
-          scrollCardIntoView(switchCardRef);
+        if (testAllContainer) {
+          scrollCardIntoView(testAllContainer);
         }
       }, 320);
 
@@ -1696,13 +1729,16 @@ SPDX-License-Identifier: GPL-3.0-or-later
           }
 
           if (await isConfigDefault()) {
-            await banner.requireRestart();
-
+            await banner.clearRestart();
             await loadChargingSwitches();
+
             const cfgRes = await exec(`cat ${CONFIG_PATH} 2>/dev/null`);
             configText = cfgRes.stdout || "";
             originalConfigText = configText;
+
+            initialLoad = true;
             await updateStatus();
+            controlDaemon("restart");
 
             resetButtonText = t("resetDone");
           } else {
@@ -2125,7 +2161,17 @@ SPDX-License-Identifier: GPL-3.0-or-later
   <div class="blob blob-3"></div>
 </div>
 <div class="main-layout-wrapper">
-  <div class="module-banner-wrap">
+  <div class="module-banner-wrap" class:charging-active={isCharging}>
+    <button
+      type="button"
+      class="banner-lang-btn"
+      onclick={() => (showLangModal = true)}
+      aria-label={t("selectLanguage")}
+      title={t("selectLanguage")}
+    >
+      <IMaterialSymbolsTranslate class="mi-icon" />
+      <span class="lang-code">{currentLocale.toUpperCase()}</span>
+    </button>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
       <defs>
         <linearGradient id="liquid-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -2171,137 +2217,134 @@ SPDX-License-Identifier: GPL-3.0-or-later
         filter="blur(40px)"
       />
 
-      <g transform="translate(60, 20)">
-        <rect
-          y="115"
-          width="115"
-          height="28"
-          rx="14"
-          fill="rgba(245, 158, 11, 0.15)"
-          stroke="rgba(245, 158, 11, 0.4)"
-          stroke-width="1"
-        />
-        <text
-          id="env-badge"
-          x="57.5"
-          y="133"
-          fill="var(--md-sys-color-tertiary-complement)"
-          font-family="system-ui, sans-serif"
-          font-size="11"
-          font-weight="700"
-          letter-spacing="1.5"
-          text-anchor="middle">{currentEnv}</text
-        >
-        <text
-          x="0"
-          y="195"
-          fill="var(--md-sys-color-primary-complement)"
-          font-family="system-ui, sans-serif"
-          font-size="62"
-          font-weight="800"
-          letter-spacing="-1.5">{t("webUiName")}</text
-        >
-        <text
-          x="0"
-          y="240"
-          fill="var(--md-sys-color-secondary-complement)"
-          font-family="system-ui, sans-serif"
-          font-size="26"
-          font-weight="600"
-          opacity="0.95">{t("advancedChargingController")}</text
-        >
-      </g>
-
-      <g transform="translate(520, 110)">
-        <rect
-          x="10"
-          y="10"
-          width="80"
-          height="160"
-          rx="14"
-          fill="transparent"
-        />
-
-        <g mask="url(#jug-interior-clip)">
-          {#if fillPercentage > 0}
-            <path fill="url(#liquid-gradient)" opacity="0.85">
-              <animate
-                attributeName="d"
-                values="{wavePath1}; {wavePath2}; {wavePath1}"
-                dur="2.5s"
-                repeatCount="indefinite"
-              />
-              <animateTransform
-                attributeName="transform"
-                type="translate"
-                from="0 {fluidHeight}"
-                to="0 0"
-                dur="5s"
-                repeatCount="indefinite"
-              />
-            </path>
-          {/if}
+      <!-- Master Centered Group for Title, Subtitle, and Battery Widget -->
+      <g transform="translate(80, 110)">
+        <!-- Title & Subtitle Group -->
+        <g transform="translate(0, 15)">
+          <text
+            x="0"
+            y="70"
+            fill="var(--md-sys-color-primary-complement)"
+            font-family="system-ui, sans-serif"
+            font-size="72"
+            font-weight="800"
+            letter-spacing="-1.5">{t("webUiName")}</text
+          >
+          <text
+            x="0"
+            y="125"
+            fill="var(--md-sys-color-secondary-complement)"
+            font-family="system-ui, sans-serif"
+            font-size="32"
+            font-weight="600"
+            opacity="0.95">{t("advancedChargingController")}</text
+          >
         </g>
 
-        <rect
-          x="0"
-          y="0"
-          width="100"
-          height="180"
-          rx="20"
-          fill="none"
-          stroke="#ffffff"
-          stroke-width="5"
-          opacity="0.95"
-        />
-        <path
-          d="M 35 0 L 65 0 L 60 -6 L 40 -6 Z"
-          fill="#ffffff"
-          opacity="0.95"
-        />
+        <!-- Battery Widget Group -->
+        <g transform="translate(520, 0)">
+          <rect
+            x="10"
+            y="10"
+            width="80"
+            height="160"
+            rx="14"
+            fill="transparent"
+          />
 
-        <line
-          x1="-50"
-          y1={fluidY}
-          x2="150"
-          y2={fluidY}
-          stroke="var(--md-sys-color-primary-complement)"
-          stroke-width="2"
-          stroke-dasharray="4 4"
-          opacity="0.8"
-        />
+          <g mask="url(#jug-interior-clip)">
+            {#if fillPercentage > 0}
+              <path fill="url(#liquid-gradient)" opacity="0.85">
+                <animate
+                  attributeName="d"
+                  values="{wavePath1}; {wavePath2}; {wavePath1}"
+                  dur="2.5s"
+                  repeatCount="indefinite"
+                />
+                <animateTransform
+                  attributeName="transform"
+                  type="translate"
+                  from="0 {fluidHeight}"
+                  to="0 0"
+                  dur="5s"
+                  repeatCount="indefinite"
+                />
+              </path>
+            {/if}
+          </g>
 
-        <g transform="translate(90, {fluidY - 12})">
           <rect
             x="0"
             y="0"
-            width="54"
-            height="24"
-            rx="12"
-            fill="var(--md-sys-color-surface-variant)"
-            stroke="var(--md-sys-color-outline)"
-            stroke-width="1.5"
+            width="100"
+            height="180"
+            rx="20"
+            fill="none"
+            stroke="#ffffff"
+            stroke-width="5"
+            opacity="0.95"
           />
-          <text
-            id="banner-percentage-text"
-            x="27"
-            y="16"
-            fill="var(--md-sys-color-tertiary-complement)"
-            font-family="monospace"
-            font-size="11"
-            font-weight="700"
-            text-anchor="middle"
-          >
-            {pauseThresh ? `${pauseThresh}%` : "--%"}
-          </text>
-        </g>
+          <path
+            d="M 35 0 L 65 0 L 60 -6 L 40 -6 Z"
+            fill="#ffffff"
+            opacity="0.95"
+          />
 
-        <path
-          d="M 53 85 L 37 110 L 48 110 L 45 135 L 61 110 L 50 110 Z"
-          fill="var(--md-sys-color-surface)"
-          opacity="0.3"
-        />
+          <line
+            x1="-50"
+            y1={fluidY}
+            x2="150"
+            y2={fluidY}
+            stroke="var(--md-sys-color-primary-complement)"
+            stroke-width="2"
+            stroke-dasharray="4 4"
+            opacity="0.8"
+          />
+
+          <g transform="translate(90, {fluidY - 12})">
+            <rect
+              x="0"
+              y="0"
+              width="54"
+              height="24"
+              rx="12"
+              fill="var(--md-sys-color-surface-variant)"
+              stroke="var(--md-sys-color-outline)"
+              stroke-width="1.5"
+            />
+            <text
+              id="banner-percentage-text"
+              x="27"
+              y="16"
+              fill="var(--md-sys-color-tertiary-complement)"
+              font-family="monospace"
+              font-size="11"
+              font-weight="700"
+              text-anchor="middle"
+            >
+              {pauseThresh ? `${pauseThresh}%` : "--%"}
+            </text>
+          </g>
+
+          <path
+            d="M 53 85 L 37 110 L 48 110 L 45 135 L 61 110 L 50 110 Z"
+            fill="var(--md-sys-color-surface)"
+            opacity="0.3"
+          />
+        </g>
       </g>
+
+      <!-- System Info Line -->
+      <text
+        x="400"
+        y="370"
+        fill="var(--md-sys-color-on-surface-variant)"
+        font-family="system-ui, sans-serif"
+        font-size="30"
+        font-weight="300"
+        opacity="0.85"
+        text-anchor="middle">{systemInfoLine}</text
+      >
     </svg>
   </div>
 
@@ -2316,9 +2359,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
     </div>
     <div class="m3-card" style="margin-bottom:0;">
       <div class="card-header">
-        <span class="card-title">{t("temperature")}</span><IMaterialSymbolsThermostat
-          class="mi-icon"
-        />
+        <span class="card-title">{t("temperature")}</span
+        ><IMaterialSymbolsThermostat class="mi-icon" />
       </div>
       <div id="bat-temp" class="card-value">{temperature}</div>
     </div>
@@ -2418,7 +2460,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
           class="toggle-description"
           transition:slide={{ duration: 250, easing: cubicOut }}
         >
-         {@html t("descriptionCurrentSwitch")}
+          {@html t("descriptionCurrentSwitch")}
         </div>
       {/if}
     </div>
@@ -2815,7 +2857,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
           </button>
         </div>
         <div class="idle-apps-value">
-          <span class="idle-apps-count">{t("idleAppsCount", { count: idleApps.length })}</span>
+          <span class="idle-apps-count"
+            >{t("idleAppsCount", { count: idleApps.length })}</span
+          >
           <IMaterialSymbolsChevronRight class="mi-icon" />
         </div>
       </div>
@@ -3586,10 +3630,21 @@ SPDX-License-Identifier: GPL-3.0-or-later
 </div>
 
 <DropdownModal
+  isOpen={showLangModal}
+  title={t("selectLanguage")}
+  options={availableLocales}
+  bind:selectedValue={currentLocale}
+  icon={IMaterialSymbolsTranslate}
+  onSelect={handleLanguageSelect}
+  onClose={() => (showLangModal = false)}
+/>
+
+<DropdownModal
   isOpen={showSwitchModal}
   title={t("selectWorkingSwitch")}
   options={availableSwitches}
   bind:selectedValue={currentSwitch}
+  icon={IMaterialSymbolsSwitch}
   onSelect={handleSelectSwitch}
   onClose={() => (showSwitchModal = false)}
 />

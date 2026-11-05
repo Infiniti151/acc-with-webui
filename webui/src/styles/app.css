@@ -181,12 +181,55 @@ button:focus,
 
 .module-banner-wrap {
     overflow: hidden;
+    position: relative;
+    border-radius: 24px;
+    isolation: isolate;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .module-banner-wrap svg {
     display: block;
     width: 100%;
     height: auto;
+}
+
+.module-banner-wrap::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+
+    background: linear-gradient(90deg,
+            var(--md-sys-color-primary),
+            var(--md-sys-color-primary-complement),
+            var(--md-sys-color-secondary),
+            var(--md-sys-color-secondary-complement),
+            var(--md-sys-color-tertiary),
+            var(--md-sys-color-tertiary-complement),
+            var(--md-sys-color-primary));
+
+    background-size: 300% 100%;
+
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+
+    pointer-events: none;
+    opacity: 0;
+
+    filter: drop-shadow(0 0 3px var(--md-sys-color-primary)) drop-shadow(0 0 6px var(--md-sys-color-secondary));
+
+    transition: opacity 0.9s ease;
+}
+
+.module-banner-wrap.charging-active::after {
+    opacity: 1;
+    animation: chargingGlowShift 6s linear infinite;
 }
 
 .m3-card {
@@ -702,6 +745,35 @@ button:disabled {
 #btn-banner-restart:disabled {
     pointer-events: none;
     opacity: 0.5;
+}
+
+.banner-lang-btn {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: color-mix(in srgb, var(--md-sys-color-surface) 45%, transparent);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--md-sys-color-outline-variant, rgba(255, 255, 255, 0.2));
+    border-radius: 16px;
+    padding: 3px 8px;
+    color: var(--md-sys-color-on-surface);
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.banner-lang-btn:hover {
+    background: color-mix(in srgb, var(--md-sys-color-surface-variant) 95%, transparent);
+    transform: translateY(-1px);
+}
+
+.banner-lang-btn .mi-icon {
+    font-size: 15px;
 }
 
 /* =========================================
@@ -1706,16 +1778,26 @@ s .btn-clear-all:active {
     transition: background 0.15s ease;
 }
 
-.dropdown-item:hover {
+.dropdown-item,
+.dropdown-item:hover,
+.dropdown-item:active,
+.dropdown-item:focus,
+.dropdown-item:focus-visible {
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+.dropdown-item.selected,
+.dropdown-item.selected:hover,
+.dropdown-item.selected:active,
+.dropdown-item.selected:focus,
+.dropdown-item.selected:focus-visible {
     background: color-mix(in srgb,
-            var(--md-sys-color-surface-variant) 40%,
-            transparent);
+            var(--md-sys-color-primary) 12%,
+            transparent) !important;
 }
 
 .dropdown-item.selected {
-    background: color-mix(in srgb,
-            var(--md-sys-color-primary) 12%,
-            transparent);
     color: var(--md-sys-color-primary);
 }
 
@@ -2402,5 +2484,15 @@ mark.search-highlight.current {
     50% {
         box-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.45),
             0 0 0 6px color-mix(in srgb, var(--md-sys-color-primary) 30%, transparent);
+    }
+}
+
+@keyframes chargingGlowShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 300% 50%;
     }
 }

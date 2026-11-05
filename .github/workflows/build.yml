@@ -44,7 +44,24 @@ jobs:
           chmod +x build.sh
           [ -f check-syntax.sh ] && chmod +x check-syntax.sh || true
 
+      - name: Read Previous Release Version
+        id: base
+        run: |
+          VERSION=$(sed -n 's/^version=\([^ ]*\).*/\1/p' module.prop)
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Detect Crowdin Changes
+        id: filter
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          base: ${{ steps.base.outputs.version }}
+          filters: |
+            crowdin:
+              - 'crowdin/**'
+
       - name: Build Module Assets
+        env:
+          CROWDIN_CHANGED: ${{ steps.filter.outputs.crowdin }}
         run: |
           ./build.sh
 

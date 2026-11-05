@@ -20,6 +20,7 @@ TXT_TEST_RUNNING="[!] Test All çalışıyor ve servisin durdurulması gerekiyor
 TXT_WAIT_TEST="[!] Tamamlanmasını bekleyin (veya iptal edin) ve tekrar deneyin."
 TXT_PROP_ERROR="[!] Hata: module.prop şurada bulunamadı:"
 MODULE_DESC="Şarj akımını, sıcaklığı ve voltajı kontrol ederek pilinizin ömrünü uzatın."
+TXT_CHANGELOG="Değişiklik günlüğü"
 
 print_already_running() {
   echo "accd zaten çalışıyor"

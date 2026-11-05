@@ -16,10 +16,11 @@ TXT_STOPPED="[*] 守护进程已停止。"
 TXT_STOPPED_STATE="[*] 守护进程当前已停止。"
 TXT_STARTING="[*] 正在启动 accd..."
 TXT_STARTED="[*] 守护进程已启动。"
-TXT_TEST_RUNNING="[!] 全面测试（Test All）正在运行，需要先停止守护进程。"
+TXT_TEST_RUNNING="[!] Test All 正在运行，需要先停止守护进程。"
 TXT_WAIT_TEST="[!] 请等待其完成（或取消），然后重试。"
 TXT_PROP_ERROR="[!] 错误：未在以下位置找到 module.prop："
-MODULE_DESC="通过控制充电电流、温度和电压来延长电池的使用寿命。"
+MODULE_DESC="通过控制充电电流、温度和电压，延长电池使用寿命。"
+TXT_CHANGELOG="更新日志"
 
 print_already_running() {
   echo "accd 已在运行"

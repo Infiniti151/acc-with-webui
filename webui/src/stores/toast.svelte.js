@@ -9,7 +9,6 @@ export const toastState = $state({
     icon: null,
     visible: false,
     bannerOffset: 0,
-    loading: false,
     onConfirm: null,
     onCancel: null
 });
@@ -21,7 +20,6 @@ export const toast = {
     get type() { return toastState.type; },
     get icon() { return toastState.icon; },
     get visible() { return toastState.visible; },
-    get loading() { return toastState.loading; },
     get onConfirm() { return toastState.onConfirm; },
     get onCancel() { return toastState.onCancel; },
 
@@ -31,7 +29,6 @@ export const toast = {
         toastState.message = message;
         toastState.type = type;
         toastState.visible = true;
-        toastState.loading = false;
 
         if (duration > 0) {
             toastTimeout = setTimeout(() => {
@@ -54,7 +51,6 @@ export const toast = {
         const { icon = null, action = null } = opts;
 
         return new Promise((resolve) => {
-            toastState.loading = false;
             toastState.icon = icon;
 
             toastState.onConfirm = async () => {
@@ -81,6 +77,5 @@ export const toast = {
     hide() {
         if (toastTimeout) clearTimeout(toastTimeout);
         toastState.visible = false;
-        toastState.loading = false;
     }
 };

@@ -87,6 +87,7 @@
     "export": "Экспорт",
     "viewOnGitHub": "Открыть на GitHub",
     "selectWorkingSwitch": "Выбор рабочего переключателя",
+    "selectLanguage": "Выберите язык",
     "selectOption": "Выберите вариант",
     "noSwitchesAvailable": "Нет доступных переключателей. Нажмите «Проверить».",
     "infoCurrentSwitchLabel": "Показать описание текущего переключателя",
