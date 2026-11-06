@@ -19,6 +19,10 @@
 > **Compatibility:** This WebUI was developed and tested on [crDroid](https://crdroid.net/) v12.13 with [KernelSU Next](https://github.com/KernelSU-Next/KernelSU-Next) v3.4.0. [WebUI X: Portable](https://github.com/MMRLApp/WebUI-X-Portable) v608 was tested using the KernelSU Next platform. While it is expected to work with official KernelSU, APatch, and most KernelSU-based derivatives, compatibility with these platforms has not been formally verified. Compatibility with Magisk through *WebUI X: Portable* has also not been tested.
 >
 
+> [!note]
+> Translations are synchronized continuously to Crowdin, but languages are only included in the module once all strings have been translated.
+>
+
 ---
 - [DESCRIPTION](#description)
 - [LICENSE](#license)

@@ -74,8 +74,9 @@ jobs:
           config: crowdin.yaml
 
           upload_sources: true
-          upload_translations: true
-          download_translations: false
+          upload_translations: false
+          download_translations: true
+          skip_untranslated_files: true
 
           localization_branch_name: l10n/crowdin
 
