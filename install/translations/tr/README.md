@@ -6,6 +6,9 @@
 > [!warning]
 > **Uyumluluk:** Bu WebUI, [crDroid](https://crdroid.net/) v12.13 üzerinde [KernelSU Next](https://github.com/KernelSU-Next/KernelSU-Next) v3.4.0 ile geliştirilmiş ve test edilmiştir. [WebUI X: Portable](https://github.com/MMRLApp/WebUI-X-Portable) v608, KernelSU Next platformu kullanılarak test edilmiştir. Resmî KernelSU, APatch ve KernelSU tabanlı türevlerin çoğuyla çalışması beklense de bu platformlarla uyumluluğu resmî olarak doğrulanmamıştır. *WebUI X: Portable* aracılığıyla Magisk ile uyumluluğu da test edilmemiştir.
 
+> [!note]
+> Çeviriler Crowdin ile sürekli olarak senkronize edilir, ancak diller yalnızca tüm metinler çevrildikten sonra modüle dahil edilir.
+
 ---
 - [Açıklama](#açıklama)
 - [Lisans](#lisans)
