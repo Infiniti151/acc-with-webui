@@ -8,11 +8,13 @@ restrictedPatterns=(
     '^META-INF/'
     '^bin/'
     '^install/webroot/'
+    '^install/translations/[^/]+/strings\.sh$'
     '^module\.prop$'
     '^module\.json$'
     '^module\.yaml$'
     '^install/latest-release-notes\.md$'
     '^webui/package-lock\.json$'
+    '^webui/src/locales/[^/]+\.json$'
     '^customize\.sh$'
     '^README\.html$'
 )

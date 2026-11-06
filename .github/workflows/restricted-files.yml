@@ -13,8 +13,13 @@ jobs:
     name: Restricted Files
     runs-on: ubuntu-latest
 
-    # Dependabot PRs are exempt.
-    if: github.event.pull_request.user.login != 'dependabot[bot]'
+    # Dependabot and Crowdin PRs are exempt.
+    if: |
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      !(
+        github.event.pull_request.head.ref == 'l10n/crowdin' &&
+        github.event.pull_request.head.repo.full_name == github.repository
+      )
 
     steps:
       - name: Check modified files
@@ -37,6 +42,8 @@ jobs:
               { pattern: /^module\.json$/, type: 'file' },
               { pattern: /^module\.yaml$/, type: 'file' },
               { pattern: /^install\/latest-release-notes\.md$/, type: 'file' },
+              { pattern: /^install\/translations\/[^/]+\/strings\.sh$/, type: 'file' },
+              { pattern: /^webui\/src\/locales\/[^/]+\.json$/, type: 'file' },
               { pattern: /^webui\/package-lock\.json$/, type: 'file' },
               { pattern: /^customize\.sh$/, type: 'file' },
               { pattern: /^README\.html$/, type: 'file' },
