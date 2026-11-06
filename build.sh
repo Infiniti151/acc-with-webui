@@ -151,6 +151,8 @@ add_header "Generating translations..."
 if [[ "${CROWDIN_CHANGED:-false}" == "true" ]]; then
     echo "Generating translations..."
     node scripts/generate-translations.js
+    echo "Generating localization progress SVG and badge..."
+    node scripts/generate-svg.js
 else
     echo "No Crowdin changes detected. Skipping translation generation."
 fi

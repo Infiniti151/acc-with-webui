@@ -1336,19 +1336,13 @@ Refer back to [terminal commands](#terminal-commands) for details.
 > These translations are not for backend ACC CLI.
 >
 
-[![Crowdin](https://badges.crowdin.net/acc-with-webui/localized.svg)](https://crowdin.com/project/acc-with-webui)
+<!-- LOCALIZATION_PROGRESS_START -->
 
-**Language progress**
+[![Crowdin](https://img.shields.io/badge/Localized-34%25-yellow?style=for-the-badge&logo=crowdin)](https://crowdin.com/project/acc-with-webui)
 
-[![German](https://img.shields.io/badge/dynamic/json?color=blue&label=German&style=flat&logo=crowdin&query=%24.progress.0.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-17964331-943657.json)](https://crowdin.com/project/acc-with-webui)
-[![French](https://img.shields.io/badge/dynamic/json?color=blue&label=French&style=flat&logo=crowdin&query=%24.progress.1.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-17964331-943657.json)](https://crowdin.com/project/acc-with-webui)
-[![Indonesian](https://img.shields.io/badge/dynamic/json?color=blue&label=Indonesian&style=flat&logo=crowdin&query=%24.progress.2.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-17964331-943657.json)](https://crowdin.com/project/acc-with-webui)
-[![Portuguese (Portugal)](https://img.shields.io/badge/dynamic/json?color=blue&label=Portuguese%20(Portugal)&style=flat&logo=crowdin&query=%24.progress.3.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-17964331-943657.json)](https://crowdin.com/project/acc-with-webui)
+![Language Progress](images/localization-progress.svg)
 
-[![Russian](https://img.shields.io/badge/dynamic/json?color=blue&label=Russian&style=flat&logo=crowdin&query=%24.progress.4.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-17964331-943657.json)](https://crowdin.com/project/acc-with-webui)
-[![Turkish](https://img.shields.io/badge/dynamic/json?color=blue&label=Turkish&style=flat&logo=crowdin&query=%24.progress.5.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-17964331-943657.json)](https://crowdin.com/project/acc-with-webui)
-[![Chinese (Simplified)](https://img.shields.io/badge/dynamic/json?color=blue&label=Chinese%20(Simplified)&style=flat&logo=crowdin&query=%24.progress.6.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-17964331-943657.json)](https://crowdin.com/project/acc-with-webui)
-[![Chinese (Traditional)](https://img.shields.io/badge/dynamic/json?color=blue&label=Chinese%20(Traditional)&style=flat&logo=crowdin&query=%24.progress.7.data.translationProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-17964331-943657.json)](https://crowdin.com/project/acc-with-webui)
+<!-- LOCALIZATION_PROGRESS_END -->
 
 [Help translate ACC on Crowdin](https://crowdin.com/project/acc-with-webui)
 
