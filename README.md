@@ -1340,7 +1340,7 @@ Refer back to [terminal commands](#terminal-commands) for details.
 
 [![Crowdin](https://img.shields.io/badge/Localized-34%25-yellow?style=for-the-badge&logo=crowdin)](https://crowdin.com/project/acc-with-webui)
 
-![Language Progress](images/localization-progress.svg)
+![Language Progress](https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/localization-progress.svg)
 
 <!-- LOCALIZATION_PROGRESS_END -->
 
