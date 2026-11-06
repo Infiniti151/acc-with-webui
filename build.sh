@@ -249,6 +249,7 @@ if [[ "$SKIP_ARCHIVES" == false ]]; then
   zip -r9 "_builds/${basename}/${basename_}.zip" \
     customize.sh META-INF/ bin/ \
     install/ module.prop README.html \
+    -x 'install/translations/*/README.md' \
     | sed 's|.*adding: ||' | grep -iv 'zip warning:'
   echo
 
@@ -260,7 +261,8 @@ if [[ "$SKIP_ARCHIVES" == false ]]; then
   # generate $id installable tarball
   cd "_builds/${basename}" || exit 1
   echo "=> _builds/${basename}/${basename}.tgz"
-  tar -cvf - "${basename}" | gzip -9 > "${basename}.tgz"
+  tar --exclude='install/translations/*/README.md' \
+  -cvf - "${basename}" | gzip -9 > "${basename}.tgz"
   rm -rf "${basename:?}/"
   echo
 
