@@ -8,6 +8,8 @@ const URL =
     "https://badges.awesome-crowdin.com/stats-17964331-943657.json";
 
 const OUTPUT = "images/localization-progress.svg";
+const GITHUB_RAW_IMAGE_URL =
+    "https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/localization-progress.svg";
 const README = "README.md";
 
 const README_START = "<!-- LOCALIZATION_PROGRESS_START -->";
@@ -15,10 +17,6 @@ const README_END = "<!-- LOCALIZATION_PROGRESS_END -->";
 
 const GREEN = "\x1b[32m";
 const RESET = "\x1b[0m";
-
-function success(message) {
-    console.log(`${GREEN}✅ ${message}${RESET}`);
-}
 
 const COLORS = {
     bg: "#0d1117",
@@ -38,9 +36,12 @@ const SVG_WIDTH = 800;
 const HEADER_HEIGHT = 50;
 const ROW_HEIGHT = 46;
 
-const LANGUAGE_COL = 240;
 const BAR_X = 260;
 const BAR_WIDTH = 360;
+
+function success(message) {
+    console.log(`${GREEN}✅ ${message}${RESET}`);
+}
 
 function escapeXml(str) {
     return str
@@ -48,6 +49,13 @@ function escapeXml(str) {
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;");
+}
+
+function escapeRegex(value) {
+    return value.replace(
+        /[.*+?^${}()|[\]\\]/g,
+        String.raw`\$&`,
+    );
 }
 
 function getColor(progress) {
@@ -241,13 +249,15 @@ text {
         "",
         `[![Crowdin](${badgeUrl})](https://crowdin.com/project/acc-with-webui)`,
         "",
-        "![Language Progress](images/localization-progress.svg)",
+        `![Language Progress](${GITHUB_RAW_IMAGE_URL})`,
         "",
         README_END,
     ].join("\n");
 
     const updatedReadme = readme.replace(
-        /<!-- LOCALIZATION_PROGRESS_START -->[\s\S]*?<!-- LOCALIZATION_PROGRESS_END -->/,
+        new RegExp(
+            String.raw`${escapeRegex(README_START)}[\s\S]*?${escapeRegex(README_END)}`,
+        ),
         replacement,
     );
 
