@@ -1338,7 +1338,7 @@ Refer back to [terminal commands](#terminal-commands) for details.
 
 <!-- LOCALIZATION_PROGRESS_START -->
 
-[![Crowdin](https://img.shields.io/badge/Localized-34%25-yellow?style=for-the-badge&logo=crowdin)](https://crowdin.com/project/acc-with-webui)
+[![Crowdin](https://img.shields.io/badge/Localized-34%25-blue?style=for-the-badge&logo=crowdin)](https://crowdin.com/project/acc-with-webui)
 
 ![Language Progress](https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/localization-progress.svg)
 

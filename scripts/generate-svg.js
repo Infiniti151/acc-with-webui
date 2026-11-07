@@ -21,15 +21,20 @@ const RESET = "\x1b[0m";
 const COLORS = {
     bg: "#0d1117",
     header: "#161b22",
-    border: "#30363d",
-    text: "#e6edf3",
-    muted: "#8b949e",
+
+    headerText: "#c9d1d9",
+    text: "#bfc9d4",
+    percentage: "#8b949e",
 
     green: "#3fb950",
-    yellow: "#d29922",
+    blue: "#58a6ff",
     red: "#f85149",
+};
 
-    barBg: "#21262d",
+const BADGE_COLORS = {
+    green: "brightgreen",
+    blue: "blue",
+    red: "red",
 };
 
 const SVG_WIDTH = 800;
@@ -64,42 +69,18 @@ function getColor(progress) {
     }
 
     if (progress >= 30) {
-        return "yellow";
+        return "blue";
     }
 
     return "red";
 }
 
 function getSvgColor(progress) {
-    switch (getColor(progress)) {
-        case "green":
-            return "#3fb950";
-
-        case "yellow":
-            return "#d29922";
-
-        case "red":
-            return "#f85149";
-
-        default:
-            return "#f85149";
-    }
+    return COLORS[getColor(progress)];
 }
 
 function getBadgeColor(progress) {
-    switch (getColor(progress)) {
-        case "green":
-            return "brightgreen";
-
-        case "yellow":
-            return "yellow";
-
-        case "red":
-            return "red";
-
-        default:
-            return "red";
-    }
+    return BADGE_COLORS[getColor(progress)];
 }
 
 async function main() {
@@ -175,13 +156,6 @@ text {
             (lang.progress / 100) * BAR_WIDTH;
 
         svg += `
-<line
-  x1="0"
-  y1="${y}"
-  x2="${SVG_WIDTH}"
-  y2="${y}"
-  stroke="${COLORS.border}" />
-
 <text
   x="20"
   y="${y + 30}"
@@ -189,14 +163,6 @@ text {
   font-size="15">
   ${escapeXml(lang.name)}
 </text>
-
-<rect
-  x="${BAR_X}"
-  y="${y + 13}"
-  width="${BAR_WIDTH}"
-  height="20"
-  rx="10"
-  fill="${COLORS.barBg}" />
 
 <rect
   x="${BAR_X}"

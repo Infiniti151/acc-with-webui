@@ -19,12 +19,12 @@ text {
   width="800"
   height="50"
   fill="#161b22"
-  stroke="#30363d" />
+  stroke="undefined" />
 
 <text
   x="20"
   y="32"
-  fill="#e6edf3"
+  fill="#bfc9d4"
   font-size="18"
   font-weight="600">
   Language
@@ -33,23 +33,16 @@ text {
 <text
   x="260"
   y="32"
-  fill="#e6edf3"
+  fill="#bfc9d4"
   font-size="18"
   font-weight="600">
   Progress
 </text>
 
-<line
-  x1="0"
-  y1="50"
-  x2="800"
-  y2="50"
-  stroke="#30363d" />
-
 <text
   x="20"
   y="80"
-  fill="#e6edf3"
+  fill="#bfc9d4"
   font-size="15">
   Russian
 </text>
@@ -60,35 +53,20 @@ text {
   width="360"
   height="20"
   rx="10"
-  fill="#21262d" />
-
-<rect
-  x="260"
-  y="63"
-  width="360"
-  height="20"
-  rx="10"
   fill="#3fb950" />
 
 <text
   x="635"
   y="80"
-  fill="#e6edf3"
+  fill="#bfc9d4"
   font-size="15">
   100%
 </text>
 
-<line
-  x1="0"
-  y1="96"
-  x2="800"
-  y2="96"
-  stroke="#30363d" />
-
 <text
   x="20"
   y="126"
-  fill="#e6edf3"
+  fill="#bfc9d4"
   font-size="15">
   Ukrainian
 </text>
@@ -99,35 +77,20 @@ text {
   width="360"
   height="20"
   rx="10"
-  fill="#21262d" />
-
-<rect
-  x="260"
-  y="109"
-  width="360"
-  height="20"
-  rx="10"
   fill="#3fb950" />
 
 <text
   x="635"
   y="126"
-  fill="#e6edf3"
+  fill="#bfc9d4"
   font-size="15">
   100%
 </text>
 
-<line
-  x1="0"
-  y1="142"
-  x2="800"
-  y2="142"
-  stroke="#30363d" />
-
 <text
   x="20"
   y="172"
-  fill="#e6edf3"
+  fill="#bfc9d4"
   font-size="15">
   Chinese Simplified
 </text>
@@ -135,14 +98,6 @@ text {
 <rect
   x="260"
   y="155"
-  width="360"
-  height="20"
-  rx="10"
-  fill="#21262d" />
-
-<rect
-  x="260"
-  y="155"
   width="54"
   height="20"
   rx="10"
@@ -151,22 +106,15 @@ text {
 <text
   x="635"
   y="172"
-  fill="#e6edf3"
+  fill="#bfc9d4"
   font-size="15">
   15%
 </text>
 
-<line
-  x1="0"
-  y1="188"
-  x2="800"
-  y2="188"
-  stroke="#30363d" />
-
 <text
   x="20"
   y="218"
-  fill="#e6edf3"
+  fill="#bfc9d4"
   font-size="15">
   Chinese Traditional
 </text>
@@ -174,14 +122,6 @@ text {
 <rect
   x="260"
   y="201"
-  width="360"
-  height="20"
-  rx="10"
-  fill="#21262d" />
-
-<rect
-  x="260"
-  y="201"
   width="54"
   height="20"
   rx="10"
@@ -190,22 +130,15 @@ text {
 <text
   x="635"
   y="218"
-  fill="#e6edf3"
+  fill="#bfc9d4"
   font-size="15">
   15%
 </text>
 
-<line
-  x1="0"
-  y1="234"
-  x2="800"
-  y2="234"
-  stroke="#30363d" />
-
 <text
   x="20"
   y="264"
-  fill="#e6edf3"
+  fill="#bfc9d4"
   font-size="15">
   French
 </text>
@@ -213,14 +146,6 @@ text {
 <rect
   x="260"
   y="247"
-  width="360"
-  height="20"
-  rx="10"
-  fill="#21262d" />
-
-<rect
-  x="260"
-  y="247"
   width="54"
   height="20"
   rx="10"
@@ -229,22 +154,15 @@ text {
 <text
   x="635"
   y="264"
-  fill="#e6edf3"
+  fill="#bfc9d4"
   font-size="15">
   15%
 </text>
 
-<line
-  x1="0"
-  y1="280"
-  x2="800"
-  y2="280"
-  stroke="#30363d" />
-
 <text
   x="20"
   y="310"
-  fill="#e6edf3"
+  fill="#bfc9d4"
   font-size="15">
   German
 </text>
@@ -252,14 +170,6 @@ text {
 <rect
   x="260"
   y="293"
-  width="360"
-  height="20"
-  rx="10"
-  fill="#21262d" />
-
-<rect
-  x="260"
-  y="293"
   width="54"
   height="20"
   rx="10"
@@ -268,22 +178,15 @@ text {
 <text
   x="635"
   y="310"
-  fill="#e6edf3"
+  fill="#bfc9d4"
   font-size="15">
   15%
 </text>
 
-<line
-  x1="0"
-  y1="326"
-  x2="800"
-  y2="326"
-  stroke="#30363d" />
-
 <text
   x="20"
   y="356"
-  fill="#e6edf3"
+  fill="#bfc9d4"
   font-size="15">
   Indonesian
 </text>
@@ -291,14 +194,6 @@ text {
 <rect
   x="260"
   y="339"
-  width="360"
-  height="20"
-  rx="10"
-  fill="#21262d" />
-
-<rect
-  x="260"
-  y="339"
   width="54"
   height="20"
   rx="10"
@@ -307,22 +202,15 @@ text {
 <text
   x="635"
   y="356"
-  fill="#e6edf3"
+  fill="#bfc9d4"
   font-size="15">
   15%
 </text>
 
-<line
-  x1="0"
-  y1="372"
-  x2="800"
-  y2="372"
-  stroke="#30363d" />
-
 <text
   x="20"
   y="402"
-  fill="#e6edf3"
+  fill="#bfc9d4"
   font-size="15">
   Portuguese
 </text>
@@ -330,14 +218,6 @@ text {
 <rect
   x="260"
   y="385"
-  width="360"
-  height="20"
-  rx="10"
-  fill="#21262d" />
-
-<rect
-  x="260"
-  y="385"
   width="54"
   height="20"
   rx="10"
@@ -346,33 +226,18 @@ text {
 <text
   x="635"
   y="402"
-  fill="#e6edf3"
+  fill="#bfc9d4"
   font-size="15">
   15%
 </text>
 
-<line
-  x1="0"
-  y1="418"
-  x2="800"
-  y2="418"
-  stroke="#30363d" />
-
 <text
   x="20"
   y="448"
-  fill="#e6edf3"
+  fill="#bfc9d4"
   font-size="15">
   Turkish
 </text>
-
-<rect
-  x="260"
-  y="431"
-  width="360"
-  height="20"
-  rx="10"
-  fill="#21262d" />
 
 <rect
   x="260"
@@ -385,7 +250,7 @@ text {
 <text
   x="635"
   y="448"
-  fill="#e6edf3"
+  fill="#bfc9d4"
   font-size="15">
   15%
 </text>
