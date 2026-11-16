@@ -9,7 +9,7 @@ const URL =
 
 const OUTPUT = "images/localization-progress.svg";
 const GITHUB_RAW_IMAGE_URL =
-    "https://raw.githubusercontent.com/Infiniti151/acc-with-webui/dev/images/localization-progress.svg";
+    "https://raw.githubusercontent.com/Infiniti151/acc-with-webui/refs/heads/dev/images/localization-progress.svg";
 const README = "README.md";
 
 const README_START = "<!-- LOCALIZATION_PROGRESS_START -->";
