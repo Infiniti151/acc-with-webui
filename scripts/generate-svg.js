@@ -102,6 +102,27 @@ async function main() {
             return a.name.localeCompare(b.name);
         });
 
+    const overallProgress = Math.round(
+        languages.reduce(
+            (sum, language) => sum + language.progress,
+            0,
+        ) / languages.length,
+    );
+
+    // Read README.md to find the previous overall progress percentage from the badge URL
+    const readme = fs.readFileSync(README, "utf8");
+    let prevOverallProgress = 0;
+    const match = readme.match(/Localized-(\d+)(?:%25|%)/);
+    if (match) {
+        prevOverallProgress = Number(match[1]);
+    }
+
+    // Only proceed if overall progress has increased
+    if (overallProgress <= prevOverallProgress) {
+        console.log(`No new translations (Overall: ${overallProgress}%).`);
+        return;
+    }
+
     const height =
         HEADER_HEIGHT +
         languages.length * ROW_HEIGHT +
@@ -190,13 +211,6 @@ text {
 
     success(`Generated ${OUTPUT}`);
 
-    const overallProgress = Math.round(
-        languages.reduce(
-            (sum, language) => sum + language.progress,
-            0,
-        ) / languages.length,
-    );
-
     const badgeColor = getBadgeColor(overallProgress);
 
     const badgeUrl =
@@ -207,8 +221,6 @@ text {
     success(
         `Generated overall translation progress badge (${overallProgress}%)`,
     );
-
-    const readme = fs.readFileSync(README, "utf8");
 
     const replacement = [
         README_START,
