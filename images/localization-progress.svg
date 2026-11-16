@@ -44,7 +44,7 @@ text {
   y="80"
   fill="#bfc9d4"
   font-size="15">
-  Russian
+  French
 </text>
 
 <rect
@@ -68,7 +68,7 @@ text {
   y="126"
   fill="#bfc9d4"
   font-size="15">
-  Ukrainian
+  Russian
 </text>
 
 <rect
@@ -92,23 +92,23 @@ text {
   y="172"
   fill="#bfc9d4"
   font-size="15">
-  Chinese Simplified
+  Ukrainian
 </text>
 
 <rect
   x="260"
   y="155"
-  width="54"
+  width="360"
   height="20"
   rx="10"
-  fill="#f85149" />
+  fill="#3fb950" />
 
 <text
   x="635"
   y="172"
   fill="#bfc9d4"
   font-size="15">
-  15%
+  100%
 </text>
 
 <text
@@ -116,23 +116,23 @@ text {
   y="218"
   fill="#bfc9d4"
   font-size="15">
-  Chinese Traditional
+  Chinese Simplified
 </text>
 
 <rect
   x="260"
   y="201"
-  width="54"
+  width="273.6"
   height="20"
   rx="10"
-  fill="#f85149" />
+  fill="#58a6ff" />
 
 <text
   x="635"
   y="218"
   fill="#bfc9d4"
   font-size="15">
-  15%
+  76%
 </text>
 
 <text
@@ -140,7 +140,7 @@ text {
   y="264"
   fill="#bfc9d4"
   font-size="15">
-  French
+  Chinese Traditional
 </text>
 
 <rect
