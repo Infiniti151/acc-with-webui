@@ -45,6 +45,7 @@ jobs:
               { pattern: /^install\/translations\/[^/]+\/strings\.sh$/, type: 'file' },
               { pattern: /^webui\/src\/locales\/[^/]+\.json$/, type: 'file' },
               { pattern: /^webui\/package-lock\.json$/, type: 'file' },
+              { pattern: /^crowdin\/(?!en\.json$)/, type: 'file' },
               { pattern: /^customize\.sh$/, type: 'file' },
               { pattern: /^README\.html$/, type: 'file' },
             ];

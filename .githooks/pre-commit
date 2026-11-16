@@ -15,12 +15,15 @@ restrictedPatterns=(
     '^install/latest-release-notes\.md$'
     '^webui/package-lock\.json$'
     '^webui/src/locales/[^/]+\.json$'
+    '^crowdin/.*'
     '^customize\.sh$'
     '^README\.html$'
 )
 
 # Find staged files matching restricted patterns.
 while IFS= read -r -d '' file; do
+    [[ "$file" == "crowdin/en.json" ]] && continue
+
     for pattern in "${restrictedPatterns[@]}"; do
         if [[ "$file" =~ $pattern ]]; then
             git restore --staged -- "$file"
