@@ -9,7 +9,10 @@
 #   e.g.,
 #     build.sh (builds $id and generates installable archives)
 #     build.sh any_random_arg (only builds $id)
-#     build.sh -W|--webui (only builds the WebUI)
+#     build.sh -w|--webui (only builds the WebUI)
+#     build.sh -d|--deploy (builds and deploys the WebUI via ADB)
+#     build.sh -i|--install [k] [adb device] (builds and installs the zip via ADB.
+#       k is for KaiOS. Specify the ADB device only if multiple devices are connected)
 
 # Bash built-in escape handling for colors
 CYAN=$'\033[0;36m'
@@ -91,14 +94,34 @@ build_webui() {
 
 BUILD_WEBUI_ONLY=false
 DEPLOY_WEBUI_ONLY=false
+INSTALL_MODULE=false
+ADB_ARGS=()
 SKIP_ARCHIVES=false
 
-for arg in "$@"; do
-  case $arg in
-    -w|--webui) BUILD_WEBUI_ONLY=true ;; # Runs standard clean build for CI/CD
-    -d|--deploy) DEPLOY_WEBUI_ONLY=true ;; # Runs the Vite build + ADB push plugin
-    *) SKIP_ARCHIVES=true ;;
+while (($#)); do
+  case "$1" in
+    -w|--webui)
+      BUILD_WEBUI_ONLY=true # Runs standard clean build for CI/CD
+      ;;
+    -d|--deploy)
+      DEPLOY_WEBUI_ONLY=true # Runs the Vite build + ADB push plugin
+      ;;
+    -i|--install)
+      INSTALL_MODULE=true # Runs push.sh to install the built zip
+      shift
+
+      # Collect optional arguments for push.sh (KaiOS and ADB device)
+      while (($#)) && [[ "$1" != -* ]]; do
+        ADB_ARGS+=("$1")
+        shift
+      done
+      continue
+      ;;
+    *)
+      SKIP_ARCHIVES=true
+      ;;
   esac
+  shift
 done
 
 id=$(get_prop id)
@@ -267,8 +290,14 @@ if [[ "$SKIP_ARCHIVES" == false ]]; then
   -cvf - "${basename}" | gzip -9 > "${basename}.tgz"
   rm -rf "${basename:?}/"
   echo
-
-  add_header "Done" "$GREEN"
 fi
+
+if [[ "$INSTALL_MODULE" == true ]]; then
+  add_header "Installing module..."
+  cd ../..
+  ./push.sh "${ADB_ARGS[@]}"
+fi
+
+add_header "Done" "$GREEN"
 
 exit 0

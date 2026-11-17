@@ -214,6 +214,7 @@ or `curl -L#  https://github.com/Infiniti151/acc-with-webui/archive/master.tar.g
 
 3. `sh build.sh` (or double-click `build.bat` on Windows 10+, if you have Windows subsystem for Linux (with zip) installed)
 
+4. `sh build.sh -i|--install [k] [adb device]` (for optionally pushing the built zip via ADB and installing with apd/ksud/magisk. k is for KaiOS. Specify the ADB device only if multiple devices are connected)
 
 #### Notes
 

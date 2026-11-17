@@ -195,6 +195,7 @@ ou `curl -L#  https://github.com/VR-25/acc/archive/master.tar.gz | tar -xz`
 
 3. `sh build.sh` (ou double cliquer `build.bat` sur Windows 10, si vous avez WSL (Windows subsystem for Linux) (avec zip) d'installé)
 
+4. `sh build.sh -i|--install [k] [adb device]` (pour transférer éventuellement le fichier ZIP généré via ADB et l'installer à l'aide de apd/ksud/magisk. k est destiné à KaiOS. Spécifiez l'appareil ADB uniquement si plusieurs appareils sont connectés)
 
 #### Notes
 
