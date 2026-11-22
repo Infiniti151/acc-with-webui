@@ -183,25 +183,25 @@ La commande d'initialisation est `/data/adb/vr25/acc/service.sh`.
 
 - git, wget, ou curl
 - zip
-
+- Node.js 22.12.0+ (Node.js 26 LTS fortement recommandé)
 
 ### Construire des Tarballs et des Zips Flashables
 
-1. Télécharger et extraire le code source : `git clone https://github.com/VR-25/acc.git`
-ou `wget  https://github.com/VR-25/acc/archive/master.tar.gz -O - | tar -xz`
-ou `curl -L#  https://github.com/VR-25/acc/archive/master.tar.gz | tar -xz`
+1. Télécharger et extraire le code source : `https://github.com/Infiniti151/acc-with-webui.git`
+ou `wget https://github.com/Infiniti151/acc-with-webui/archive/refs/heads/dev.tar.gz -O - | tar -xz`
+ou `curl -L# https://github.com/Infiniti151/acc-with-webui/archive/refs/heads/dev.tar.gz | tar -xz`
 
 2. `cd acc*`
 
-3. `sh build.sh` (ou double cliquer `build.bat` sur Windows 10, si vous avez WSL (Windows subsystem for Linux) (avec zip) d'installé)
+3. `sh ./build.sh` (ou double cliquer `build.bat` sur Windows 10, si vous avez WSL (Windows subsystem for Linux) (avec zip) d'installé)
 
-4. `sh build.sh -i|--install [k] [adb device]` (pour transférer éventuellement le fichier ZIP généré via ADB et l'installer à l'aide de apd/ksud/magisk. k est destiné à KaiOS. Spécifiez l'appareil ADB uniquement si plusieurs appareils sont connectés)
+4. `sh ./build.sh -i|--install [k] [adb device]` (pour transférer éventuellement le fichier ZIP généré via ADB et l'installer à l'aide de apd/ksud/magisk. k est destiné à KaiOS. Spécifiez l'appareil ADB uniquement si plusieurs appareils sont connectés)
 
 #### Notes
 
 - build.sh définit/change automatiquement `id=*` dans les fichiers `*.sh` et `update-binary`.
 Se référer à framework-details.txt pour une liste entière des tâches qu'il exécute.
-Pour passer la génération des archives, lancer le script de construction avec un argument aléatoire. (ex,`bash build.sh h`)
+Pour ignorer la génération d'archives, exécutez le script de compilation avec un argument non reconnu (par ex. `./build.sh h` ou `sh ./build.sh h`).
 - Pour mettre à jour le code source local, exécuter `git pull --force` ou le retélécharger (avec wget/curl) comme expliqué au-dessus.
 
 
@@ -214,7 +214,7 @@ L'ordre des arguments n'a pas d'importance.
 Pour les mises à jour, si `%répertoire d'installation parrent%` n'est pas donné, le répertoire actuel/original est utilisé.
 
 - `sh install-tarball.sh [module id, défaut: acc] [répertoire d'installation parrent (ex, /data/data/mattecarra.accapp/files)]` installe le tarball (acc*gz) à partir de l'emplacement du script.
-L'archive doit être dans le même répertoire que le script - et obtenue via Github : https://github.com/VR-25/acc/archive/$commit.tar.gz (exemples de commit: master, dev, v2020.5.20-rc).
+L'archive doit être dans le même répertoire que le script - et obtenue via Github : https://github.com/Infiniti151/acc-with-webui/archive/$commit.tar.gz (exemples de commit: master, dev, v2020.5.20-rc).
 
 
 #### Notes

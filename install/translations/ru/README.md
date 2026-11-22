@@ -181,25 +181,25 @@ ACC также работает в некоторых средах recovery.
 
 - git, wget или curl
 - zip
-
+- Node.js 22.12.0+ (настоятельно рекомендуется Node.js 26 LTS)
 
 ### Сборка tar-архивов и прошиваемых ZIP-файлов
 
-1. Скачайте и распакуйте исходный код: `git clone https://github.com/VR-25/acc.git`
-или `wget  https://github.com/VR-25/acc/archive/master.tar.gz -O - | tar -xz`
-или `curl -L#  https://github.com/VR-25/acc/archive/master.tar.gz | tar -xz`
+1. Скачайте и распакуйте исходный код: `https://github.com/Infiniti151/acc-with-webui.git`
+или `wget https://github.com/Infiniti151/acc-with-webui/archive/refs/heads/dev.tar.gz -O - | tar -xz`
+или `curl -L# https://github.com/Infiniti151/acc-with-webui/archive/refs/heads/dev.tar.gz | tar -xz`
 
 2. Выполните `cd acc*`
 
-3. Выполните `sh build.sh` (или дважды щёлкните `build.bat` в Windows 10, если установлен WSL (Windows Subsystem for Linux) с zip)
+3. Выполните `sh ./build.sh` (или дважды щёлкните `build.bat` в Windows 10, если установлен WSL (Windows Subsystem for Linux) с zip)
 
-4. `sh build.sh -i|--install [k] [adb device]` (для необязательной передачи собранного ZIP-файла через ADB и установки с помощью apd/ksud/magisk. k используется для KaiOS. Указывайте ADB-устройство только в том случае, если подключено несколько устройств)
+4. `sh ./build.sh -i|--install [k] [adb device]` (для необязательной передачи собранного ZIP-файла через ADB и установки с помощью apd/ksud/magisk. k используется для KaiOS. Указывайте ADB-устройство только в том случае, если подключено несколько устройств)
 
 #### Примечания
 
 - `build.sh` автоматически задаёт или меняет `id=*` в файлах `*.sh` и `update-binary`.
 Полный список выполняемых задач см. в `framework-details.txt`.
-Чтобы пропустить создание архивов, запустите скрипт сборки с произвольным аргументом (например, `bash build.sh h`).
+Чтобы пропустить создание архивов, запустите скрипт сборки с нераспознанным аргументом (например, `./build.sh h` или `sh ./build.sh h`).
 - Чтобы обновить локальный исходный код, выполните `git pull --force` или скачайте его заново (с помощью wget/curl), как описано выше.
 
 
@@ -212,7 +212,7 @@ ACC также работает в некоторых средах recovery.
 При обновлении, если `%родительский каталог установки%` не указан, используется текущий/исходный каталог.
 
 - `sh install-tarball.sh [ID модуля, по умолчанию: acc] [родительский каталог установки (например, /data/data/mattecarra.accapp/files)]` устанавливает tar-архив (acc*gz) из каталога со скриптом.
-Архив должен находиться в том же каталоге и быть скачан с GitHub: https://github.com/VR-25/acc/archive/$commit.tar.gz (примеры commit: master, dev, v2020.5.20-rc).
+Архив должен находиться в том же каталоге и быть скачан с GitHub: https://github.com/Infiniti151/acc-with-webui/archive/$commit.tar.gz (примеры commit: master, dev, v2020.5.20-rc).
 
 
 #### Примечания

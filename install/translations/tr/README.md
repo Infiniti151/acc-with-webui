@@ -178,26 +178,26 @@ Başlatma komutu `/data/adb/vr25/acc/service.sh`.
 
 - git, wget, or curl (birini seçin)
 - zip
-
+- Node.js 22.12.0+ (Node.js 26 LTS şiddetle önerilir)
 
 ### Tarball veya zip dosyalarından kurulum
 
-1. Kaynak kodu indirin ve gerekli dizine çıkartın: `git clone https://github.com/VR-25/acc.git`
-veya `wget  https://github.com/VR-25/acc/archive/master.tar.gz -O - | tar -xz`
-veya `curl -L#  https://github.com/VR-25/acc/archive/master.tar.gz | tar -xz`
+1. Kaynak kodu indirin ve gerekli dizine çıkartın: `https://github.com/Infiniti151/acc-with-webui.git`
+veya `wget https://github.com/Infiniti151/acc-with-webui/archive/refs/heads/dev.tar.gz -O - | tar -xz`
+veya `curl -L# https://github.com/Infiniti151/acc-with-webui/archive/refs/heads/dev.tar.gz | tar -xz`
 
 2. `cd acc*`
 
-3. `sh build.sh` (veya `build.bat` dosyasına çift click eğer Windows 10 kullanıyorsanız, veya linux içinde (zip yüklü) bir Windows alt
+3. `sh ./build.sh` (veya `build.bat` dosyasına çift click eğer Windows 10 kullanıyorsanız, veya linux içinde (zip yüklü) bir Windows alt
 sistemi kullanıyorsanız)
 
-4. `sh build.sh -i|--install [k] [adb device]` (oluşturulan ZIP dosyasını isteğe bağlı olarak ADB üzerinden cihaza aktarmak ve apd/ksud/magisk kullanarak yüklemek için. k, KaiOS içindir. ADB cihazını yalnızca birden fazla cihaz bağlıysa belirtin)
+4. `sh ./build.sh -i|--install [k] [adb device]` (oluşturulan ZIP dosyasını isteğe bağlı olarak ADB üzerinden cihaza aktarmak ve apd/ksud/magisk kullanarak yüklemek için. k, KaiOS içindir. ADB cihazını yalnızca birden fazla cihaz bağlıysa belirtin)
 
 #### Notlar
 
 - build.sh otomatik olarak `*.sh` ve `update-binary` dosyaları içindeki `id=*` kısmını doğrular/düzeltir.
 Detaylar için bkz -> framework-details.txt.
-Arşiv yaratma işlemini geçmek için, kurulum script'ini rastgele bir argüman ile çalıştırın (e.g. bash build.sh h).
+Arşiv oluşturmayı atlamak için derleme betiğini tanınmayan bir argümanla çalıştırın (ör. `./build.sh h` veya `sh ./build.sh h`)
 
 - Lokal kaynak kodunu güncellemek için `git pull --force` veya (wget/curl kullanara) yukarıda tanımlandığı gibi yeniden indirin.
 
@@ -211,7 +211,7 @@ Argümanların sırası fark etmez.
 Güncellemeler için, eğer `%parent install dir%` verilmedi ise, orijinal/var olan kullanılır.
 
 - `sh install-tarball.sh [module id, default: acc] [parent install dir (e.g., /data/data/mattecarra.accapp/files)]` script'in lokasyonundan tarball (acc*gz) yükler.
-Arşiv script ile aynı klasörde olmalı - ve GitHub'dan alınmalıdır: https://github.com/VR-25/acc/archive/$commit.tar.gz ($commit examples: master, dev, v2020.5.20-rc).
+Arşiv script ile aynı klasörde olmalı - ve GitHub'dan alınmalıdır: https://github.com/Infiniti151/acc-with-webui/archive/$commit.tar.gz ($commit examples: master, dev, v2020.5.20-rc).
 
 
 #### Notlar
