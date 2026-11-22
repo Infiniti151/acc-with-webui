@@ -202,24 +202,24 @@ The initialization script is `/data/adb/vr25/acc/service.sh`.
 
 - git, wget, or curl (pick one)
 - zip
-
+- Node.js 22.12.0+ (Node.js 26 LTS strongly recommended)
 
 ### Build Tarballs and Flashable Zips
 
 1. Download and extract the source code: `git clone https://github.com/Infiniti151/acc-with-webui.git`
-or `wget  https://github.com/Infiniti151/acc-with-webui/archive/master.tar.gz -O - | tar -xz`
-or `curl -L#  https://github.com/Infiniti151/acc-with-webui/archive/master.tar.gz | tar -xz`
+or `wget https://github.com/Infiniti151/acc-with-webui/archive/refs/heads/dev.tar.gz -O - | tar -xz`
+or `curl -L# https://github.com/Infiniti151/acc-with-webui/archive/refs/heads/dev.tar.gz | tar -xz`
 
 2. `cd acc*`
 
-3. `sh build.sh` (or double-click `build.bat` on Windows 10+, if you have Windows subsystem for Linux (with zip) installed)
+3. `sh ./build.sh` (or double-click `build.bat` on Windows 10+, if you have Windows subsystem for Linux (with zip) installed)
 
-4. `sh build.sh -i|--install [k] [adb device]` (for optionally pushing the built zip via ADB and installing with apd/ksud/magisk. k is for KaiOS. Specify the ADB device only if multiple devices are connected)
+4. `sh ./build.sh -i|--install [k] [adb device]` (for optionally pushing the built zip via ADB and installing with apd/ksud/magisk. k is for KaiOS. Specify the ADB device only if multiple devices are connected)
 
 #### Notes
 
 - `build.sh` automatically sets/corrects `id=*` in `*.sh` and `update-binary` files.
-To skip generating archives, run the build script with a random argument (e.g. `sh build.sh h`).
+To skip generating archives, run the build script with an unrecognized argument (e.g., `./build.sh h` or `sh ./build.sh h`).
 
 - To update the local source code, run `git pull --force` or re-download it (with `wget`/`curl`) as described above.
 

@@ -5,14 +5,14 @@
 # SPDX-FileCopyrightText: 2026 Infiniti151
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# usage: $0 [any_random_arg]
+# usage: $0 [-w|--webui] [-d|--deploy] [-i|--install [k] [adb device]] [other_arg]
 #   e.g.,
-#     build.sh (builds $id and generates installable archives)
-#     build.sh any_random_arg (only builds $id)
-#     build.sh -w|--webui (only builds the WebUI)
-#     build.sh -d|--deploy (builds and deploys the WebUI via ADB)
-#     build.sh -i|--install [k] [adb device] (builds and installs the zip via ADB.
-#       k is for KaiOS. Specify the ADB device only if multiple devices are connected)
+#     build.sh                                    (builds $id and generates installable archives)
+#     build.sh -w|--webui                         (only builds the WebUI)
+#     build.sh -d|--deploy                        (builds and deploys the WebUI via ADB)
+#     build.sh -i|--install [k] [adb device]      (builds and installs the zip via ADB;
+#                                                  k is for KaiOS; specify ADB device only if multiple are connected)
+#     build.sh <any_other_arg>                    (builds $id without generating installable archives)
 
 # Bash built-in escape handling for colors
 CYAN=$'\033[0;36m'
