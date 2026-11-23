@@ -20,8 +20,7 @@
 >
 
 > [!note]
-> Translations are synchronized continuously to Crowdin, but languages are only included in the module once all strings have been translated.
->
+> Translations are synchronized continuously to Crowdin. A language is included in the module once most of its strings are translated (75% for the WebUI, 50% for the terminal/installer). Any strings not yet translated are shown in English until they are.
 
 ---
 - [DESCRIPTION](#description)

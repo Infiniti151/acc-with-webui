@@ -13,6 +13,9 @@ const CROWDIN_DIR = path.join(ROOT, 'crowdin');
 const WEBUI_LOCALES_DIR = path.join(ROOT, 'webui/src/locales');
 const SHELL_TRANSLATIONS_DIR = path.join(ROOT, 'install/translations');
 
+const MIN_WEBUI_COMPLETION = 0.75;
+const MIN_SHELL_COMPLETION = 0.5;
+
 // Map Crowdin locale codes to ACC's existing shell translation directories.
 // WebUI locale filenames always use the original Crowdin locale.
 const shellLocaleMap = {
@@ -186,8 +189,8 @@ function logSyncedLocales(locales) {
 }
 
 function logIncompleteLocales(translations, english) {
-    const incompleteWebui = [];
-    const incompleteShell = [];
+    const belowWebui = [];
+    const belowShell = [];
 
     for (const [localeCode, data] of translations) {
         if (localeCode === 'en') {
@@ -197,30 +200,33 @@ function logIncompleteLocales(translations, english) {
         const webui = resolveWebuiNamespace(data, english.webui);
         const shell = resolveShellNamespace(data, english.shell);
 
-        if (!hasCompleteTranslation(
+        const webuiRatio = completionRatio(
             webui,
             english.webui,
             NON_TRANSLATABLE_WEBUI_KEYS
-        )) {
-            incompleteWebui.push(localeCode);
+        );
+        const shellRatio = completionRatio(shell, english.shell);
+
+        if (webuiRatio < MIN_WEBUI_COMPLETION) {
+            belowWebui.push(`${localeCode} ${Math.round(webuiRatio * 100)}%`);
         }
 
-        if (!hasCompleteTranslation(shell, english.shell)) {
-            incompleteShell.push(localeCode);
+        if (shellRatio < MIN_SHELL_COMPLETION) {
+            belowShell.push(`${localeCode} ${Math.round(shellRatio * 100)}%`);
         }
     }
 
-    if (incompleteWebui.length > 0) {
+    if (belowWebui.length > 0) {
         console.log(
-            `  ${colors.yellow}⚠${colors.reset} WebUI incomplete: ` +
-            `[${incompleteWebui.join(', ')}]`
+            `  ${colors.yellow}⚠${colors.reset} WebUI below ` +
+            `${MIN_WEBUI_COMPLETION * 100}%: [${belowWebui.join(', ')}]`
         );
     }
 
-    if (incompleteShell.length > 0) {
+    if (belowShell.length > 0) {
         console.log(
-            `  ${colors.yellow}⚠${colors.reset} Shell incomplete: ` +
-            `[${incompleteShell.join(', ')}]`
+            `  ${colors.yellow}⚠${colors.reset} Shell below ` +
+            `${MIN_SHELL_COMPLETION * 100}%: [${belowShell.join(', ')}]`
         );
     }
 }
@@ -545,20 +551,15 @@ function updateShellStrings(file, strings, allKeys) {
 // Generate locale files
 // -----------------------------------------------------------------------------
 
-function hasCompleteTranslation(translated, english, excludedKeys = []) {
-    const excluded = new Set(excludedKeys);
+function completionRatio(translated, english, excludedKeys = new Set()) {
+    const keys = Object.keys(english).filter(k => !excludedKeys.has(k));
+    if (keys.length === 0) return 0;
 
-    const translatableKeys = Object.keys(english).filter(
-        key => !excluded.has(key)
-    );
+    const done = keys.filter(
+        k => typeof translated[k] === 'string' && translated[k].trim() !== ''
+    ).length;
 
-    return (
-        translatableKeys.length > 0 &&
-        translatableKeys.every(
-            key => typeof translated[key] === 'string' &&
-                translated[key].trim() !== ''
-        )
-    );
+    return done / keys.length;
 }
 
 function generateLocale(localeCode, data, english) {
@@ -573,8 +574,8 @@ function generateLocale(localeCode, data, english) {
         `${localeCode}.json`
     );
 
-    // Generate WebUI locale files only when every translatable key is translated.
-    const hasCompleteWebuiTranslation = hasCompleteTranslation(
+    // Generate WebUI locale files only when 80% of webui keys are translated.
+    const ratio = completionRatio(
         webui,
         english.webui,
         NON_TRANSLATABLE_WEBUI_KEYS
@@ -582,10 +583,14 @@ function generateLocale(localeCode, data, english) {
 
     let webuiUpdated = false;
 
-    if (localeCode === 'en' || hasCompleteWebuiTranslation) {
+    if (localeCode === 'en' || ratio >= MIN_WEBUI_COMPLETION) {
+        // Drop untranslated keys
+        const output = Object.fromEntries(
+            Object.entries(webui).filter(([, v]) => v.trim() !== '')
+        );
         webuiUpdated = writeIfChanged(
             webuiFile,
-            `${JSON.stringify(webui, null, 2)}\n`
+            `${JSON.stringify(output, null, 2)}\n`
         );
     }
 
@@ -601,13 +606,14 @@ function generateLocale(localeCode, data, english) {
             'strings.sh'
         );
 
-    // Generate Shell locale files only when every translatable key is translated.
-    const hasCompleteShellTranslation = localeCode === 'en' ||
-        hasCompleteTranslation(shell, english.shell);
+    // Generate Shell locale files only when 50% of shell keys are translated.
+    const shellRatio = localeCode === 'en'
+        ? 1
+        : completionRatio(shell, english.shell);
 
     let shellUpdated = false;
 
-    if (hasCompleteShellTranslation) {
+    if (shellRatio >= MIN_SHELL_COMPLETION) {
         shellUpdated = updateShellStrings(
             shellFile,
             shell,
