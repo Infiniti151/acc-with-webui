@@ -10,6 +10,12 @@ on:
       - ".github/workflows/crowdin.yml"
 
   workflow_dispatch:
+    inputs:
+      download_language:
+        description: "Crowdin language ID(s) to download, comma-separated (e.g. zh-CN or zh-CN,de). Leave empty for all languages."
+        type: string
+        required: false
+        default: ""
 
   schedule:
     - cron: "0 0 * * 1"
@@ -67,6 +73,32 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Prepare download arguments
+        id: download_args
+        if: steps.check_changes.outputs.skip != 'true'
+        env:
+          DOWNLOAD_LANGUAGE: ${{ inputs.download_language }}
+        run: |
+          ARGS=""
+          LANGS=$(printf '%s' "$DOWNLOAD_LANGUAGE" | tr -d '[:space:]')
+
+          if [ -n "$LANGS" ]; then
+            if ! printf '%s' "$LANGS" |
+              grep -Eq '^[A-Za-z]{2,3}(-[A-Za-z0-9]+)?(,[A-Za-z]{2,3}(-[A-Za-z0-9]+)?)*$'
+            then
+              echo "::error title=Invalid input::download_language must be Crowdin language IDs separated by commas, e.g. zh-CN,de"
+              exit 1
+            fi
+
+            IFS=',' read -ra CODES <<< "$LANGS"
+            for code in "${CODES[@]}"; do
+              ARGS="$ARGS -l $code"
+            done
+          fi
+
+          echo "Download arguments:${ARGS:- (none, downloading all languages)}"
+          echo "args=${ARGS# }" >> "$GITHUB_OUTPUT"
+
       - name: Synchronize with Crowdin
         if: steps.check_changes.outputs.skip != 'true'
         uses: crowdin/github-action@d651c77756acbe11a31d77a6fb79d8a239e1e05a # v3.6.0
@@ -77,6 +109,7 @@ jobs:
           upload_translations: false
           download_translations: true
           skip_untranslated_strings: true
+          download_translations_args: ${{ steps.download_args.outputs.args }}
 
           localization_branch_name: l10n/crowdin
 
