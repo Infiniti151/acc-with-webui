@@ -1,7 +1,7 @@
 {
     "webui": {
-        "webUiName": "ACC WebUI",
-        "advancedChargingController": "Advanced Charging Controller",
+        "webUiName": "",
+        "advancedChargingController": "",
         "health": "Состояние",
         "temperature": "Температура",
         "current": "Ток",
